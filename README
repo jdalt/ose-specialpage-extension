@@ -1,1 +1,3 @@
-This extension is to be used for Open Source Ecology's True Fans microfunding platform. We're using git for VCS. This code is to be tested on a LAMP stack development environment. 
+This extension is to be used for Open Source Ecology's True Fans microfunding platform. We're using git for VCS. This code is to be tested on a LAMP stack development environment.
+
+To use this extension clone this git project in the extensions directory of MediaWiki 1.16, and add require_once('ShareOSE.php'); to LocalSettings.php in the MediaWiki root directory.
