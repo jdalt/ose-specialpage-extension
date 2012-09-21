@@ -1,94 +1,171 @@
 <?php
-class SpecialShareOSE extends SpecialPage {
 /**
+
+ *
+ */
+
+require_once('class.TrueFanDb.php');
+ 
+class SpecialShareOSE extends SpecialPage {
+
+	/**
 	 * Constructor : initialise object
+	 * Get data POSTed through the form and assign them to the object
+	 * @param WebRequest $request Data posted.
 	 */
-	public function __construct( $request = null ) {
-//		global $wgRequest;
 
-		parent::__construct( 'ShareOSE' );
+	protected $mTrueFanDb;
+	 
+	public function __construct() {
+		global $wgRequest;
+		tfDebug('***  Constructing SpecialShareOSE  ***');
+		parent::__construct( 'ShareOSE');
 
-//		$this->loadRequest( is_null( $request ) ? $wgRequest : $request );
+		$this->loadRequest();
+		$this->mTrueFanDb = new TrueFanDb();
 	}
+
+	/** Misc variables **/
+	protected $mRequest;			// The WebRequest or FauxRequest this form is supposed to handle
+	protected $mRequestPosted;
 	
-	// $par is the subpage compenet of the special page i.e. 'ShareOSE/'.$par
-	function execute( $par ) 
-	{
-		global $wgRequest, $wgOut;
+	protected $mReqName;
+	protected $mReqEmail;
+	protected $mReqUrl;
+	
+	/**
+	 * Initialize instance variables from request and create an Upload handler
+	 *
+	 * @param WebRequest $request The request to extract variables from
+	 */
+	protected function loadRequest() {
+		global $wgUser, $wgRequest;
+
+		$this->mRequest = $wgRequest;
+		
+		$this->mRequestPosted = $this->mRequest->wasPosted();
+		
+		// MediaWiki prefixes 'wp' to names in the form $descriptor
+		$this->mReqName = $this->mRequest->getText('wpName');
+		$this->mReqEmail = $this->mRequest->getText('wpEmail');
+		$this->mReqUrl = $this->mRequest->getText('wpUrl');
+	}
+
+	/**
+	 * Special page entry point
+	 */
+	public function execute( $par ) {
+		global $wgUser, $wgOut, $wgRequest;
 
 		$this->setHeaders();
-
-		# Get request data from, e.g.
-		$param = $wgRequest->getText('param');
-
-		# Do stuff
-		# ...
+		$this->outputHeader();
 		
-		//$output = 'Hello worlds!';
-		$sampleMessage = 'Hey <INSERT NAME>, You, me and a thousand other visionairies are teaming up to create a Global Village Construction set.  This is a high-performance, modular, do-it-yourself, low-cost platform - that allows for the easy fabrication of the 50 different industrial machines that it takes - to build a small, sustainable civilization with modern comforts.  We are all giving $10 month (ie. 2 cups of coffee) for 2 years to make this happen and create a better world.  You even get enshrined on their web site as a True Fan and your name immortalized in the documentation as a founding True Fan to impress your grandchildren.  Check out the link below to see a video I made for you and more info.';
-		$form = 
-				'<form action="http://microfundingtest.openfarmtech.org/wiki/Special:ShareOSE" method="post" class="visualClear" enctype="multipart/form-data" id="mw-upload-form">
-					
-					<!-- Email -->
-					<fieldset>
-						<legend>Email to send to Friend/colleague</legend>
-						<table id="mw-htmlform-source">
-							<tbody>
-								<tr>
-									<td>Name:</td>
-								</tr>
-								<tr>
-									<td class="mw-input"><input name="contactName" size="40" type="text" />
-									</td>
-								</tr>
-								<tr>
-									<td>Email Address:</td>
-								</tr>
-								<tr>
-									<td class="mw-input"><input name="contactEmail" size="40" type="text" />
-									</td>
-								</tr>
-								<tr>
-									<td>Message to friend/colleague(update or create your own):</td>									
-								</tr>
-								<tr class="mw-htmlform-field-HTMLTextAreaField ">
-									<td class="mw-input">
-										<textarea id="mw-input-wptextarea" rows="5" cols="80" name="emailContent">' . $sampleMessage . '</textarea>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</fieldset>
-					
-					<!-- Upload Video -->
-					<fieldset>
-						<legend>Upload personalized intro video</legend>
-						<table id="mw-htmlform-source">
-							<tbody>
-								<tr class="mw-htmlform-field-UploadSourceField"><td class="mw-label"><label for="wpSourceTypeFile">Video file to upload:</label></td>
-								<td class="mw-input"><input id="wpUploadFile" name="wpUploadFile" size="60" type="file" />
-								</td>
-								</tr>
-								<tr><td colspan="2" class="htmlform-tip">Maximum file size: 5 MB  (a file on your computer)</td></tr>
-								<tr class="mw-htmlform-field-HTMLInfoField"><td class="mw-label"><label></label></td><td class="mw-input">
-								</td></tr>
-							</tbody>
-						</table>
-					</fieldset>
-					
-					<!-- Please Read -->
-					<fieldset>
-						<legend>Please Read </legend>						
-						Once you click on button below and your introductory video successfully uploads, an email will be sent to your friend/colleague containing your message and a link to the Join True Fans web page with your video at the top.
-					</fieldset>
-					<input id="wpEditToken" type="hidden" value="ff8f0b5c225c9b0b0f1b6913da85c329+\" name="wpEditToken" />
-					<input type="hidden" value="Special:ShareOSE" name="title" />
-					<input type="hidden" name="wpDestFileWarningAck" />
-					<input type="submit" value="Upload file & email message" name="wpUpload" title="Start upload [s]" accesskey="s" class="mw-htmlform-submit" />
-				</form>';				
-				
-				
-			$wgOut->addHTML($form); //WikiText( $output );
-	}	
+		if($this->mRequestPosted) {
+			$wgOut->addHTML("<p>Received form from: ".$this->mReqName." the III. </p>");
+		} else {
+			$this->getUploadForm()->show();
+		}
+	}
+
+
+	/**
+	 * Get an UploadForm instance with title and text properly set.
+	 *
+	 * @param string $message HTML string to add to the form
+	 * @param string $sessionKey Session key in case this is a stashed upload
+	 * @return UploadForm
+	 */
+	protected function getUploadForm($sessionKey = '') {
+		global $wgOut;
+		
+		# Initialize form
+		$form = new TrueFanForm(); // /*'sessionkey' => $sessionKey*/);
+		$form->setTitle( $this->getTitle() );
+		
+		return $form;
+	}
 }
 
+
+
+/**
+ * Sub class of HTMLForm that provides the form section of SpecialUpload
+ */
+class TrueFanForm extends HTMLForm {
+	//protected $mSessionKey;
+	protected $mSourceIds;
+
+	public function __construct() { //maybe session key ... ?
+		global $wgLang;
+
+		$descriptor = $this->getFormDescriptor();
+
+		parent::__construct( $descriptor, 'true-fan-form' );
+
+		# Set some form properties
+		$this->setSubmitText( 'Submit Form'); //wfMsg( 'uploadbtn' ) ); // internationalize later
+		$this->setSubmitName( 'wpTrueFanSubmit' );
+		$this->setSubmitTooltip( 'upload' );
+		$this->setId( 'mw-ose-truefan-form' );
+
+		# Build a list of IDs for javascript insertion // !! WTF does this doe and can i use it with my own custom js??
+		$this->mSourceIds = array();
+		foreach ( $descriptor as $key => $field ) {
+			if ( !empty( $field['id'] ) )
+				$this->mSourceIds[] = $field['id'];
+		}
+
+	}
+
+
+	/**
+	 * Get the descriptor of the fieldset that contains the file description
+	 * input. The section is 'description'
+	 * 
+	 * @return array Descriptor array
+	 */
+	protected function getFormDescriptor() {
+		$descriptor = array(
+			'Name' => array(
+				'type' => 'text',
+				'section' => 'main',
+				'id' => 'ose-truefan-name',
+				'label' => 'Your Name',
+				'size' => 20,
+			),
+			'Email' => array(
+				'type' => 'text',
+				'section' => 'main',
+				'id' => 'ose-truefan-email',
+				'label' => 'Email',
+				'size' => 20,
+			),
+			'Url' => array(
+				'type' => 'text',
+				'section' => 'main',
+				'id' => 'ose-truefan-url',
+				'label' => 'Url of Video',
+				'size' => 20,
+			),
+		);
+		return $descriptor;
+	}
+
+	/**
+	 * Empty function; submission is handled elsewhere.
+	 * 
+	 * @return bool false
+	 */
+	function trySubmit() {
+		return false;
+	}
+}
+
+/**
+ * Syntactic sugar. Outputs to local extension log.
+*/
+function tfDebug($str)
+{
+	wfDebug($str."\n"); // !!! Not intended for production use !!! This will inject lots of extension specific logging into the master log which should only be for important errors !!!
+	wfDebugLog( 'ShareOSE', $str);
+}
