@@ -8,12 +8,6 @@ require_once('class.TrueFanDb.php');
  
 class SpecialShareOSE extends SpecialPage {
 
-	/**
-	 * Constructor : initialise object
-	 * Get data POSTed through the form and assign them to the object
-	 * @param WebRequest $request Data posted.
-	 */
-
 	protected $mTrueFanDb;
 	 
 	public function __construct() {
@@ -34,9 +28,7 @@ class SpecialShareOSE extends SpecialPage {
 	protected $mReqUrl;
 	
 	/**
-	 * Initialize instance variables from request and create an Upload handler
-	 *
-	 * @param WebRequest $request The request to extract variables from
+	 * Initialize instance variables from request.
 	 */
 	protected function loadRequest() {
 		global $wgUser, $wgRequest;
@@ -63,23 +55,21 @@ class SpecialShareOSE extends SpecialPage {
 		if($this->mRequestPosted) {
 			$wgOut->addHTML("<p>Received form from: ".$this->mReqName." the III. </p>");
 		} else {
-			$this->getUploadForm()->show();
+			$this->getTrueFanForm()->show();
 		}
 	}
 
 
 	/**
-	 * Get an UploadForm instance with title and text properly set.
+	 * Get a TrueFanForm instance with title and text properly set.
 	 *
-	 * @param string $message HTML string to add to the form
-	 * @param string $sessionKey Session key in case this is a stashed upload
 	 * @return UploadForm
 	 */
-	protected function getUploadForm($sessionKey = '') {
+	protected function getTrueFanForm() {
 		global $wgOut;
 		
 		# Initialize form
-		$form = new TrueFanForm(); // /*'sessionkey' => $sessionKey*/);
+		$form = new TrueFanForm(); 
 		$form->setTitle( $this->getTitle() );
 		
 		return $form;
@@ -89,10 +79,9 @@ class SpecialShareOSE extends SpecialPage {
 
 
 /**
- * Sub class of HTMLForm that provides the form section of SpecialUpload
+ * Sub class of HTMLForm that provides the form 
  */
 class TrueFanForm extends HTMLForm {
-	//protected $mSessionKey;
 	protected $mSourceIds;
 
 	public function __construct() { //maybe session key ... ?
@@ -119,8 +108,7 @@ class TrueFanForm extends HTMLForm {
 
 
 	/**
-	 * Get the descriptor of the fieldset that contains the file description
-	 * input. The section is 'description'
+	 * Get the descriptor. 
 	 * 
 	 * @return array Descriptor array
 	 */
