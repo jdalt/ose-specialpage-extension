@@ -18,6 +18,14 @@ $wgExtensionCredits['specialpage'][] = array(
         'descriptionmsg' => 'This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage',
         'version' => '0.0.1',
 );
+
+// !! This hook will not work in MediaWiki 1.16 !! The hook was only added in MW 1.17  :( 
+$wgHooks['UnitTestsList'][] = 'eShareOSERegisterUnitTests';
+function eShareOSERegisterUnitTests( &$files ) {
+        $testDir = dirname( __FILE__ ) . '/';
+        $files[] = $testDir . 'ShareOSETest.php';
+        return true;
+}
  
 $dir = dirname(__FILE__) . '/';
  
