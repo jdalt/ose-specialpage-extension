@@ -4,7 +4,7 @@
  *
  */
 
-require_once('class.TrueFanDb.php');
+require_once('class.TrueFansDb.php');
  
 class SpecialShareOSE extends SpecialPage {
 
@@ -16,7 +16,7 @@ class SpecialShareOSE extends SpecialPage {
 		parent::__construct( 'ShareOSE');
 
 		$this->loadRequest();
-		$this->mTrueFanDb = new TrueFanDb();
+		$this->mDb = new TrueFansDb(); // not goot to do for unit testing...
 	}
 
 	/** Misc variables **/
@@ -25,7 +25,7 @@ class SpecialShareOSE extends SpecialPage {
 	
 	protected $mReqName;
 	protected $mReqEmail;
-	protected $mReqUrl;
+	protected $mReqVideoId;
 	
 	/**
 	 * Initialize instance variables from request.
@@ -40,7 +40,7 @@ class SpecialShareOSE extends SpecialPage {
 		// MediaWiki prefixes 'wp' to names in the form $descriptor
 		$this->mReqName = $this->mRequest->getText('wpName');
 		$this->mReqEmail = $this->mRequest->getText('wpEmail');
-		$this->mReqUrl = $this->mRequest->getText('wpUrl');
+		$this->mReqVideoId = $this->mRequest->getText('wpVideoId');
 	}
 
 	/**
@@ -53,7 +53,23 @@ class SpecialShareOSE extends SpecialPage {
 		$this->outputHeader();
 		
 		if($this->mRequestPosted) {
-			$wgOut->addHTML("<p>Received form from: ".$this->mReqName." the III. </p>");
+			$wgOut->addHTML("<p>Received form from: <strong>".$this->mReqName."</strong></p>");
+			if($this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
+				$wgOut->addHTML("<p>Added request to DB.</p>");
+			} else {
+				$wgOut->addHTML("<p>Unable to add request to DB.</p>");
+			}
+			$wgOut->addHTML("<p>------------------</p>");
+			$result = $this->mDb->getAllEntries();
+			$wgOut->addHTML('<ul>');
+			foreach($result as $row) {
+				$wgOut->addHTML('<li>');
+				foreach($row as $rkey => $rval) {
+					$wgOut->addHTML("<span>$rval </span>");
+				}
+				$wgOut->addHTML('</li>');
+			}
+			$wgOut->addHTML('</ul>');
 		} else {
 			$this->getTrueFanForm()->show();
 		}
@@ -128,7 +144,7 @@ class TrueFanForm extends HTMLForm {
 				'label' => 'Email',
 				'size' => 20,
 			),
-			'Url' => array(
+			'VideoId' => array(
 				'type' => 'text',
 				'section' => 'main',
 				'id' => 'ose-truefan-url',
