@@ -16,5 +16,5 @@ $wgDebugLogGroups = array(
 *List
 *Listy
 *Lister
-+Loster?
-*Toaster
+
+Tytho
