@@ -1,7 +1,6 @@
 <?php
 /**
-
- *
+ * SpecialShareOSE.php - the html entry point for displaying gluing this thing together
  */
 
 require_once('class.TrueFansDb.php');
@@ -52,11 +51,11 @@ class SpecialShareOSE extends SpecialPage {
 	 * Special page entry point
 	 */
 	public function execute( $par ) {
-		global $wgUser, $wgOut, $wgRequest;
+		global $wgUser, $wgOut, $wgRequest, $wgScriptPath;
 
 		$this->setHeaders();
 		$this->outputHeader();
-		$wgOut->addExtensionStyle('extensions/ShareOSE/style.css');
+		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/style.css'); 
 
 		if($this->mReqPage === 'viewall') {
 			$result = $this->mDb->getAllEntries();
@@ -64,9 +63,6 @@ class SpecialShareOSE extends SpecialPage {
 			foreach($result as $row) {
 				$wgOut->addHTML('<li>');
 				$wgOut->addHTML("<div><a href='?page=view&id=".$row['id']."'><span>{$row['name']}: </span><span>{$row['email']}</span></a></div>");
-				//foreach($row as $rkey => $rval) {
-				//	$wgOut->addHTML("<span>$rval </span>");
-				//}
 				$wgOut->addHTML('</li>');
 			}
 			$wgOut->addHTML('</ul>');
@@ -103,13 +99,14 @@ class SpecialShareOSE extends SpecialPage {
 			$wgOut->addHTML('</ul>');
 		} else {
 			if($wgUser->isLoggedIn()) {
-				$wgOut->addHTML('<p>Hooks 5 Changes! Avast ye! Your login info was added to the form.</p>');
+				$wgOut->addHTML('<p>Your login info was added to the form.</p>');
 				$trueFanForm = $this->buildTrueFanForm($wgUser->getRealName(), $wgUser->getEmail());
 			} else {
 				$trueFanForm = $this->buildTrueFanForm();
 			}
 			$trueFanForm->show();
 		}
+		$wgOut->addHTML('<br/><div><a href="?page=viewall">View All Pages</a></div>');
 	}
 
 
@@ -152,7 +149,7 @@ class TrueFanForm extends HTMLForm {
 		$this->setSubmitTooltip( 'upload' );
 		$this->setId( 'mw-ose-truefan-form' );
 
-		# Build a list of IDs for javascript insertion // !! WTF does this doe and can i use it with my own custom js??
+		# Build a list of IDs for javascript insertion // !! WTF does this do and can i use it with my own custom js??
 		$this->mSourceIds = array();
 		foreach ( $descriptor as $key => $field ) {
 			if ( !empty( $field['id'] ) )

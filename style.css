@@ -5,4 +5,12 @@
 iframe
 {
 	width: 640px;
+	height: 480px;
+	border: none;
+}
+
+#bodyContent
+{
+	width: 640px;
+	margin: 0 auto;
 }
