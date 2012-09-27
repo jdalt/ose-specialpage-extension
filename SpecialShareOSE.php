@@ -26,6 +26,8 @@ class SpecialShareOSE extends SpecialPage {
 	protected $mReqName;
 	protected $mReqEmail;
 	protected $mReqVideoId;
+
+	protected $mReqPage;
 	
 	/**
 	 * Initialize instance variables from request.
@@ -41,6 +43,9 @@ class SpecialShareOSE extends SpecialPage {
 		$this->mReqName = $this->mRequest->getText('wpName');
 		$this->mReqEmail = $this->mRequest->getText('wpEmail');
 		$this->mReqVideoId = $this->mRequest->getText('wpVideoId');
+
+		$this->mReqPage = $this->mRequest->getText('page');
+		$this->mReqId = $this->mRequest->getText('id');
 	}
 
 	/**
@@ -51,13 +56,39 @@ class SpecialShareOSE extends SpecialPage {
 
 		$this->setHeaders();
 		$this->outputHeader();
-		
-		if($this->mRequestPosted) {
+		$wgOut->addExtensionStyle('extensions/ShareOSE/style.css');
+
+		if($this->mReqPage === 'viewall') {
+			$result = $this->mDb->getAllEntries();
+			$wgOut->addHTML('<ul>');
+			foreach($result as $row) {
+				$wgOut->addHTML('<li>');
+				$wgOut->addHTML("<div><a href='?page=view&id=".$row['id']."'><span>{$row['name']}: </span><span>{$row['email']}</span></a></div>");
+				//foreach($row as $rkey => $rval) {
+				//	$wgOut->addHTML("<span>$rval </span>");
+				//}
+				$wgOut->addHTML('</li>');
+			}
+			$wgOut->addHTML('</ul>');
+		} else if($this->mReqPage === 'view' ) {
+				$profile = $this->mDb->getUser($this->mReqId);
+				$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
+				$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+		} else if($this->mRequestPosted) {
 			$wgOut->addHTML("<p>Received form from: <strong>".$this->mReqName."</strong></p>");
-			if($this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
+			if($id = $this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
 				$wgOut->addHTML("<p>Added request to DB.</p>");
+				$profile = $this->mDb->getUser($id);
+				$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
+				$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
 			} else {
-				$wgOut->addHTML("<p>Unable to add request to DB.</p>");
+				if($this->mDb->isDuplicateEmail($this->mReqEmail)) {
+					$wgOut->addHTML("<p>Unable to add user. Your email was already entered.</p>");
+				} else if(!$this->mDb->extractVideoId($this->mReqVideoId)) {
+					$wgOut->addHTML("<p>Unable to extract video id from URL.</p>");
+				} else {
+					$wgOut->addHTML("<p>Unable to add request to DB.</p>");
+				}
 			}
 			$wgOut->addHTML("<p>------------------</p>");
 			$result = $this->mDb->getAllEntries();
@@ -71,7 +102,13 @@ class SpecialShareOSE extends SpecialPage {
 			}
 			$wgOut->addHTML('</ul>');
 		} else {
-			$this->getTrueFanForm()->show();
+			if($wgUser->isLoggedIn()) {
+				$wgOut->addHTML('<p>Your login info was added to the form.</p>');
+				$trueFanForm = $this->buildTrueFanForm($wgUser->getRealName(), $wgUser->getEmail());
+			} else {
+				$trueFanForm = $this->buildTrueFanForm();
+			}
+			$trueFanForm->show();
 		}
 	}
 
@@ -81,11 +118,11 @@ class SpecialShareOSE extends SpecialPage {
 	 *
 	 * @return UploadForm
 	 */
-	protected function getTrueFanForm() {
+	protected function buildTrueFanForm($name='', $email='') {
 		global $wgOut;
 		
 		# Initialize form
-		$form = new TrueFanForm(); 
+		$form = new TrueFanForm($name, $email);
 		$form->setTitle( $this->getTitle() );
 		
 		return $form;
@@ -100,11 +137,13 @@ class SpecialShareOSE extends SpecialPage {
 class TrueFanForm extends HTMLForm {
 	protected $mSourceIds;
 
-	public function __construct() { //maybe session key ... ?
+	public function __construct($name='',$email='') { //maybe session key ... ?
 		global $wgLang;
 
 		$descriptor = $this->getFormDescriptor();
-
+		$descriptor['Name']['default'] = $name;
+		$descriptor['Email']['default'] = $email;
+		
 		parent::__construct( $descriptor, 'true-fan-form' );
 
 		# Set some form properties

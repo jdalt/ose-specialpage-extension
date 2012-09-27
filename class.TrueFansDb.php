@@ -1,14 +1,12 @@
 <?php 
 /* 
-	microfundDb.php - This is a wrapper to microfund mySQL database. This class uses a PDO
-			  database conenction and prepared statements to prevent SQL injection.
-*/
+ *		microfundDb.php - 	This is a wrapper to microfund mySQL database. This class uses a PDO
+ *			  				database connection and prepared statements to prevent SQL injection.
+ */
 
-echo 'truefans opened';
-
-if(!@include_once("/home2/wordpage/.connect_microfund.php"))  
+if(!@include_once("/home2/wordpage/.connect_truefans.php"))
 {
-    @include_once("/home/jacob/.connect_truefan.php"); // local file
+    @include_once("/home/jacob/.connect_truefans.php"); // local file
 }
    
 class TrueFansDb
@@ -18,7 +16,6 @@ class TrueFansDb
 	
 	function __construct()
 	{
-		echo 'constructing';
 		$dsn = 'mysql:dbname='.getDatabase().';host='.getHost();
 		try {
 			$this->pdo = new PDO($dsn, getUser(),getPass());
@@ -44,21 +41,29 @@ class TrueFansDb
 
 	// *** Modification Functions ***
 	
-	// addUser() - fills entire row of true_fans table
-	public function addUser($name, $email, $video_id)
+	// addUser() - fills entire row of true_fans table; user must manually test if fail was for duplicate email
+	public function addUser($name, $email, $video_id, $extractUrl=true)
 	{
+		if($extractUrl) {
+			$insert_id = $this->extractVideoId($video_id);
+			if(!$insert_id) {
+				return NULL;
+			}
+		} else {
+			$insert_id = $video_id;
+		}
 		$stmt = $this->pdo->prepare('INSERT INTO true_fans(name,email,video_id) VALUES(:name, :email, :video_id)');
 		try {
-			if($stmt->execute(array(':name' => $name, ':email' => $email, ':video_id' => $video_id))) {
+			if($stmt->execute(array(':name' => $name, ':email' => $email, ':video_id' => $insert_id))) {
 				// success
 				$stmt2 = $this->pdo->prepare('SELECT id FROM true_fans WHERE name=:name AND email=:email');
 				if($stmt2->execute(array(':name' => $name, ':email' => $email))) {
 					$result = $stmt2->fetch(PDO::FETCH_ASSOC);
-					return $result['id']; 
+					return $result['id'];
 				}
-			} 
+			}
 		} catch (PDOException $e) {
-			$this->log('Unable to insert user' .$e->getMessage()); 
+			$this->log('Unable to insert user: ' .$e->getMessage());
 		}
 		return NULL;
 	}
@@ -70,6 +75,18 @@ class TrueFansDb
 	{
 		$stmt = $this->pdo->prepare('SELECT name, email, video_id FROM true_fans WHERE id=:id');
 		if($stmt->execute(array(':id' => $id))) {
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			return $result;
+		} else {
+			return NULL;
+		}
+	}
+	
+	// getUser() - gets entire row of true_fans table and returns an associative array
+	public function getUserByEmail($email)
+	{
+		$stmt = $this->pdo->prepare('SELECT name, email, video_id FROM true_fans WHERE email=:email');
+		if($stmt->execute(array(':email' => $email))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
 		} else {
@@ -112,13 +129,13 @@ class TrueFansDb
 	{
 		// !!** Delete echo before going live **!!
 		if(preg_match('/src=\"http[s]??:\/\/www.youtube.com\/embed\/([A-Za-z0-9_-]{11})[\?&]?[\S]*\"/', $url_mess, $matches) == 1) {  // carve out 11 digit id from iframe embed
-			echo 'Extracted id from src attribute of an iframe. <br />';
+			$this->log('Extracted id from src attribute of an iframe.');
 			return $matches[1];
 		} else if(preg_match('/http[s]??:\/\/youtu.be\/([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out id from shortened youtube url
-			echo 'Extracted id from shortened url text.<br />';
+			$this->log('Extracted id from shortened url text.');
 			return $matches[1];
 		} else if(preg_match('/[\?&]v=([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out id from youtube viewing url
-			echo 'Extracted id from viewing url text.<br />';
+			$this->log('Extracted id from viewing url text.');
 			return $matches[1];
 		} else {
 			return NULL;
