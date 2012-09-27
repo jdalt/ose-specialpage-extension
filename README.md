@@ -12,3 +12,8 @@ $wgDebugLogFile = "$IP/logs/debug_log.log";
 $wgDebugLogGroups = array(
         'ShareOSE'     => "$IP/extensions/ShareOSE/logs/share_ose.log",
 );
+
+*List
+*Listy
+*Lister
++Loster?
