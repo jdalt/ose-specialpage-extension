@@ -59,13 +59,13 @@ class SpecialShareOSE extends SpecialPage {
 
 		if($this->mReqPage === 'viewall') {
 			$result = $this->mDb->getAllEntries();
-			$wgOut->addHTML('<ul>');
+			$wgOut->addHTML('<table><tbody>');
 			foreach($result as $row) {
-				$wgOut->addHTML('<li>');
-				$wgOut->addHTML("<div><a href='?page=view&id=".$row['id']."'><span>{$row['name']}: </span><span>{$row['email']}</span></a></div>");
-				$wgOut->addHTML('</li>');
+				$wgOut->addHTML('<tr>');
+				$wgOut->addHTML("<td><a href='?page=view&id=".$row['id']."'>{$row['name']} </a></td><td>{$row['email']}</td><td>{$row['video_id']}</td>");
+				$wgOut->addHTML('</tr>');
 			}
-			$wgOut->addHTML('</ul>');
+			$wgOut->addHTML('</table></tbody>');
 		} else if($this->mReqPage === 'view' ) {
 				$profile = $this->mDb->getUser($this->mReqId);
 				$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
