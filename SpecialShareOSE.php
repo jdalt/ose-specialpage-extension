@@ -103,7 +103,7 @@ class SpecialShareOSE extends SpecialPage {
 			$wgOut->addHTML('</ul>');
 		} else {
 			if($wgUser->isLoggedIn()) {
-				$wgOut->addHTML('<p>Changes! Avast ye! Your login info was added to the form.</p>');
+				$wgOut->addHTML('<p>Hooks 5 Changes! Avast ye! Your login info was added to the form.</p>');
 				$trueFanForm = $this->buildTrueFanForm($wgUser->getRealName(), $wgUser->getEmail());
 			} else {
 				$trueFanForm = $this->buildTrueFanForm();
