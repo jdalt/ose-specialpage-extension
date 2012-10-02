@@ -7,14 +7,13 @@ To use this extension clone this git project in the '/extensions' directory of M
 
 Add the following lines to LocalSettings.php:
 
-require_once( "$IP/extensions/ShareOSE/ShareOSE.php" );
-$wgDebugLogFile = "$IP/logs/debug_log.log";
-$wgDebugLogGroups = array(
-        'ShareOSE'     => "$IP/extensions/ShareOSE/logs/share_ose.log",
-);
-
-*List
-*Listy
-*Lister
-
-Tytho
+	require_once( "$IP/extensions/ShareOSE/ShareOSE.php" );
+	$wgDebugLogFile = "$IP/logs/debug_log.log";
+	$wgDebugLogGroups = array(
+		'ShareOSE'     => "$IP/extensions/ShareOSE/logs/share_ose.log",
+	);
+	function wfIncludeJQuery() {
+		global $wgOut;
+		$wgOut->includeJQuery();
+	}
+	$wgExtensionFunctions[] = 'wfIncludeJQuery';

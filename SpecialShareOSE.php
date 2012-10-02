@@ -55,11 +55,12 @@ class SpecialShareOSE extends SpecialPage {
 
 		$this->setHeaders();
 		$this->outputHeader();
-		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/style.css'); 
-
+		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/style.css');
+		$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/dynamic.js');
+		
 		if($this->mReqPage === 'viewall') {
 			$result = $this->mDb->getAllEntries();
-			$wgOut->addHTML('<table><tbody>');
+			$wgOut->addHTML('<table id="submissions"><tbody>');
 			foreach($result as $row) {
 				$wgOut->addHTML('<tr>');
 				$wgOut->addHTML("<td><a href='?page=view&id=".$row['id']."'>{$row['name']} </a></td><td>{$row['email']}</td><td>{$row['video_id']}</td>");
@@ -67,9 +68,14 @@ class SpecialShareOSE extends SpecialPage {
 			}
 			$wgOut->addHTML('</table></tbody>');
 		} else if($this->mReqPage === 'view' ) {
-				$profile = $this->mDb->getUser($this->mReqId);
-				$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
-				$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+			$profile = $this->mDb->getUser($this->mReqId);
+			$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
+			$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+		} else if($this->mReqPage === 'invite') {
+			$wgOut->addHTML('<p>Invite your friends to become part of OSE.</p>');
+		} else if($this->mReqPage === 'subscribe') {
+			$wgOut->addHTML('<p>True Fans: As a project working for the common good, we rely on a growing group of crowd-funders called True Fans to keep our mission alive. The True Fans program is a monthly donation with options for $10, $20, $30, $50, and $100 per month for 24 months. </p>');
+			$wgOut->addHTML(getPayPalButton());
 		} else if($this->mRequestPosted) {
 			$wgOut->addHTML("<p>Received form from: <strong>".$this->mReqName."</strong></p>");
 			if($id = $this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
@@ -86,27 +92,21 @@ class SpecialShareOSE extends SpecialPage {
 					$wgOut->addHTML("<p>Unable to add request to DB.</p>");
 				}
 			}
-			$wgOut->addHTML("<p>------------------</p>");
-			$result = $this->mDb->getAllEntries();
-			$wgOut->addHTML('<ul>');
-			foreach($result as $row) {
-				$wgOut->addHTML('<li>');
-				foreach($row as $rkey => $rval) {
-					$wgOut->addHTML("<span>$rval </span>");
-				}
-				$wgOut->addHTML('</li>');
-			}
-			$wgOut->addHTML('</ul>');
 		} else {
 			if($wgUser->isLoggedIn()) {
 				$wgOut->addHTML('<p>Your login info was added to the form.</p>');
 				$trueFanForm = $this->buildTrueFanForm($wgUser->getRealName(), $wgUser->getEmail());
 			} else {
+				$wgOut->addHTML('<p>You are not logged in.</p>');
 				$trueFanForm = $this->buildTrueFanForm();
 			}
 			$trueFanForm->show();
+			echo(hash('md5',randomString()));
 		}
-		$wgOut->addHTML('<br/><div><a href="?page=viewall">View All Pages</a></div>');
+		$wgOut->addHTML('<ul id="special-links"><li><a href="?page=home">Submit A Video</a></li>');
+		$wgOut->addHTML('<li><a href="?page=invite">Invite Friends</a></li>');
+		$wgOut->addHTML('<li><a href="?page=subscribe">Become a True Fan</a></li>');
+		$wgOut->addHTML('<li><a href="?page=viewall">View All Submissions</a></li></ul>');
 	}
 
 
@@ -149,7 +149,7 @@ class TrueFanForm extends HTMLForm {
 		$this->setSubmitTooltip( 'upload' );
 		$this->setId( 'mw-ose-truefan-form' );
 
-		# Build a list of IDs for javascript insertion // !! WTF does this do and can i use it with my own custom js??
+		# Build a list of IDs for javascript insertion // !! WTF does this do and can i use it with my own custom js?? must interface with wiki js, usable 4 me?
 		$this->mSourceIds = array();
 		foreach ( $descriptor as $key => $field ) {
 			if ( !empty( $field['id'] ) )
@@ -199,6 +199,39 @@ class TrueFanForm extends HTMLForm {
 	function trySubmit() {
 		return false;
 	}
+}
+
+function getPayPalButton()
+{
+	$str = <<<EOT
+	<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+	<input type="hidden" name="cmd" value="_s-xclick">
+	<input type="hidden" name="hosted_button_id" value="LW3QK7UZWFZ2Y">
+	<table>
+	<tr><td><input type="hidden" name="on0" value=""></td></tr><tr><td><select class="serious-button" name="os0">
+		<option value="Standard">Standard : $10.00 USD - monthly</option>
+		<option value="Gold">Gold : $20.00 USD - monthly</option>
+		<option value="Gold Extra">Gold Extra : $30.00 USD - monthly</option>
+		<option value="Platinum">Platinum : $50.00 USD - monthly</option>
+		<option value="Angel">Angel : $100.00 USD - monthly</option>
+	</select> </td></tr>
+	</table>
+	<input type="hidden" name="currency_code" value="USD">
+	<input type="submit" id="paypal-submit" class="serious-button" name="submit" value="Subscribe">
+	<img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+	</form>
+EOT;
+	return $str;
+}
+
+function randomString($bits = 256)
+{
+    $bytes = ceil($bits / 8);
+    $return = '';
+    for ($i = 0; $i < $bytes; $i++) {
+        $return .= chr(mt_rand(0, 255));
+    }
+    return $return;
 }
 
 /**

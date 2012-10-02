@@ -13,4 +13,42 @@ iframe
 {
 	width: 640px;
 	margin: 0 auto;
+	background-color: #eee;
+}
+
+.serious-button
+{
+    background-color: #fff;
+    border: 1px solid black;
+}
+
+.serious-button:hover
+{
+	box-shadow: 0 0 2px 1px #f00;
+}
+
+#submissions tbody tr:nth-child(odd) {
+   background-color: #ccc;
+}
+
+#special-links
+{
+	margin: 0;
+	text-align: center;
+}
+
+#special-links li
+{ 
+	display: inline-block;
+	margin: 20px 5px 0 0;
+}
+
+#special-links li:before
+{
+	content: "\ \7C \ ";
+}
+
+#special-links li:first-child:before
+{
+	content: "";
 }
