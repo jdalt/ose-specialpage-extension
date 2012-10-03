@@ -15,8 +15,6 @@ $messages['en'] = array(
         'shareOSE-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
         'trueFanForm-video' => 'True Fan Information',
         'trueFanSubmitText-video' => 'Submit Video',
-        'trueFanForm-paypal' => 'True Fan Sign-up',
-        'trueFanSubmitText-paypal' => 'Subscribe',
 );
  
 /** Message documentation

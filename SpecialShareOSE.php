@@ -39,7 +39,7 @@ class SpecialShareOSE extends SpecialPage {
 		$this->mRequestPosted = $this->mRequest->wasPosted();
 		
 		// MediaWiki prefixes 'wp' to names in the form $descriptor
-		$this->mReqName = $this->mRequest->getText('wpName');
+		$this->mReqName = $this->mRequest->getText('Name');
 		$this->mReqEmail = $this->mRequest->getText('wpEmail');
 		$this->mReqVideoId = $this->mRequest->getText('wpVideoId');
 
@@ -75,9 +75,7 @@ class SpecialShareOSE extends SpecialPage {
 			$wgOut->addHTML('<p>Invite your friends to become part of OSE.</p>');
 		} else if($this->mReqPage === 'subscribe') {
 			$wgOut->addHTML('<p>True Fans: As a project working for the common good, we rely on a growing group of crowd-funders called True Fans to keep our mission alive. The True Fans program is a monthly donation with options for $10, $20, $30, $50, and $100 per month for 24 months. </p>');
-			$wgOut->addHTML(getPayPalButton());
-			$paypalForm = new TrueFanForm($this->getTitle(),'paypal');
-			$paypalForm->show();
+			$wgOut->addHTML($this->getPayPalButton());
 		} else if($this->mRequestPosted) {
 			$wgOut->addHTML("<p>Received form from: <strong>".$this->mReqName."</strong></p>");
 			if($id = $this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
@@ -99,17 +97,43 @@ class SpecialShareOSE extends SpecialPage {
 				$wgOut->addHTML('<p>Your login info was added to the form.</p>');
 				$trueFanForm = new TrueFanForm($this->getTitle());
 				$trueFanForm->setFieldDefault('Name', $wgUser->getRealName());
+				$trueFanForm->setFieldDefault('NameDisplay', $wgUser->getRealName());
 				$trueFanForm->setFieldDefault('Email', $wgUser->getEmail());
 				$trueFanForm->show();
 			} else {
 				$wgOut->addHTML('<p>You must log in to submit a video.</p>');
 			}
 		}
+		//TODO: Use $this->mTitle to get full url and add request on the ass end
 		$wgOut->addHTML('<ul id="special-links"><li><a href="?page=home">Submit A Video</a></li>');
 		$wgOut->addHTML('<li><a href="?page=invite">Invite Friends</a></li>');
 		$wgOut->addHTML('<li><a href="?page=subscribe">Become a True Fan</a></li>');
 		$wgOut->addHTML('<li><a href="?page=viewall">View All Submissions</a></li></ul>');
 	}
+	
+	private function getPayPalButton()
+	{
+		// ugly text drop of paypal button, you can modify css and add things, but don't mess with names and values of fields
+		$str = <<<EOT
+		<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+		<input type="hidden" name="cmd" value="_s-xclick">
+		<input type="hidden" name="hosted_button_id" value="LW3QK7UZWFZ2Y">
+		<table>
+		<tr><td><input type="hidden" name="on0" value=""></td></tr><tr><td><select class="serious-button" name="os0">
+			<option value="Standard">Standard : $10.00 USD - monthly</option>
+			<option value="Gold">Gold : $20.00 USD - monthly</option>
+			<option value="Gold Extra">Gold Extra : $30.00 USD - monthly</option>
+			<option value="Platinum">Platinum : $50.00 USD - monthly</option>
+			<option value="Angel">Angel : $100.00 USD - monthly</option>
+		</select> </td></tr>
+		</table>
+		<input type="hidden" name="currency_code" value="USD">
+		<input type="submit" id="paypal-submit" class="serious-button" name="submit" value="Subscribe">
+		<!-- <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1"> -->
+		</form>
+EOT;
+	return $str;
+}
 }
 
 
@@ -118,13 +142,13 @@ class TrueFanForm
 	protected $mDescriptor;
 	protected $mForm;
 	protected $mTitle;
-	protected $mFormSuffix;
-	protected $mExternalPostAction;
 
-	public function __construct($title, $type='video')
+	/*
+	 * @param $title a MW Title object with url info for post action
+	 */
+	public function __construct($title)
 	{
-		$this->mExternalPostAction = NULL;
-		$this->initializeDescriptor($type);
+		$this->initializeDescriptor();
 		$this->mTitle = $title;
 	}
 
@@ -132,18 +156,12 @@ class TrueFanForm
 	public function show()
 	{
 		// Reminder: 2nd param in constructor creates messagePrefix which is used to 
-		// name the fieldset for section main. (text of which is .i18n file)
+		// name the fieldset for section video. (text of which is .i18n file)
 		$this->mForm = new HTMLForm($this->mDescriptor, "trueFanForm"); 
-		$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-video".$this->mFormSuffix)); 
+		$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-video")); 
 		$this->mForm->setSubmitName('submit');
-		$this->mForm->setId("trueFanId-".$this->mFormSuffix);
-		if($this->mExternalPostAction) {
-			$this->mTitle->mTextform = 'paypal';
-			$this->mTitle->mUrlform = $this->mExternalPostAction;
-		}
+		$this->mForm->setId("trueFanId-video");
 		$this->mForm->setTitle($this->mTitle);
-		print_r($this->mForm);
-		//echo $this->mFlatFields['os0']->mName;
 		$this->mForm->show();
 	}
 
@@ -152,98 +170,40 @@ class TrueFanForm
 		$this->mDescriptor[$field]['default'] = $value;
 	}
 		
-	private function initializeDescriptor($type)
+	private function initializeDescriptor()
 	{
-		// TODO: Internationalize all messages 
-		$this->mFormSuffix = $type;
-		switch($type) {
-		case 'video':
-			$this->mDescriptor = array(
-				'Name' => array(
-					'type' => 'text',
-					'section' => 'video',
-					'id' => 'ose-truefan-name',
-					'label' => 'Your Name',
-					'size' => 20,
-				),
-				'Email' => array(
-					'type' => 'text',
-					'section' => 'video',
-					'id' => 'ose-truefan-email',
-					'label' => 'Email',
-					'size' => 20,
-				),
-				'VideoId' => array(
-					'type' => 'text',
-					'section' => 'video',
-					'id' => 'ose-truefan-url',
-					'label' => 'Url of Video',
-					'size' => 20,
-				),
-			);
-			break;
-		case 'paypal':
-			$this->mDescriptor = array(
-				'cmd' => array(
-					'type' => 'hidden',
-					'section' => 'paypal',
-					'default' => '_s-xclick',
-				),
-				'hosted_button_id' => array(
-					'type' => 'hidden',
-					'section' => 'paypal',
-					'default' => 'LW3QK7UZWFZ2Y',
-				),
-				'on0' => array(
-					'type' => 'hidden',
-					'section' => 'paypal',
-					'default' => '',
-				),
-				'os0' => array(
-					'type' => 'select',
-					'section' => 'paypal',
-					'options' => array(
-						'Standard' => 'Standard : $10.00 USD - monthly',
-						'Gold' => 'Gold : $20.00 USD - monthly',
-						'Gold Extra' => 'Gold Extra: $30 USD - monthly',
-						'Platinum' => 'Platinum: $50.00 USD - monthly',
-						'Angel' => 'Angel : $100.00 USD - monthly',
-						),
-				),
-				'currency_code' => array(
-					'type' => 'hidden',
-					'section' => 'paypal',
-					'default' => 'USD',
-				),
-			);	
-			$this->mExternalPostAction = 'https://www.sandbox.paypal.com/cgi-bin/webscr'; 
-			break;
-		}
+		// TODO: Internationalize all labels 
+		$this->mDescriptor = array(
+			'NameDisplay' => array(
+				'type' => 'info',
+				'value' => '',
+				'section' => 'video',
+				'id' => 'ose-truefan-name',
+				'size' => 20,
+			),
+			'Name' => array(
+				'type' => 'hidden',
+				'section' => 'video',
+			),
+			'Email' => array(
+				'type' => 'text',
+				'section' => 'video',
+				'id' => 'ose-truefan-email',
+				'label' => 'Email',
+				'size' => 20,
+			),
+			'VideoId' => array(
+				'type' => 'text',
+				'section' => 'video',
+				'id' => 'ose-truefan-url',
+				'label' => 'Url of Video',
+				'size' => 20,
+			),
+		);
 	}
 }
 
-function getPayPalButton()
-{
-	$str = <<<EOT
-	<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
-	<input type="hidden" name="cmd" value="_s-xclick">
-	<input type="hidden" name="hosted_button_id" value="LW3QK7UZWFZ2Y">
-	<table>
-	<tr><td><input type="hidden" name="on0" value=""></td></tr><tr><td><select class="serious-button" name="os0">
-		<option value="Standard">Standard : $10.00 USD - monthly</option>
-		<option value="Gold">Gold : $20.00 USD - monthly</option>
-		<option value="Gold Extra">Gold Extra : $30.00 USD - monthly</option>
-		<option value="Platinum">Platinum : $50.00 USD - monthly</option>
-		<option value="Angel">Angel : $100.00 USD - monthly</option>
-	</select> </td></tr>
-	</table>
-	<input type="hidden" name="currency_code" value="USD">
-	<input type="submit" id="paypal-submit" class="serious-button" name="submit" value="Subscribe">
-	<!-- <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1"> -->
-	</form>
-EOT;
-	return $str;
-}
+
 
 /**
  * Syntactic sugar. Outputs to local extension log.
