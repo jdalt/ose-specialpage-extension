@@ -26,7 +26,15 @@ function eShareOSERegisterUnitTests( &$files ) {
         $files[] = $testDir . 'ShareOSETest.php';
         return true;
 }
- 
+$wgHooks['GetFullURL'][] = 'checkPaypalUrl';
+function checkPaypalUrl($title, $url, $query ) {
+	if($title->mTextform === 'paypal'){
+		$url = $title->mUrlform;
+	}
+	echo 'url hook';
+	return false;
+}
+
 $dir = dirname(__FILE__) . '/';
  
 $wgAutoloadClasses['SpecialShareOSE'] = $dir . 'SpecialShareOSE.php'; # Location of the SpecialMyExtension class (Tell MediaWiki to load this file)

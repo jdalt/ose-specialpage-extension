@@ -76,6 +76,8 @@ class SpecialShareOSE extends SpecialPage {
 		} else if($this->mReqPage === 'subscribe') {
 			$wgOut->addHTML('<p>True Fans: As a project working for the common good, we rely on a growing group of crowd-funders called True Fans to keep our mission alive. The True Fans program is a monthly donation with options for $10, $20, $30, $50, and $100 per month for 24 months. </p>');
 			$wgOut->addHTML(getPayPalButton());
+			$paypalForm = new TrueFanForm($this->getTitle(),'paypal');
+			$paypalForm->show();
 		} else if($this->mRequestPosted) {
 			$wgOut->addHTML("<p>Received form from: <strong>".$this->mReqName."</strong></p>");
 			if($id = $this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
@@ -95,109 +97,128 @@ class SpecialShareOSE extends SpecialPage {
 		} else {
 			if($wgUser->isLoggedIn()) {
 				$wgOut->addHTML('<p>Your login info was added to the form.</p>');
-				$trueFanForm = $this->buildTrueFanForm($wgUser->getRealName(), $wgUser->getEmail());
+				$trueFanForm = new TrueFanForm($this->getTitle());
+				$trueFanForm->setFieldDefault('Name', $wgUser->getRealName());
+				$trueFanForm->setFieldDefault('Email', $wgUser->getEmail());
+				$trueFanForm->show();
 			} else {
-				$wgOut->addHTML('<p>You are not logged in.</p>');
-				$trueFanForm = $this->buildTrueFanForm();
+				$wgOut->addHTML('<p>You must log in to submit a video.</p>');
 			}
-			$trueFanForm->show();
-			echo(hash('md5',randomString()));
 		}
 		$wgOut->addHTML('<ul id="special-links"><li><a href="?page=home">Submit A Video</a></li>');
 		$wgOut->addHTML('<li><a href="?page=invite">Invite Friends</a></li>');
 		$wgOut->addHTML('<li><a href="?page=subscribe">Become a True Fan</a></li>');
 		$wgOut->addHTML('<li><a href="?page=viewall">View All Submissions</a></li></ul>');
 	}
-
-
-	/**
-	 * Get a TrueFanForm instance with title and text properly set.
-	 *
-	 * @return UploadForm
-	 */
-	protected function buildTrueFanForm($name='', $email='') {
-		global $wgOut;
-		
-		# Initialize form
-		$form = new TrueFanForm($name, $email);
-		$form->setTitle( $this->getTitle() );
-		
-		return $form;
-	}
 }
 
 
+class TrueFanForm
+{
+	protected $mDescriptor;
+	protected $mForm;
+	protected $mTitle;
+	protected $mFormSuffix;
+	protected $mExternalPostAction;
 
-/**
- * Sub class of HTMLForm that provides the form 
- */
-class TrueFanForm extends HTMLForm {
-	protected $mSourceIds;
+	public function __construct($title, $type='video')
+	{
+		$this->mExternalPostAction = NULL;
+		$this->initializeDescriptor($type);
+		$this->mTitle = $title;
+	}
 
-	public function __construct($name='',$email='') { //maybe session key ... ?
-		global $wgLang;
-
-		$descriptor = $this->getFormDescriptor();
-		$descriptor['Name']['default'] = $name;
-		$descriptor['Email']['default'] = $email;
-		
-		parent::__construct( $descriptor, 'true-fan-form' );
-
-		# Set some form properties
-		$this->setSubmitText( 'Submit Form'); //wfMsg( 'uploadbtn' ) ); // internationalize later
-		$this->setSubmitName( 'wpTrueFanSubmit' );
-		$this->setSubmitTooltip( 'upload' );
-		$this->setId( 'mw-ose-truefan-form' );
-
-		# Build a list of IDs for javascript insertion // !! WTF does this do and can i use it with my own custom js?? must interface with wiki js, usable 4 me?
-		$this->mSourceIds = array();
-		foreach ( $descriptor as $key => $field ) {
-			if ( !empty( $field['id'] ) )
-				$this->mSourceIds[] = $field['id'];
+	// builds and shows the form
+	public function show()
+	{
+		// Reminder: 2nd param in constructor creates messagePrefix which is used to 
+		// name the fieldset for section main. (text of which is .i18n file)
+		$this->mForm = new HTMLForm($this->mDescriptor, "trueFanForm"); 
+		$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-video".$this->mFormSuffix)); 
+		$this->mForm->setSubmitName('submit');
+		$this->mForm->setId("trueFanId-".$this->mFormSuffix);
+		if($this->mExternalPostAction) {
+			$this->mTitle->mTextform = 'paypal';
+			$this->mTitle->mUrlform = $this->mExternalPostAction;
 		}
-
+		$this->mForm->setTitle($this->mTitle);
+		print_r($this->mForm);
+		//echo $this->mFlatFields['os0']->mName;
+		$this->mForm->show();
 	}
 
-
-	/**
-	 * Get the descriptor. 
-	 * 
-	 * @return array Descriptor array
-	 */
-	protected function getFormDescriptor() {
-		$descriptor = array(
-			'Name' => array(
-				'type' => 'text',
-				'section' => 'main',
-				'id' => 'ose-truefan-name',
-				'label' => 'Your Name',
-				'size' => 20,
-			),
-			'Email' => array(
-				'type' => 'text',
-				'section' => 'main',
-				'id' => 'ose-truefan-email',
-				'label' => 'Email',
-				'size' => 20,
-			),
-			'VideoId' => array(
-				'type' => 'text',
-				'section' => 'main',
-				'id' => 'ose-truefan-url',
-				'label' => 'Url of Video',
-				'size' => 20,
-			),
-		);
-		return $descriptor;
+	public function setFieldDefault($field, $value)
+	{
+		$this->mDescriptor[$field]['default'] = $value;
 	}
-
-	/**
-	 * Empty function; submission is handled elsewhere.
-	 * 
-	 * @return bool false
-	 */
-	function trySubmit() {
-		return false;
+		
+	private function initializeDescriptor($type)
+	{
+		// TODO: Internationalize all messages 
+		$this->mFormSuffix = $type;
+		switch($type) {
+		case 'video':
+			$this->mDescriptor = array(
+				'Name' => array(
+					'type' => 'text',
+					'section' => 'video',
+					'id' => 'ose-truefan-name',
+					'label' => 'Your Name',
+					'size' => 20,
+				),
+				'Email' => array(
+					'type' => 'text',
+					'section' => 'video',
+					'id' => 'ose-truefan-email',
+					'label' => 'Email',
+					'size' => 20,
+				),
+				'VideoId' => array(
+					'type' => 'text',
+					'section' => 'video',
+					'id' => 'ose-truefan-url',
+					'label' => 'Url of Video',
+					'size' => 20,
+				),
+			);
+			break;
+		case 'paypal':
+			$this->mDescriptor = array(
+				'cmd' => array(
+					'type' => 'hidden',
+					'section' => 'paypal',
+					'default' => '_s-xclick',
+				),
+				'hosted_button_id' => array(
+					'type' => 'hidden',
+					'section' => 'paypal',
+					'default' => 'LW3QK7UZWFZ2Y',
+				),
+				'on0' => array(
+					'type' => 'hidden',
+					'section' => 'paypal',
+					'default' => '',
+				),
+				'os0' => array(
+					'type' => 'select',
+					'section' => 'paypal',
+					'options' => array(
+						'Standard' => 'Standard : $10.00 USD - monthly',
+						'Gold' => 'Gold : $20.00 USD - monthly',
+						'Gold Extra' => 'Gold Extra: $30 USD - monthly',
+						'Platinum' => 'Platinum: $50.00 USD - monthly',
+						'Angel' => 'Angel : $100.00 USD - monthly',
+						),
+				),
+				'currency_code' => array(
+					'type' => 'hidden',
+					'section' => 'paypal',
+					'default' => 'USD',
+				),
+			);	
+			$this->mExternalPostAction = 'https://www.sandbox.paypal.com/cgi-bin/webscr'; 
+			break;
+		}
 	}
 }
 
@@ -218,20 +239,10 @@ function getPayPalButton()
 	</table>
 	<input type="hidden" name="currency_code" value="USD">
 	<input type="submit" id="paypal-submit" class="serious-button" name="submit" value="Subscribe">
-	<img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+	<!-- <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1"> -->
 	</form>
 EOT;
 	return $str;
-}
-
-function randomString($bits = 256)
-{
-    $bytes = ceil($bits / 8);
-    $return = '';
-    for ($i = 0; $i < $bytes; $i++) {
-        $return .= chr(mt_rand(0, 255));
-    }
-    return $return;
 }
 
 /**

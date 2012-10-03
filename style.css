@@ -27,6 +27,11 @@ iframe
 	box-shadow: 0 0 2px 1px #f00;
 }
 
+#submissions
+{
+	margin: 0 auto;
+}
+
 #submissions tbody tr:nth-child(odd) {
    background-color: #ccc;
 }
