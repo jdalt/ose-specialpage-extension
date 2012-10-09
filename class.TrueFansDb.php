@@ -1,6 +1,6 @@
 <?php 
 /* 
- *		microfundDb.php - 	This is a wrapper to microfund mySQL database. This class uses a PDO
+ *		class.TrueFansDb.php - 	This is a wrapper to microfund mySQL database. This class uses a PDO
  *			  				database connection and prepared statements to prevent SQL injection.
  */
 
@@ -67,13 +67,39 @@ class TrueFansDb
 		}
 		return NULL;
 	}
+
+	public function addInvitation($id, $message, $emailList)
+	{
+		if(!$this->getUser($id)){
+			$this->log("!!User $id not found!! Unable to add message!!");
+			return false;
+		}
+		foreach($emailList as $email) {
+			// TODO: validate emails
+			if($email === '') {
+				unset($emailList[$email]);
+			}
+		}
+		$emailStr = implode(',', $emailList);
+		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
+		try {
+			if($stmt->execute(array(':message' => $message, ':emailStr' => $emailStr, ':id' => $id))) {
+				// success
+				return true;
+			}
+		} catch (PDOException $e) {
+			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
+		}
+		return false;
+	}
+
 	
 	// *** Get Functions ***
 	
 	// getUser() - gets entire row of true_fans table and returns an associative array
 	public function getUser($id)
 	{
-		$stmt = $this->pdo->prepare('SELECT name, email, video_id FROM true_fans WHERE id=:id');
+		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE id=:id');
 		if($stmt->execute(array(':id' => $id))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
@@ -85,7 +111,7 @@ class TrueFansDb
 	// getUser() - gets entire row of true_fans table and returns an associative array
 	public function getUserByEmail($email)
 	{
-		$stmt = $this->pdo->prepare('SELECT name, email, video_id FROM true_fans WHERE email=:email');
+		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE email=:email');
 		if($stmt->execute(array(':email' => $email))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
@@ -94,10 +120,10 @@ class TrueFansDb
 		}
 	}
 	
-	// getAllEntries() - returns a big fat associative array of all the users in the entire databse, currently not even paginated
+	// getAllEntries() - returns a big fat associative array of all the users in the entire database, currently not even paginated
 	public function getAllEntries()
 	{
-		$stmt = $this->pdo->prepare('SELECT id, name, email, video_id FROM true_fans');
+		$stmt = $this->pdo->prepare('SELECT * FROM true_fans');
 		if($stmt->execute()) {
 			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $result;

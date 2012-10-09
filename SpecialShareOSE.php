@@ -19,8 +19,8 @@ class SpecialShareOSE extends SpecialPage {
 	}
 
 	/** Misc variables **/
-	protected $mRequest;			// The WebRequest or FauxRequest this form is supposed to handle
 	protected $mRequestPosted;
+	protected $mReqPostPage; 
 	
 	protected $mReqName;
 	protected $mReqEmail;
@@ -28,30 +28,33 @@ class SpecialShareOSE extends SpecialPage {
 	
 	protected $mReqInviteEmails;
 	protected $mReqInviteMessage;
+	protected $mReqInviteId;
 
-	protected $mReqPage;
-	
+	protected $mReqGetPage;
+
 	/**
 	 * Initialize instance variables from request.
 	 */
 	protected function loadRequest() {
 		global $wgUser, $wgRequest;
 
-		$this->mRequest = $wgRequest;
-		
-		$this->mRequestPosted = $this->mRequest->wasPosted();
-		
 		// MediaWiki prefixes 'wp' to names in the form $descriptor
-		// TODO: Consider loaded nearly all form material via the calling form ($videoForm, $inviteForm)
-		$this->mReqName = $this->mRequest->getText('Name');
-		$this->mReqEmail = $this->mRequest->getText('wpEmail');
-		$this->mReqVideoId = $this->mRequest->getText('wpVideoId');
+		// !! Security Concern - we need to guarantee requests come 
+		// !! through the proper way GET or POST. How w/o using form?
 
-		$this->mReqInviteEmails = $this->mRequest->getArray('wpEmailInput');
-		$this->mReqInviteMessage = $this->mRequest->getText('wpMessage');
+		$this->mRequestPosted = $wgRequest->wasPosted();
+		$this->mReqPostPage = $wgRequest->getText('Page');
 		
-		$this->mReqPage = $this->mRequest->getText('page');
-		$this->mReqId = $this->mRequest->getText('id');
+		$this->mReqName = $wgRequest->getText('Name');
+		$this->mReqEmail = $wgRequest->getText('wpEmail');
+		$this->mReqVideoId = $wgRequest->getText('wpVideoId');
+
+		$this->mReqInviteEmails = $wgRequest->getArray('wpEmailInput');
+		$this->mReqInviteMessage = $wgRequest->getText('wpMessage');
+		$this->mReqInviteId = $wgRequest->getText('Id');
+		
+		$this->mReqGetPage = $wgRequest->getText('page');
+		$this->mReqId = $wgRequest->getText('id');
 	}
 
 	/**
@@ -65,18 +68,46 @@ class SpecialShareOSE extends SpecialPage {
 		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/style.css');
 		$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/dynamic.js');
 		
+		$url = $this->getTitle()->getLocalUrl();
+		$full_url = $this->getTitle()->getFullUrl(); 
+
+		echo "<strong>$full_url</strong><span>{$this->getTitle()->getFragment()}</span>";
+
 		// Request specific HTML dependent upon the request
-		switch($this->mReqPage) {
+		switch($this->mReqGetPage) {
 			case 'view':
 				$profile = $this->mDb->getUser($this->mReqId);
 				$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
 				$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+				$wgOut->addHTML("<p>".$profile['video_message']."</p>");
+
 				break;
 	
 			case 'invite':
-				$wgOut->addHTML('<p>Invite your friends to become part of OSE.</p>');
-				$inviteForm = new TrueFanForm($this->getTitle(), 'invite');
-				$inviteForm->show();	
+				if($wgUser->isLoggedIn()) {
+					$profile = $this->mDb->getUserByEmail($wgUser->getEmail());
+					$id = $profile['id'];
+					if($id) {	
+						$wgOut->addHTML('<p>Invite your friends to become part of OSE.</p>');
+						$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
+						$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+						
+	
+						$inviteForm = new TrueFanForm($this->getTitle(), 'invite');
+						$inviteForm->setFieldDefault('Id', $id); 
+						
+						if($profile['video_message'] && $profile['email_invite_list']) {
+							$inviteForm->setFieldDefault('Message', $profile['video_message']);
+							$inviteForm->setFieldDefault('EmailInput', $profile['email_invite_list']);
+						}
+						$inviteForm->show();	
+					} else {
+						$wgOut->addHTML("You must create a True Fan profile and submit a video before inviting people to become True Fans.</p>");
+						$wgOut->addHTML("<a href='?page=home'>Create Profile</a>"); // TODO: cleanup this url 
+					}
+				} else {
+					$wgOut->addHTML("<p>You must be logged in to invite people to become true fans.</p>");
+				}
 				break;
 			
 			case 'subscribe':
@@ -91,7 +122,13 @@ class SpecialShareOSE extends SpecialPage {
 				$wgOut->addHTML('<table id="submissions"><tbody>');
 				foreach($result as $row) {
 					$wgOut->addHTML('<tr>');
-					$wgOut->addHTML("<td><a href='?page=view&id=".$row['id']."'>{$row['name']} </a></td><td>{$row['email']}</td><td>{$row['video_id']}</td>");
+					$wgOut->addHTML("<td><a href='?page=view&id=".$row['id']."'>{$row['id']} </a></td>");
+					// This is sort of future proofed for further column additions to TrueFanDb
+					foreach($row as $key => $val) {
+						if($key != 'id') {
+							$wgOut->addHTML("<td>$val</td>");
+						}
+					}
 					$wgOut->addHTML('</tr>');
 				}
 				$wgOut->addHTML('</table></tbody>');
@@ -99,13 +136,19 @@ class SpecialShareOSE extends SpecialPage {
 			
 			default:
 				if($this->mRequestPosted) {
-					if($this->mReqEmail) {
+					if($this->mReqPostPage === 'video') {
 						$wgOut->addHTML("<p>Received form from: <strong>".$this->mReqName."</strong></p>");
 						if($id = $this->mDb->addUser($this->mReqName, $this->mReqEmail, $this->mReqVideoId)) {
 							$wgOut->addHTML("<p>Added request to DB.</p>");
 							$profile = $this->mDb->getUser($id);
 							$wgOut->addHTML("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
 							$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+
+							$wgOut->addHTML('<p>Invite your friends to become part of OSE.</p>');
+							$inviteForm = new TrueFanForm($this->getTitle(), 'invite');
+							$inviteForm->setFieldDefault('Id', $id); // I can also get this info from the $wgUser...which may be better for release
+							$inviteForm->show();	
+
 						} else {
 							if($this->mDb->isDuplicateEmail($this->mReqEmail)) {
 								$wgOut->addHTML("<p>Unable to add user. Your email was already entered.</p>");
@@ -115,18 +158,27 @@ class SpecialShareOSE extends SpecialPage {
 								$wgOut->addHTML("<p>Unable to add request to DB.</p>");
 							}
 						}
-					} else {
-					
-						$wgOut->addHTML("<p>{$this->mReqInviteMessage}</p><ul>");
-						foreach($this->mReqInviteEmails as $email) {
-							$wgOut->addHTML("<li>$email</li>");
+					} elseif($this->mReqPostPage === 'invite') {
+						if($this->mDb->addInvitation($this->mReqInviteId, $this->mReqInviteMessage, $this->mReqInviteEmails)) { 
+							$wgOut->addHTML("<p>{$this->mReqInviteMessage}</p><ul>"); 
+							foreach($this->mReqInviteEmails as $email) {
+								$wgOut->addHTML("<li>$email</li>");
+							}
+							$wgOut->addHTML("</ul>");	
+							$link = $full_url."?page=view&id={$this->mReqInviteId}";
+							$wgOut->addHTML("<span>View your video and message at this link: </span><a href='$link'>$link</a>");
+						} else {
+							$wgOut->addHTML("<p>Unable to insert message and email list :< </p>");
 						}
-						$wgOut->addHTML("</ul>");
+					} else {
+						$wgOut->addHTML("<p>Unknown request posted.</p>");
 					}
 				} else {
+					// TODO: Make login a condition for all input pages...
 					if($wgUser->isLoggedIn()) {
 						$wgOut->addHTML('<p>Your login info was added to the form.</p>');
-						$videoForm = new TrueFanForm($this->getTitle());
+						$postPage = Title::newFromText($url.'?page=invite'); 
+						$videoForm = new TrueFanForm($postPage);
 						$videoForm->setFieldDefault('Name', $wgUser->getRealName());
 						$videoForm->setFieldDefault('NameDisplay', $wgUser->getRealName());
 						$videoForm->setFieldDefault('Email', $wgUser->getEmail());
@@ -138,11 +190,10 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 		}
 		// Global HTML added to every page
-		//TODO: Use $this->mTitle to get full url and add request on the end 
-		$wgOut->addHTML('<ul id="special-links"><li><a href="?page=home">Submit A Video</a></li>');
-		$wgOut->addHTML('<li><a href="?page=invite">Invite Friends</a></li>');
-		$wgOut->addHTML('<li><a href="?page=subscribe">Become a True Fan</a></li>');
-		$wgOut->addHTML('<li><a href="?page=viewall">View All Submissions</a></li></ul>');
+		$wgOut->addHTML('<ul id="special-links"><li><a href="'.$url.'?page=home">Submit A Video</a></li>');
+		$wgOut->addHTML('<li><a href="'.$url.'?page=invite">Invite Friends</a></li>');
+		$wgOut->addHTML('<li><a href="'.$url.'?page=subscribe">Become a True Fan</a></li>');
+		$wgOut->addHTML('<li><a href="'.$url.'?page=viewall">View All Submissions</a></li></ul>');
 	}
 	
 	private function getPayPalButton()
@@ -178,6 +229,7 @@ class TrueFanForm
 	protected $mTitle;
 	protected $mType;	
 	protected $mFormBuilt;
+	protected $mFormLoaded;
 
 	/*
 	 * @param $title a MW Title object with url info for post action
@@ -189,6 +241,7 @@ class TrueFanForm
 		$this->initializeDescriptor();
 		$this->mTitle = $title;
 		$this->mFormBuilt = false;
+		$this->mFormLoaded = false;
 	}
 
 	private function build()
@@ -201,7 +254,7 @@ class TrueFanForm
 			$this->mForm->setSubmitName('submit');
 			$this->mForm->setId("trueFanId-".$this->mType);
 			$this->mForm->setTitle($this->mTitle);
-			$this->mForm->loadData();
+			//$this->mForm->loadData();
 			$this->mFormBuilt = true;
 		}
 	}
@@ -219,14 +272,23 @@ class TrueFanForm
 		if(!$this->mFormBuilt) {
 			$this->mDescriptor[$field]['default'] = $value;
 		} else {
-			tf("Can't add default to a built form.");
+			tfDebug("Can't add default to a built form.");
 		}
 	}
 
+	// !! MW 1.16 this function won't return the values of hidden fields, making it useless
+	// as a replacement to the jumble of code in SpecialPage::loadRequest()
 	public function getData($field)
-	{
-		$this->build();
-		return $this->mForm->mFieldData[$field];
+	{ 
+		if(!$this->mFormLoaded) {
+			$this->build();
+			$this->mForm->loadData();
+			$this->mFormLoaded = true;
+			tfDebug("Loaded {$this->mType}");
+		}
+		$data = $this->mForm->mFieldData[$field]; 
+		tfDebug("$field is $data");
+		return $data;
 	}
 
 		
@@ -236,6 +298,11 @@ class TrueFanForm
 		switch($this->mType) {
 		case 'video':
 			$this->mDescriptor = array(
+				'Page' => array(
+					'type' => 'hidden',
+					'default' => $this->mType, 
+					'section' => $this->mType,
+				),
 				'NameDisplay' => array(
 					'type' => 'info',
 					'value' => '',
@@ -265,17 +332,17 @@ class TrueFanForm
 			break;
 		case 'invite':
 			$this->mDescriptor = array(
+				'Page' => array(
+					'type' => 'hidden',
+					'default' => $this->mType, 
+					'section' => $this->mType,
+				),
 				'Message' => array(
 					'type' => 'textarea',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-message',
 					'label' => 'Message',
 					'rows' => 5,
-				),
-				'EmailList' => array(
-					'type' => 'hidden',
-					'section' => $this->mType,
-					'default' => '',
 				),
 				'EmailInput' => array(
 					'type' => 'text',
@@ -286,6 +353,11 @@ class TrueFanForm
 					'size' => 20,
 					'cssclass' => 'changeme',
 				),
+				'Id' => array(
+					'type' => 'hidden',
+					'section' => $this->mType,
+				),
+
 			);
 			break;
 		}
