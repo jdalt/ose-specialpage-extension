@@ -16,6 +16,11 @@ iframe
 	background-color: #eee;
 }
 
+#bodyContent h3
+{
+	text-align: center;
+}
+
 .serious-button
 {
     background-color: #fff;

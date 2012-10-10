@@ -1,8 +1,27 @@
 <?php 
-/* 
- *		class.TrueFansDb.php - 	This is a wrapper to microfund mySQL database. This class uses a PDO
- *			  				database connection and prepared statements to prevent SQL injection.
- */
+/**
+ * class.TrueFansDb.php -- a wrapper for True Fans database
+ * Copyright 2012 by Jacob Dalton	
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * @file class.TrueFansDb.php
+ * @author Jacob Dalton <jacobrdalton@gmail.com>
+ * @ingroup Extensions
+*/
+
 
 if(!@include_once("/home2/wordpage/.connect_truefans.php"))
 {
@@ -11,9 +30,13 @@ if(!@include_once("/home2/wordpage/.connect_truefans.php"))
    
 class TrueFansDb
 {
+	// TODO: Is bconnected useful????
 	protected $bconnected; // Currently used to control error output of destructor which can't close a connection for a null object
 	private $pdo;
 	
+	/**
+	* Creates PDO object according to functions in connect script
+	*/
 	function __construct()
 	{
 		$dsn = 'mysql:dbname='.getDatabase().';host='.getHost();
@@ -28,6 +51,9 @@ class TrueFansDb
 		}
 	}
 
+	/**
+	* Destroys PDO object and sets bconnect to false
+	*/
 	function __destruct()
 	{
 		if($this->bconnected) {
@@ -41,7 +67,17 @@ class TrueFansDb
 
 	// *** Modification Functions ***
 	
-	// addUser() - fills entire row of true_fans table; user must manually test if fail was for duplicate email
+	/**
+	* Adds a new user and fills name, email, and video_id fields
+	* @param String $name
+	* @param String $email 
+	* @param String $video_id
+	* @param Boolean $extractUrl Optional parameter to extract url. 
+	* Defaults to true. When set to false, video_id inserted w/o checks.
+	* @return Integer|NULL On success returns id of newly created true
+	* fan profile. On failure returns NULL
+	* TODO: Unit test a 0 id return vs NULL return
+	*/
 	public function addUser($name, $email, $video_id, $extractUrl=true)
 	{
 		if($extractUrl) {
@@ -68,19 +104,20 @@ class TrueFansDb
 		return NULL;
 	}
 
-	public function addInvitation($id, $message, $emailList)
+	/**
+	* Updates a row of true_ran table with video_message and email_invite_list
+	* @param Integer $id The row to update
+	* @param String $message The message to add
+	* @param Array(String) $emailList An array strings that are emails
+	* @return Boolean Returns true on success and false on failure
+	*/
+	public function updateInvitation($id, $message, $emailList)
 	{
 		if(!$this->getUser($id)){
 			$this->log("!!User $id not found!! Unable to add message!!");
 			return false;
 		}
-		foreach($emailList as $email) {
-			// TODO: validate emails
-			if($email === '') {
-				unset($emailList[$email]);
-			}
-		}
-		$emailStr = implode(',', $emailList);
+		$emailStr = implode(', ', $emailList);
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
 		try {
 			if($stmt->execute(array(':message' => $message, ':emailStr' => $emailStr, ':id' => $id))) {
@@ -94,9 +131,13 @@ class TrueFansDb
 	}
 
 	
-	// *** Get Functions ***
+	// *** Get Functions *** \\
 	
-	// getUser() - gets entire row of true_fans table and returns an associative array
+	/**
+	* Retrieves a true fan via id key
+	* @param Integer $id Id key in db
+	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
+	*/
 	public function getUser($id)
 	{
 		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE id=:id');
@@ -108,7 +149,11 @@ class TrueFansDb
 		}
 	}
 	
-	// getUser() - gets entire row of true_fans table and returns an associative array
+	/**
+	* Retrieves a true fan via email key
+	* @param String $email Email key in db
+	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
+	*/
 	public function getUserByEmail($email)
 	{
 		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE email=:email');
@@ -120,7 +165,11 @@ class TrueFansDb
 		}
 	}
 	
-	// getAllEntries() - returns a big fat associative array of all the users in the entire database, currently not even paginated
+	/**
+	* Retrieves all true fan entries in database
+	* @return Array An associate array of all entries
+	* TODO: Create a pagination strategy so that a large db doesn't DDOS db server
+	*/
 	public function getAllEntries()
 	{
 		$stmt = $this->pdo->prepare('SELECT * FROM true_fans');
@@ -132,9 +181,13 @@ class TrueFansDb
 		}
 	}
 	
-	// *** Utility functions ***
+	// *** Utility functions *** \\
 	
-	// isDuplicateEmail - checks an email string to see if it's already in the database. Emails are UNIQUE in the database, inserting duplicates will fail, so this allows us to test in advance if an insert will fail due to a duplicate key.
+	/**
+	* Checks for a duplicate email in database
+	* @param String $email The key to match in the database
+	* @return Boolean True on match otherwise false
+	*/
 	public function isDuplicateEmail($email)
 	{
 		$stmt = $this->pdo->prepare('SELECT id FROM true_fans WHERE email=:email');
@@ -150,10 +203,16 @@ class TrueFansDb
 		}
 	}
 
-	// mixed extractVideoId($url_mess) -  performs a regex on $url_mess and returns the 11 character youtube id on a match and NULL if the id cannot be extracted
+	/**
+	* Performs a series of regular expressions to find video_id
+	* Accepts youtube embed iframes, shortened youtu.be urls, youtube viewing urls
+	* and straight 11 character ids.
+	* @param String $url_mess The incoming iframe, url, or id to search inside
+	* @return String|NULL Returns 11 character video_id String on a match or null on a miss
+	*/
 	public function extractVideoId($url_mess)
 	{
-		// !!** Delete echo before going live **!!
+		// TODO: These regexes could use some unit tests to prove their correctness and ferret out any edge cases
 		if(preg_match('/src=\"http[s]??:\/\/www.youtube.com\/embed\/([A-Za-z0-9_-]{11})[\?&]?[\S]*\"/', $url_mess, $matches) == 1) {  // carve out 11 digit id from iframe embed
 			$this->log('Extracted id from src attribute of an iframe.');
 			return $matches[1];
@@ -163,15 +222,20 @@ class TrueFansDb
 		} else if(preg_match('/[\?&]v=([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out id from youtube viewing url
 			$this->log('Extracted id from viewing url text.');
 			return $matches[1];
+		} else if(preg_match('/[A-Za-z0-9_-]{11}/', $url_mess, $matches) == 1) { // take an 11 character string of valid characters as an id
+			$this->log('Extracted plain id.');
+			return $matches[0];
 		} else {
 			return NULL;
 		}
 	}
 
+	/**
+	* A function to log debug ouput. Currently must be hot-wired SpecialPage hosting database.
+	* @param String $str string to add to log file
+	*/
 	protected function log($str)
 	{
 		tfDebug($str); // !! only works with OSE Special Page; !! TODO: indep log file editing
 	}
 }
-
-?>
