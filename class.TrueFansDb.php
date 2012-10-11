@@ -76,7 +76,7 @@ class TrueFansDb
 	* Defaults to true. When set to false, video_id inserted w/o checks.
 	* @return True|NULL On success returns true. On failure returns NULL.
 	*/
-	public function addUser($name, $email, $video_id, $extractUrl=true)
+	public function addUser($foreign_id, $name, $email, $video_id, $extractUrl=true)
 	{
 		$insert_id = $video_id;
 		if($extractUrl) {
@@ -86,9 +86,9 @@ class TrueFansDb
 			}
 		}
 
-		$stmt = $this->pdo->prepare('INSERT INTO true_fans(name,email,video_id) VALUES(:name, :email, :video_id)');
+		$stmt = $this->pdo->prepare('INSERT INTO true_fans(foreign_id, name,email,video_id) VALUES(:foreign_id, :name, :email, :video_id)');
 		try {
-			if($stmt->execute(array(':name' => $name, ':email' => $email, ':video_id' => $insert_id))) {
+			if($stmt->execute(array(':foreign_id' => $foreign_id, ':name' => $name, ':email' => $email, ':video_id' => $insert_id))) {
 				// success
 				return true;
 			}
@@ -142,16 +142,17 @@ class TrueFansDb
 	* Updates a row of true_ran table with video_message and email_invite_list
 	* @param Integer $id The row to update
 	* @param String $message The message to add
-	* @param Array(String) $emailList An array strings that are emails
+	* @param String $emailStr A comma separated list of emails
 	* @return Boolean Returns true on success and false on failure
 	*/
-	public function updateInvitation($id, $message, $emailList)
+	public function updateInvitation($id, $message, $emailStr)
 	{
 		if(!$this->getUser($id)){
 			$this->log("!!User $id not found!! Unable to add message!!");
 			return NULL;
 		}
-		$emailStr = implode(', ', $emailList);
+
+
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
 		try {
 			if($stmt->execute(array(':message' => $message, ':emailStr' => $emailStr, ':id' => $id))) {
@@ -183,14 +184,14 @@ class TrueFansDb
 	}
 
 	/**
-	* Retrieves a true fan via email key
-	* @param String $email Email key in db
+	* Retrieves a true fan via foreign_id key
+	* @param String $key
 	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
 	*/
-	public function getUserByEmail($email)
+	public function getUserByForeignId($key)
 	{
-		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE email=:email');
-		if($stmt->execute(array(':email' => $email))) {
+		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE foreign_id=:key');
+		if($stmt->execute(array(':key' => $key))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
 		}
@@ -213,11 +214,11 @@ class TrueFansDb
 	}
 	
 	/**
-	* Retrieves a true fan id from an email
-	* @param Integer $email Email key in db
+	* Retrieves a true fan id from a foreign_id 
+	* @param String $foreign_id 
 	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
 	*/
-	public function getUserId($email)
+	public function getUserId($foreign_id)
 	{
 		$stmt = $this->pdo->prepare('SELECT id FROM true_fans WHERE email=:email');
 		if($stmt->execute(array(':email' => $email))) {

@@ -68,7 +68,7 @@ iframe
 	display: none;
 }
 
-#ose-id-hidden
+#ose-id-hidden, #ose-fid-hidden
 {
 	visibility: hidden;
 	position: absolute;

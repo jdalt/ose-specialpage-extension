@@ -42,17 +42,8 @@ class SpecialShareOSE extends SpecialPage {
 	}
 
 	/** Misc variables **/
-	protected $mRequestPosted; // !! elim possible
 	protected $mReqPostPage; 
-	
-	protected $mReqName;
-	protected $mReqEmail;
-	protected $mReqVideoId;
-	
-	protected $mReqInviteEmails;
-	protected $mReqInviteMessage;
-	protected $mReqInviteId;
-
+	protected $mPostedForm;
 	protected $mReqGetPage;
 
 	/**
@@ -61,36 +52,16 @@ class SpecialShareOSE extends SpecialPage {
 	protected function loadRequest() {
 		global $wgUser, $wgRequest;
 
-		// MediaWiki prefixes 'wp' to names in the form $descriptor
 		// !! Security Concern - we need to guarantee requests come 
 		// !! through the proper way GET or POST. How w/o using form?
 
-		$this->mRequestPosted = $wgRequest->wasPosted();
 		$this->mReqPostPage = $wgRequest->getText('Page');
-		if($this->mRequestPosted) {
+		if($wgRequest->wasPosted()) {
 			$this->mPostedForm = new TrueFanForm($this->getTitle(), $this->mReqPostPage);
 		}
-
-		$this->mReqName = $wgRequest->getText('wpName');
-		$this->mReqEmail = $wgRequest->getText('wpEmail');
-		$this->mReqVideoId = $wgRequest->getText('wpVideoId');
-
-		$this->mReqInviteEmails = $wgRequest->getArray('wpEmailInput');
-		if($this->mReqInviteEmails) {
-			foreach($this->mReqInviteEmails as $key => $email) {
-				if($email == '') {
-					unset($this->mReqInviteEmails[$key]);
-				}
-			}
-		}
-		$this->mReqInviteMessage = $wgRequest->getText('wpMessage');
-		$this->mReqInviteId = $wgRequest->getText('Id');
 		
 		$this->mReqGetPage = $wgRequest->getText('page');
 		$this->mReqId = $wgRequest->getText('id');
-
-		//$this->mReceivedEditForm = new TrueFanForm($this->mTitle, 'edit');
-		//$this->mReceivedEditForm->load();
 	}
 
 	/**
@@ -163,7 +134,7 @@ class SpecialShareOSE extends SpecialPage {
 				if(!$wgUser->isLoggedIn()) {
 					$wgOut->addHTML('<p>You are not logged in.</p>'); 
 				} else {
-					$profile = $this->mDb->getUserByEmail($wgUser->getEmail());
+					$profile = $this->mDb->getUserByForeignId('mw:'.$wgUser->getId());
 					if(!$profile){
 						$wgOut->addHTML('<p>Unable to find profile. You need to submit a video.</p>'); 
 					} else {
@@ -198,24 +169,20 @@ class SpecialShareOSE extends SpecialPage {
 					$wgOut->addHTML('<p>You must log in to submit a video.</p>');
 				} else {
 					// Intelligently decide the logged in user's needs based on DB contents
-					$userEmail = $wgUser->getEmail();
-					//!!!! ***** Major Sercurity Flaw ***** Initial email in MW is confirmed but
-					//!!!! uncomfirmed changes affect profile. Do not use email as a key anymore
-					//!!!! change TrueFan schema and add a foreign id to correspond to MW user Id
-					//!!!! which is invariant.
-					$profile = $this->mDb->getUserByEmail($userEmail);
-					// Proposed $profile = $this->mDb->getUserByForeignId($wgUser->getId());
-
+					$mwId = 'mw:'.$wgUser->getId();
+					$profile = $this->mDb->getUserByForeignId($mwId);
 					$form = NULL;
 
 					if(!$profile['video_id']) {
 						// No video_id: create a 'video' form
 						$form = new TrueFanForm($this->getTitle(), 'video');
 						$userName = '';
+						$userEmail = '';
 						if(!$profile) {
 							// The user doesn't exist in the true fans database
 							$wgOut->addHTML('<p>Create a True Fan profile and submit a video. </p>');
 							$userName = $wgUser->getRealName();
+							$userEmail = $wgUser->getEmail();
 						} else {
 							// The user exists but hasn't submitted a video_id
 							// !!This isn't currently possible except by external intervention!!
@@ -223,9 +190,11 @@ class SpecialShareOSE extends SpecialPage {
 							$form->setFieldAttr('Id', 'default', $profile['id']);
 							echo $profile['id'];
 							$userName = $profile['name'];
+							$userEmail = $profile['email'];
 						}
 						$form->setFieldAttr('Name', 'default', $userName);
 						$form->setFieldAttr('Email', 'default', $userEmail);					
+						$form->setFieldAttr('ForeignId', 'default', $mwId);					
 
 					} elseif(!$profile['video_message']) {
 						// !! Kind of flukey behavior -- empty message plus email list will show empty emailList...
@@ -248,7 +217,8 @@ class SpecialShareOSE extends SpecialPage {
 						$form->setFieldAttr('Email', 'default', $profile['email']);					
 						$form->setFieldAttr('VideoId', 'default', $profile['video_id']);									
 						$form->setFieldAttr('Message', 'default', $profile['video_message']);
-						$form->setFieldAttr('EmailInput', 'default', $profile['email_invite_list']);
+						// FIX: Bug -- delete video_id, add new video_id, next submit form emailInput will be blank
+						$form->setFieldAttr('EmailInput', 'default', $profile['email_invite_list']); // WL: Create new attribute and extend the descriptor upon build within the constructor
 						$form->setFieldAttr('Id', 'default', $profile['id']);
 					}
 
@@ -301,12 +271,10 @@ class SpecialShareOSE extends SpecialPage {
 					} else {
 						$wgOut->addHTML("<p>Failed to update video id.</p>");
 					}
-				} elseif($this->mDb->addUser($postFields['Name'], $postFields['Email'], $postFields['VideoId'])) { 
+				} elseif($this->mDb->addUser($postFields['ForeignId'], $postFields['Name'], $postFields['Email'], $postFields['VideoId'])) { 
 					$wgOut->addHTML("<p>Added request to DB.</p>");
 				} else {
-					if($this->mDb->isDuplicateEmail($postFields['Email'])) {
-						$wgOut->addHTML("<p>Unable to add user. Your email was already entered.</p>");
-					} else if(!$this->mDb->extractVideoId($postFields['VideoId'])) {
+					if(!$this->mDb->extractVideoId($postFields['VideoId'])) {
 						$wgOut->addHTML("<p>Unable to extract video id from URL.</p>");
 					} else {
 						$wgOut->addHTML("<p>Unable to add request to DB.</p>");
@@ -316,21 +284,22 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 
 			case 'invite':
-				if($this->mDb->updateInvitation($this->mReqInviteId, $this->mReqInviteMessage, $this->mReqInviteEmails)) { 
-					$wgOut->addHTML("<p>{$this->mReqInviteMessage}</p><ul>"); 
-					foreach($this->mReqInviteEmails as $email) {
+				if($this->mDb->updateInvitation($postFields['Id'], $postFields['Message'], $postFields['EmailInput'])) { 
+					$wgOut->addHTML("<p>{$postFields['Message']}</p><ul>"); 
+					$emails = explode(', ', $postFields['EmailInput']);
+					foreach($emails as $email) {
 						$wgOut->addHTML("<li>$email</li>");
 					}
 					$wgOut->addHTML("</ul>");	
-					$link = $this->getTitle()->getFullUrl()."?page=view&id={$this->mReqInviteId}";
+					$link = $this->getTitle()->getFullUrl()."?page=view&id={$postFields['Id']}";
 					$wgOut->addHTML("<span>View your video and message at this link: </span><p><a href='$link'>$link</a></p>");
 				} else {
 					$wgOut->addHTML("<p>Unable to insert message and email list :< </p>");
+					$this->handleViewPage('submit'); // throw it back viewing pages
 				}
 				break;
 
 			case 'edit':
-				//$postedForm = new TrueFanForm($this->getTitle(), 'edit');
 				foreach($postFields as $key => $data) {
 					$wgOut->addHTML("<p>$key is $data</p>");
 				}
@@ -338,18 +307,19 @@ class SpecialShareOSE extends SpecialPage {
 				// or anyone can send post over cUrl and modify any known id.
 				// Currently I'm assuming HTMLForm checks the edit token
 				// when the data is loaded. *Need to verify this is the case*
-				$id = $postFields['Id']; // $this->mDb->getUserId($postFields['Email']);
+
 				// Any draw back to updating with this information even if it hasn't changed...?
-				if(!$this->mDb->updateVideoId($id, $postFields['VideoId'], true)) {
+				if(!$this->mDb->updateVideoId($postFields['Id'], $postFields['VideoId'], true)) {
 					$wgOut->addHTML("<p>Failed to update video id.</p>");
 				} else {
 					$wgOut->addHTML("<p>Updated video id.</p>");
 				}
-				if(!$this->mDb->updateInvitation($id, $postFields['Message'], $this->mReqInviteEmails)) {
+				if(!$this->mDb->updateInvitation($postFields['Id'], $postFields['Message'], $postFields['EmailInput'])) {
 					$wgOut->addHTML("<p>Failed to update video message and email ivites.</p>");
 				} else {
 					$wgOut->addHTML("<p>Updated message and email invitations.</p>");
 				}
+				$this->handleViewPage('submit'); // throw it back viewing pages
 				break;
 
 			default:
@@ -431,7 +401,7 @@ class TrueFanForm
 			$this->mForm = new HTMLForm($this->mDescriptor, "trueFanForm"); 
 			$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-".$this->mType)); 
 			$this->mForm->setSubmitName('submit');
-			$this->mForm->setId("trueFanId-".$this->mType);
+			$this->mForm->setId("trueFanForm");
 			$this->mForm->setTitle($this->mTitle);
 			$this->mFormBuilt = true;
 		}
@@ -541,6 +511,12 @@ class TrueFanForm
 					'id' => 'ose-id-hidden',
 					'readonly' => true,
 				),
+				'ForeignId' => array(
+					'type' => 'text',
+					'section' => $this->mType,
+					'id' => 'ose-fid-hidden',
+					'readonly' => true,
+				),
 			);
 			break;
 		case 'invite':
@@ -558,13 +534,11 @@ class TrueFanForm
 					'rows' => 5,
 				),
 				'EmailInput' => array(
-					'type' => 'text',
+					'class' => 'HTMLTextArray',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email-input',
 					'label' => 'Email',
-					'name' => 'EmailInput[]', /* >= MW 1.17 */
 					'size' => 20,
-					'cssclass' => 'changeme',
 				),
 				'Id' => array(
 					'type' => 'text',
@@ -572,11 +546,6 @@ class TrueFanForm
 					'id' => 'ose-id-hidden',
 					'readonly' => true,
 				),
-				'Id' => array(
-					'type' => 'hidden',
-					'section' => $this->mType,
-				),
-
 			);
 			break;
 		case 'edit':
@@ -618,13 +587,11 @@ class TrueFanForm
 					'rows' => 5,
 				),
 				'EmailInput' => array(
-					'type' => 'text',
+					'class' => 'HTMLTextArray',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email-input',
 					'label' => 'Email',
-					'name' => 'EmailInput[]', /* >= MW 1.17 */
 					'size' => 20,
-					'cssclass' => 'changeme',
 				),
 				'Id' => array(
 					'type' => 'text',
@@ -637,6 +604,38 @@ class TrueFanForm
 	}
 }
 
+/**
+ * It's textField that loads as an array -- so you can have multiple repeated textfields.
+ */
+class HTMLTextArray extends HTMLTextField
+{
+	protected $mRequestName;
+	function __construct( $params ) {
+		parent::__construct( $params );
+		$this->mRequestName = $this->mName;
+		$this->mName .= '[]';
+	}
+
+	function loadDataFromRequest( $request ) {
+		# won't work with getCheck
+		if( $request->getCheck( 'wpEditToken' ) ) {
+			$emailArray = $request->getArray($this->mRequestName);
+			
+			$emailStr = '';
+			if($emailArray) {
+				foreach($emailArray as $key => $email) {
+					if($email == '') {
+						unset($emailArray[$key]);
+					}
+				}
+				$emailStr = implode(', ', $emailArray);
+			}
+			return $emailStr; 
+		} else {
+			return $this->getDefault();
+		}
+	}
+}
 
 
 /**
