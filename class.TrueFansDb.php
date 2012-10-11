@@ -30,7 +30,7 @@ if(!@include_once("/home2/wordpage/.connect_truefans.php"))
    
 class TrueFansDb
 {
-	// TODO: Is bconnected useful????
+	// TODO: Is bconnected useful? 
 	protected $bconnected; // Currently used to control error output of destructor which can't close a connection for a null object
 	private $pdo;
 	
@@ -74,32 +74,66 @@ class TrueFansDb
 	* @param String $video_id
 	* @param Boolean $extractUrl Optional parameter to extract url. 
 	* Defaults to true. When set to false, video_id inserted w/o checks.
-	* @return Integer|NULL On success returns id of newly created true
-	* fan profile. On failure returns NULL
-	* TODO: Unit test a 0 id return vs NULL return
+	* @return True|NULL On success returns true. On failure returns NULL.
 	*/
 	public function addUser($name, $email, $video_id, $extractUrl=true)
 	{
+		$insert_id = $video_id;
 		if($extractUrl) {
 			$insert_id = $this->extractVideoId($video_id);
 			if(!$insert_id) {
 				return NULL;
 			}
-		} else {
-			$insert_id = $video_id;
 		}
+
 		$stmt = $this->pdo->prepare('INSERT INTO true_fans(name,email,video_id) VALUES(:name, :email, :video_id)');
 		try {
 			if($stmt->execute(array(':name' => $name, ':email' => $email, ':video_id' => $insert_id))) {
 				// success
-				$stmt2 = $this->pdo->prepare('SELECT id FROM true_fans WHERE name=:name AND email=:email');
-				if($stmt2->execute(array(':name' => $name, ':email' => $email))) {
-					$result = $stmt2->fetch(PDO::FETCH_ASSOC);
-					return $result['id'];
-				}
+				return true;
 			}
 		} catch (PDOException $e) {
 			$this->log('Unable to insert user: ' .$e->getMessage());
+		}
+		return NULL;
+	}
+
+	/**
+	* Updates a video_id
+	* @param String $id 
+	* @param String $video_id
+	* @param Boolean $extractUrl Optional parameter to extract url. 
+	* Defaults to true. When set to false, video_id inserted w/o checks.
+	* @return Boolean|NULL True for success and NULL for failure 
+	*/
+	public function updateVideoId($id, $video_id, $extractUrl=true)
+	{
+		// Perhaps I should create a more efficient way to test id (getUser returns entire profile)
+		// Could also just let this fail...this prbly overly cautious since most ids are already require
+		// a call to the db....
+		// TODO: Consider eliminating following check
+		if(!$this->getUser($id)){
+			$this->log("!!User $id not found!! Unable to add message!!");
+			return NULL;
+		}
+
+		$update_id = $video_id;
+		if($extractUrl) {
+			$update_id = $this->extractVideoId($video_id);
+			if(!$update_id) {
+				return NULL;
+			}
+		} 
+	
+		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_id=:update_id WHERE id=:id');
+		try {
+			if($stmt->execute(array(':id' => $id, ':update_id' => $update_id))) {
+				return true;
+			} else {
+				return NULL;
+			}
+		} catch (PDOException $e) {
+			$this->log('Unable to update video id: ' .$e->getMessage());
 		}
 		return NULL;
 	}
@@ -115,7 +149,7 @@ class TrueFansDb
 	{
 		if(!$this->getUser($id)){
 			$this->log("!!User $id not found!! Unable to add message!!");
-			return false;
+			return NULL;
 		}
 		$emailStr = implode(', ', $emailList);
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
@@ -127,7 +161,7 @@ class TrueFansDb
 		} catch (PDOException $e) {
 			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
 		}
-		return false;
+		return NULL;
 	}
 
 	
@@ -144,11 +178,10 @@ class TrueFansDb
 		if($stmt->execute(array(':id' => $id))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
-		} else {
-			return NULL;
-		}
+		} 
+		return NULL;
 	}
-	
+
 	/**
 	* Retrieves a true fan via email key
 	* @param String $email Email key in db
@@ -160,9 +193,8 @@ class TrueFansDb
 		if($stmt->execute(array(':email' => $email))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
-		} else {
-			return NULL;
 		}
+		return NULL;
 	}
 	
 	/**
@@ -176,11 +208,26 @@ class TrueFansDb
 		if($stmt->execute()) {
 			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
+		} 
+		return NULL;
+	}
+	
+	/**
+	* Retrieves a true fan id from an email
+	* @param Integer $email Email key in db
+	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
+	*/
+	public function getUserId($email)
+	{
+		$stmt = $this->pdo->prepare('SELECT id FROM true_fans WHERE email=:email');
+		if($stmt->execute(array(':email' => $email))) {
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			return $result['id'];
 		} else {
 			return NULL;
 		}
 	}
-	
+
 	// *** Utility functions *** \\
 	
 	/**

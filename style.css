@@ -62,3 +62,14 @@ iframe
 {
 	content: "";
 }
+
+#ose-truefan-email-hidden
+{
+	display: none;
+}
+
+#ose-id-hidden
+{
+	visibility: hidden;
+	position: absolute;
+}	

@@ -19,6 +19,9 @@ $messages['en'] = array(
 
         'trueFanForm-invite' => 'Send A Message',
         'trueFanSubmitText-invite' => 'Send Invite',
+
+        'trueFanForm-edit' => 'Edit True Fan Profile',
+        'trueFanSubmitText-edit' => 'Confirm Edit',
 );
  
 /** Message documentation

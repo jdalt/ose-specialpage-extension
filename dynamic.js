@@ -19,8 +19,8 @@ function addEmailInput(e)
 	// Any keyup except tab (which == 9) creates a new input in our form
 	if(this.value != '') {
 		$j(this).unbind('blur');
-		$j('#trueFanId-invite tbody:first').append('<tr><td class="mw-label"><label>Email</label></td><td><input type="text" name="wpEmailInput[]"/></td></tr>');
-		$j('#trueFanId-invite tbody:first td input:last').blur(addEmailInput);
+		$j('[id=^trueFanId] invite tbody:first').append('<tr><td class="mw-label"><label>Email</label></td><td><input type="text" name="wpEmailInput[]"/></td></tr>');
+		$j('[id=^trueFanId] tbody:first td input:last').blur(addEmailInput);
 		console.log('added email input');
 	}
 }
