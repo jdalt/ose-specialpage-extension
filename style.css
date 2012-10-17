@@ -2,11 +2,18 @@
  * style.css - style for SpecialPageOSE extension
  */
 
+
+
 iframe
 {
 	width: 640px;
 	height: 480px;
 	border: none;
+}
+
+#p-logo a
+{
+	display: none;
 }
 
 #bodyContent
@@ -62,14 +69,3 @@ iframe
 {
 	content: "";
 }
-
-#ose-truefan-email-hidden
-{
-	display: none;
-}
-
-#ose-id-hidden, #ose-fid-hidden
-{
-	visibility: hidden;
-	position: absolute;
-}	

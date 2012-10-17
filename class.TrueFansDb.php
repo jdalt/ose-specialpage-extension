@@ -261,6 +261,7 @@ class TrueFansDb
 	public function extractVideoId($url_mess)
 	{
 		// TODO: These regexes could use some unit tests to prove their correctness and ferret out any edge cases
+		// FIXME: adding characters to an id within a url will cause regex to snip added characters and return an invalid id
 		if(preg_match('/src=\"http[s]??:\/\/www.youtube.com\/embed\/([A-Za-z0-9_-]{11})[\?&]?[\S]*\"/', $url_mess, $matches) == 1) {  // carve out 11 digit id from iframe embed
 			$this->log('Extracted id from src attribute of an iframe.');
 			return $matches[1];
@@ -270,7 +271,7 @@ class TrueFansDb
 		} else if(preg_match('/[\?&]v=([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out id from youtube viewing url
 			$this->log('Extracted id from viewing url text.');
 			return $matches[1];
-		} else if(preg_match('/[A-Za-z0-9_-]{11}/', $url_mess, $matches) == 1) { // take an 11 character string of valid characters as an id
+		} else if(preg_match('/^[A-Za-z0-9_-]{11}$/', $url_mess, $matches) == 1) { // take an 11 character string of valid characters as an id
 			$this->log('Extracted plain id.');
 			return $matches[0];
 		} else {
