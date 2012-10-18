@@ -182,6 +182,8 @@ class SpecialShareOSE extends SpecialPage {
 						$form = new TrueFanForm($this, 'video');
 						$form->addPreMessage('<p>Create a True Fan Profile and submit a video. </p>');
 						$form->setFieldAttr('Name', 'default', $wgUser->getRealName());
+						// TODO: Internationalize
+						$form->setFieldAttr('Name', 'help', 'Your name was added from your wiki profile. You may edit it.');
 						$form->setFieldAttr('Email', 'default', $wgUser->getEmail());					
 					} elseif(!$this->mTfProfile['video_message']) {
 					 	// Precondition: User exists with video_id but no message and email list
@@ -249,6 +251,9 @@ class SpecialShareOSE extends SpecialPage {
 		} 
 	}
 
+
+	/****** Utility Functions *******/
+
 	/**
 	 * Accumulates messages from post callback of TrueFansForm that are displayed at the top of the page alone or before next form. 
 	 */
@@ -266,7 +271,15 @@ class SpecialShareOSE extends SpecialPage {
 		global $wgUser;
 		return 'mw:'.$wgUser->getId();
 	}
-	
+
+	/**
+	 * Returns link to view profile page for logged in user.
+	 * @return String The link.
+	 */
+	function getUserViewProfileLink() 
+	{
+		return $this->getTitle()->getFullUrl()."?page=view&id={$this->mTfProfile['id']}"; 
+	}
 
 	/**
 	 * Heredoc text drop of paypal button.
@@ -427,6 +440,7 @@ class TrueFanForm
 	{ 
 		switch($formFields['Page']) {
 			case 'video':
+				//FIXME: Potential XSS security flaw - non-escaped $formFields directly displayed, consider getting a return form db of escaped via htmlspecialchars
 				$this->mPage->addPostMessage("<p>Received form from: <strong>".$formFields['Name']."</strong></p>");
 				if($this->mPage->mDb->addUser($this->mPage->getMwId(), $formFields['Name'], $formFields['Email'], $formFields['VideoId'])) { 
 					$this->mPage->addPostMessage("<p>Added request to DB.</p>");
@@ -440,15 +454,16 @@ class TrueFanForm
 				break;
 
 			case 'invite':
-				//if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
+				//if(($this->mPage->mTfProfile['vide[MaCo_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
 				if($this->mPage->mDb->updateInvitation($this->mPage->mTfProfile['id'], $formFields['Message'], $formFields['EmailInput'])) { 
+					//FIXME: Potential XSS security flaw - non-escaped $formFields directly displayed, consider getting a return form db of escaped via htmlspecialchars
 					$this->mPage->addPostMessage("<p>{$formFields['Message']}</p><ul>"); 
-					$emails = explode(', ', $formFields['EmailInput']);
+					$emails = explode(',', $formFields['EmailInput']);
 					foreach($emails as $email) {
 						$this->mPage->addPostMessage("<li>$email</li>");
 					}
 					$this->mPage->addPostMessage("</ul>");	
-					$link = $this->mPage->getTitle()->getFullUrl()."?page=view&id={$this->mPage->mTfProfile['id']}"; 
+					$link = $this->mPage->getUserViewProfileLink();
 					$this->mPage->addPostMessage("<span>View your video and message at this link: </span><p><a href='$link'>$link</a></p>");
 					return true;
 				} else {
@@ -457,6 +472,11 @@ class TrueFanForm
 				break;
 
 			case 'edit':
+				// TODO: Make name editable and report change to name.
+				// Should there be a generalized update function mDm->update($id, $field, $value)?
+				// Or should I just update the entire profile no matter what mDb->updateAll($fields)?
+				//if($this->mPage->mTfProfile['name'] != $formFields['Name'])
+
 				if($this->mPage->mTfProfile['video_id'] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
 					if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile['id'], $formFields['VideoId'], true)) {
 						// Revert to the previous, valid, id.
@@ -466,6 +486,10 @@ class TrueFanForm
 						$this->mPage->addPostMessage("<p>Updated video id.</p>");
 					}
 				}
+				
+				// We declare this to be the profile information but we'll change it if got edited
+				$email_str = $this->mPage->mTfProfile['email_invite_list'];
+				
 				if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
 					if(!$this->mPage->mDb->updateInvitation($this->mPage->mTfProfile['id'], $formFields['Message'], $formFields['EmailInput'])) {
 						// Revert to the previous, valid, message and email list
@@ -478,9 +502,36 @@ class TrueFanForm
 						}
 						if($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput']) {
 							$this->mPage->addPostMessage("<p>Updated email invitations.</p>");
+							// FIXME: Temporary code, until email sending is moved to a separate post page
+							$email_str = htmlspecialchars($formFields['EmailInput']);
 						}
 					}
 				}
+				
+				// TODO: This will eventually be a separate form in which the page profile is up to date and invariant
+				// and this business of up email_str and wondering if the senders address has been change won't matter
+				if($formFields['SubmitEmails']) {
+					$emailArray = explode(',',$email_str);
+					foreach($emailArray as $friendAddress) {
+						// TODO: Internationalize
+						$sendTo = new MailAddress($friendAddress);
+						$from = new MailAddress($this->mPage->mTfProfile['email']);
+						$subject = 'A Message From Open Source Ecology';
+						// TODO: consider putting the following into a function, it's used twice, if we change url scheme...more edits
+						$link = $this->mPage->getUserViewProfileLink();
+						$message = 	'<p>Hello from the interwebs. This is a message from Open Source Ecology. <strong>'
+										.$this->mPage->mTfProfile['name'].'</strong> wanted to let you know that OSE is building '
+										.'an open source post scarcity economy. '.$this->mPage->mTfProfile['name'].' even make a video for you: </p>'
+										.'<a href="'.$link.'">'.$link.'</a>';
+						$contentType = 'text/html';
+						$result = UserMailer::send($sendTo, $from, $subject, $message, $from, $contentType);
+						if($result != true) {
+							return $result;
+						}
+						$this->mPage->addPostMessage("<p>Sent email to $friendAddress.</p>");
+					}
+				}
+				
 				return true;
 				break;
 		}
@@ -508,7 +559,6 @@ class TrueFanForm
 					'id' => 'ose-truefan-name',
 					'label' => 'Name',
 					'size' => 20,
-					'readonly' => true,
 				),
 				'Email' => array(
 					'type' => 'text',
@@ -586,13 +636,20 @@ class TrueFanForm
 					'id' => 'ose-truefan-message',
 					'label' => 'Message',
 					'rows' => 5,
+					'cols' => 70,
 				),
 				'EmailInput' => array(
 					'class' => 'HTMLTextArray',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email-input',
 					'label' => 'Email',
-					'size' => 20,
+					'size' => 70,
+				),
+				'SubmitEmails' => array(
+					'type' => 'submit',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-email-submit',
+					'default' => 'Send Emails',
 				),
 			);
 		}
