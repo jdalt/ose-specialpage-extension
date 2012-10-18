@@ -78,6 +78,8 @@ class TrueFansDb
 	*/
 	public function addUser($foreign_id, $name, $email, $video_id, $extractUrl=true)
 	{
+		$name = htmlspecialchars($name, ENT_QUOTES);
+
 		$insert_id = $video_id;
 		if($extractUrl) {
 			$insert_id = $this->extractVideoId($video_id);
@@ -104,65 +106,63 @@ class TrueFansDb
 	* @param String $video_id
 	* @param Boolean $extractUrl Optional parameter to extract url. 
 	* Defaults to true. When set to false, video_id inserted w/o checks.
-	* @return Boolean|NULL True for success and NULL for failure 
+	* @return Boolean Returns true on success and false on failure.
+	* No rows being updated counts as a failure. This requires a client
+	* of this library to test that the new data will different than existing
+	* data if they want to understand a 0 row return.
 	*/
 	public function updateVideoId($id, $video_id, $extractUrl=true)
 	{
-		// Perhaps I should create a more efficient way to test id (getUser returns entire profile)
-		// Could also just let this fail...this prbly overly cautious since most ids are already require
-		// a call to the db....
-		// TODO: Consider eliminating following check
-		if(!$this->getUser($id)){
-			$this->log("!!User $id not found!! Unable to add message!!");
-			return NULL;
-		}
-
 		$update_id = $video_id;
 		if($extractUrl) {
 			$update_id = $this->extractVideoId($video_id);
 			if(!$update_id) {
-				return NULL;
+				$this->log('Unable to update extract video id.'); 
+				return false;
 			}
 		} 
 	
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_id=:update_id WHERE id=:id');
 		try {
 			if($stmt->execute(array(':id' => $id, ':update_id' => $update_id))) {
+				if($stmt->rowCount() == 0) {
+					$this->log('No rows were updated on video_id');
+					return false;
+				}
 				return true;
-			} else {
-				return NULL;
 			}
 		} catch (PDOException $e) {
-			$this->log('Unable to update video id: ' .$e->getMessage());
+			$this->log('Unable to update video id exception thrown: ' .$e->getMessage());
 		}
-		return NULL;
+		return false; 
 	}
 
 	/**
 	* Updates a row of true_ran table with video_message and email_invite_list
 	* @param Integer $id The row to update
 	* @param String $message The message to add
-	* @param String $emailStr A comma separated list of emails
-	* @return Boolean Returns true on success and false on failure
+	* @return Boolean Returns true on success and false on failure.
+	* No rows being updated counts as a failure.
 	*/
 	public function updateInvitation($id, $message, $emailStr)
 	{
-		if(!$this->getUser($id)){
-			$this->log("!!User $id not found!! Unable to add message!!");
-			return NULL;
-		}
-
+		$message = htmlspecialchars($message, ENT_QUOTES);
+		$emailStr = htmlspecialchars($emailStr, ENT_QUOTES);
 
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
 		try {
 			if($stmt->execute(array(':message' => $message, ':emailStr' => $emailStr, ':id' => $id))) {
 				// success
+				if($stmt->rowCount() == 0) {
+					$this->log('No rows were updated via change to message or email_invite_list.');
+					return false;
+				}
 				return true;
 			}
 		} catch (PDOException $e) {
 			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
 		}
-		return NULL;
+		return false; 
 	}
 
 	

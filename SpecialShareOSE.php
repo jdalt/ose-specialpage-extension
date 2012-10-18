@@ -241,6 +241,7 @@ class SpecialShareOSE extends SpecialPage {
 			$wgOut->addHTML('Please login.');
 			return;
 		}
+		
 
 		if($this->mPostedForm->show()) { // checks edit token and fires trySubmit --> will not display form if submit is successful 
 			$wgOut->addHTML($this->mPostMessage);
@@ -414,7 +415,31 @@ class TrueFanForm
 	 * The error message is then output by HTMLForm::displayForm() method.
 	 */
 	public function formCallback($formFields)
-	{  
+	{ 
+		global $wgUser;
+		
+		// Consider making $mwId a member of SpecialPage
+		// This prevents the user from changing the hidden id field and writing to another truefan profile
+		$mwId = 'mw:'.$wgUser->getId();
+		if(isset($formFields['Id'])) {
+			$profile = $this->mPage->mDb->getUserByForeignId($mwId);
+			if($formFields['Id'] != $profile['id']) {
+				$this->mForm->mFieldData['Id'] = $profile['id'];
+				echo $profile['id'];
+				tfDebug("Potentially malicious attempt to inject id.");
+				return 'The input has been corrupted. Retry.';
+			}
+		}
+
+		if(isset($formFields['ForeignId'])) {
+			$profile = $this->mPage->mDb->getUserByForeignId($mwId);
+			if($formFields['ForeignId'] != $mwId) {
+				$this->mForm->mFieldData['ForeignId'] = $profile['foreign_id'];
+				tfDebug("Potentially malicious attempt to inject foreign_id.");
+				return 'The input has been corrputed. Retry.';
+			}
+		}
+	
 		switch($formFields['Page']) {
 			case 'video':
 				$this->mPage->addPostMessage("<p>Received form from: <strong>".$formFields['Name']."</strong></p>");
@@ -441,28 +466,35 @@ class TrueFanForm
 					$this->mPage->addPostMessage("<span>View your video and message at this link: </span><p><a href='$link'>$link</a></p>");
 					return true;
 				} else {
-					return 'Unable to insert message and email list.';
+					return 'Unable to add invitation.';
 				}
 				break;
 
 			case 'edit':
-				// Precondition: valid $formFields['Id'] -- test curl post if Id is mangled --> what happens?
-				if(!$this->mPage->mDb->updateVideoId($formFields['Id'], $formFields['VideoId'], true)) {
-					// Revert to the previous, valid, id.
-					$profile = $this->mPage->mDb->getUser($formFields['Id']);
-					$this->mForm->mFieldData['VideoId'] = $profile['video_id'];
-					return 'Failed to updated video_id.';
-				} else {
-					$this->mPage->addPostMessage("<p>Updated video id.</p>");
+				if($profile['video_id'] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
+					if(!$this->mPage->mDb->updateVideoId($formFields['Id'], $formFields['VideoId'], true)) {
+						// Revert to the previous, valid, id.
+						$this->mForm->mFieldData['VideoId'] = $profile['video_id'];
+						return 'Unable to update your video.'; 
+					} else {
+						$this->mPage->addPostMessage("<p>Updated video id.</p>");
+					}
 				}
-				if(!$this->mPage->mDb->updateInvitation($formFields['Id'], $formFields['Message'], $formFields['EmailInput'])) {
-					// Revert to the previous, valid, message and email list
-					$profile = $this->mPage->mDb->getUser($formFields['Id']);
-					$this->mForm->mFieldData['Message'] = $profile['video_message'];
-					$this->mForm->mFieldData['EmailInput'] = $profile['email_invite_list'];
-					return 'Failed to update video message and email ivites.';
-				} else {
-					$this->mPage->addPostMessage("<p>Updated message and email invitations.</p>");
+				if(($profile['video_message'] != $formFields['Message']) || ($profile['email_invite_list'] != $formFields['EmailInput'])) {
+					if(!$this->mPage->mDb->updateInvitation($formFields['Id'], $formFields['Message'], $formFields['EmailInput'])) {
+						// Revert to the previous, valid, message and email list
+						$profile = $this->mPage->mDb->getUser($formFields['Id']);
+						$this->mForm->mFieldData['Message'] = $profile['video_message'];
+						$this->mForm->mFieldData['EmailInput'] = $profile['email_invite_list'];
+						return 'Unable to update invitation.';
+					} else {
+						if($profile['video_message'] != $formFields['Message']) {
+							$this->mPage->addPostMessage("<p>Updated video message.</p>");
+						}
+						if($profile['email_invite_list'] != $formFields['EmailInput']) {
+							$this->mPage->addPostMessage("<p>Updated email invitations.</p>");
+						}
+					}
 				}
 				return true;
 				break;
@@ -511,6 +543,7 @@ class TrueFanForm
 				'ForeignId' => array(
 					'class' => 'HTMLPassableHidden',
 					'section' => $this->mType,
+					'default' => 'FAILURE',
 				),
 			);
 			break;
@@ -538,6 +571,7 @@ class TrueFanForm
 				'Id' => array(
 					'class' => 'HTMLPassableHidden',
 					'section' => $this->mType,
+					'default' => 'FAILURE',
 				),
 			);
 			break;
@@ -632,7 +666,7 @@ class HTMLPassableHidden extends HTMLHiddenField
 	public function getTableRow( $value ){
 		$this->mParent->addHiddenField( 
 			$this->mName,
-			$this->mParams['default']
+			$value
 		);
 		return '';
 	}
