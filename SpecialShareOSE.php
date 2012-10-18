@@ -26,7 +26,8 @@ require_once('class.TrueFansDb.php');
  
 class SpecialShareOSE extends SpecialPage {
 
-	public  $mDb;
+	public $mDb;
+	public $mTfProfile;
 	protected $mPostMessage;
 	 
 	/**
@@ -34,6 +35,7 @@ class SpecialShareOSE extends SpecialPage {
 	 * CONSIDER: Can I please the unit test faeries and pass in the database?
 	 */
 	public function __construct() {
+		global $wgUser;
 		tfDebug('***  Constructing SpecialShareOSE  ***');
 		
 		parent::__construct( 'ShareOSE');
@@ -41,6 +43,9 @@ class SpecialShareOSE extends SpecialPage {
 		$this->loadRequest();
 		$this->mPostMessage = '';
 		$this->mDb = new TrueFansDb(); // Unit Test Faerie: *Glares* "Beware the new operator!"
+		if($wgUser->isLoggedIn()) {
+			$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); // Unit Testing Kosher?
+		}
 	}
 
 	/** Misc variables **/
@@ -135,14 +140,13 @@ class SpecialShareOSE extends SpecialPage {
 				if(!$wgUser->isLoggedIn()) {
 					$wgOut->addHTML('<p>You are not logged in.</p>'); 
 				} else {
-					$profile = $this->mDb->getUserByForeignId('mw:'.$wgUser->getId());
-					if(!$profile){
+					if(!$this->mTfProfile){
 						$wgOut->addHTML('<p>Unable to find profile. You need to submit a video.</p>'); 
 					} else {
-						$wgOut->addHTML("<h3>{$profile['name']} </h3><h3>{$profile['email']}</h3>");
-						$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
-						$wgOut->addHTML("<p>".$profile['video_message']."</p>");
-						$wgOut->addHTML("<p><strong>Email List: </strong>".$profile['email_invite_list']."</p>");
+						$wgOut->addHTML("<h3>{$this->mTfProfile['name']} </h3><h3>{$this->mTfProfile['email']}</h3>");
+						$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$this->mTfProfile['video_id']."'>No iframes.</iframe>");
+						$wgOut->addHTML("<p>".$this->mTfProfile['video_message']."</p>");
+						$wgOut->addHTML("<p><strong>Email List: </strong>".$this->mTfProfile['email_invite_list']."</p>");
 					}
 				}
 				break;
@@ -170,47 +174,40 @@ class SpecialShareOSE extends SpecialPage {
 					$wgOut->addHTML('<p>You must log in to submit a video.</p>');
 				} else {
 					// Intelligently decide the logged in user's needs based on DB contents
-
-					$mwId = 'mw:'.$wgUser->getId();
-					$profile = $this->mDb->getUserByForeignId($mwId);
 					$form = NULL;
 
-					if(!$profile) {
-						// Precondition: You don't have a profile in TrueFansDb
+					if(!$this->mTfProfile) {
+						// Precondition: You don't have a this->mTfProfile in TrueFansDb
 
 						$form = new TrueFanForm($this, 'video');
-						$form->addPreMessage('<p>Create a True Fan profile and submit a video. </p>');
+						$form->addPreMessage('<p>Create a True Fan Profile and submit a video. </p>');
 						$form->setFieldAttr('Name', 'default', $wgUser->getRealName());
 						$form->setFieldAttr('Email', 'default', $wgUser->getEmail());					
-						$form->setFieldAttr('ForeignId', 'default', $mwId);					
-					} elseif(!$profile['video_message']) {
+					} elseif(!$this->mTfProfile['video_message']) {
 					 	// Precondition: User exists with video_id but no message and email list
 						// No video_message: create an 'invite' form 
 						
 						$form = new TrueFanForm($this, 'invite');
 						$form->addPreMessage('<p>Add a message and invite friends to view your video.</p>');
-						$form->setFieldAttr('Id', 'default', $profile['id']);
 					} else {
 						// We have all necessary information, allow the user to edit their information
 						// We need an 'edit' form
 
 						$form = new TrueFanForm($this, 'edit');
 						$form->addPreMessage('<p>Edit your message or email invitation.</p>');
-						$form->setFieldAttr('Name', 'default', $profile['name']);
-						$form->setFieldAttr('Email', 'default', $profile['email']);					
-						$form->setFieldAttr('VideoId', 'default', $profile['video_id']);									
-						$form->setFieldAttr('Message', 'default', $profile['video_message']);
-						$form->setFieldAttr('EmailInput', 'default', $profile['email_invite_list']);
-						$form->setFieldAttr('Id', 'default', $profile['id']);
+						$form->setFieldAttr('Name', 'default', $this->mTfProfile['name']);
+						$form->setFieldAttr('Email', 'default', $this->mTfProfile['email']);					
+						$form->setFieldAttr('VideoId', 'default', $this->mTfProfile['video_id']);									
+						$form->setFieldAttr('Message', 'default', $this->mTfProfile['video_message']);
+						$form->setFieldAttr('EmailInput', 'default', $this->mTfProfile['email_invite_list']);
 					}
-
+					
 					// Display available true fan profile information
-					// TODO: Add these lines of text into the form Pre variable
-					if($profile) {
-						$form->addPreMessage("<div><span>{$profile['name']}: </span><span>{$profile['email']}</span></div>");
+					if($this->mTfProfile) {
+						$form->addPreMessage("<div><span>{$this->mTfProfile['name']}: </span><span>{$this->mTfProfile['email']}</span></div>");
 					}
-					if($profile['video_id']) {
-						$form->addPreMessage("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
+					if($this->mTfProfile['video_id']) {
+						$form->addPreMessage("<iframe src='http://www.youtube.com/embed/".$this->mTfProfile['video_id']."'>No iframes.</iframe>");
 					}
 					$form->displayForm();
 				}
@@ -246,6 +243,7 @@ class SpecialShareOSE extends SpecialPage {
 		if($this->mPostedForm->show()) { // checks edit token and fires trySubmit --> will not display form if submit is successful 
 			$wgOut->addHTML($this->mPostMessage);
 			if($postRequest != 'invite') { 
+				$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); // update the profile that the viewer will use.:w
 				$this->handleViewPage('submit'); // throw it back viewing pages
 			} 
 		} 
@@ -258,6 +256,17 @@ class SpecialShareOSE extends SpecialPage {
 	{
 		$this->mPostMessage .= $str;
 	}
+
+	/**
+	 * Returns foreign Id for TrueFansDb
+	 * @return String foreign_id
+	 */
+	public function getMwId()
+	{
+		global $wgUser;
+		return 'mw:'.$wgUser->getId();
+	}
+	
 
 	/**
 	 * Heredoc text drop of paypal button.
@@ -416,34 +425,10 @@ class TrueFanForm
 	 */
 	public function formCallback($formFields)
 	{ 
-		global $wgUser;
-		
-		// Consider making $mwId a member of SpecialPage
-		// This prevents the user from changing the hidden id field and writing to another truefan profile
-		$mwId = 'mw:'.$wgUser->getId();
-		if(isset($formFields['Id'])) {
-			$profile = $this->mPage->mDb->getUserByForeignId($mwId);
-			if($formFields['Id'] != $profile['id']) {
-				$this->mForm->mFieldData['Id'] = $profile['id'];
-				echo $profile['id'];
-				tfDebug("Potentially malicious attempt to inject id.");
-				return 'The input has been corrupted. Retry.';
-			}
-		}
-
-		if(isset($formFields['ForeignId'])) {
-			$profile = $this->mPage->mDb->getUserByForeignId($mwId);
-			if($formFields['ForeignId'] != $mwId) {
-				$this->mForm->mFieldData['ForeignId'] = $profile['foreign_id'];
-				tfDebug("Potentially malicious attempt to inject foreign_id.");
-				return 'The input has been corrputed. Retry.';
-			}
-		}
-	
 		switch($formFields['Page']) {
 			case 'video':
 				$this->mPage->addPostMessage("<p>Received form from: <strong>".$formFields['Name']."</strong></p>");
-				if($this->mPage->mDb->addUser($formFields['ForeignId'], $formFields['Name'], $formFields['Email'], $formFields['VideoId'])) { 
+				if($this->mPage->mDb->addUser($this->mPage->getMwId(), $formFields['Name'], $formFields['Email'], $formFields['VideoId'])) { 
 					$this->mPage->addPostMessage("<p>Added request to DB.</p>");
 					return true;
 				} else {
@@ -455,14 +440,15 @@ class TrueFanForm
 				break;
 
 			case 'invite':
-				if($this->mPage->mDb->updateInvitation($formFields['Id'], $formFields['Message'], $formFields['EmailInput'])) { 
+				//if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
+				if($this->mPage->mDb->updateInvitation($this->mPage->mTfProfile['id'], $formFields['Message'], $formFields['EmailInput'])) { 
 					$this->mPage->addPostMessage("<p>{$formFields['Message']}</p><ul>"); 
 					$emails = explode(', ', $formFields['EmailInput']);
 					foreach($emails as $email) {
 						$this->mPage->addPostMessage("<li>$email</li>");
 					}
 					$this->mPage->addPostMessage("</ul>");	
-					$link = $this->mPage->getTitle()->getFullUrl()."?page=view&id={$formFields['Id']}"; 
+					$link = $this->mPage->getTitle()->getFullUrl()."?page=view&id={$this->mPage->mTfProfile['id']}"; 
 					$this->mPage->addPostMessage("<span>View your video and message at this link: </span><p><a href='$link'>$link</a></p>");
 					return true;
 				} else {
@@ -471,27 +457,26 @@ class TrueFanForm
 				break;
 
 			case 'edit':
-				if($profile['video_id'] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
-					if(!$this->mPage->mDb->updateVideoId($formFields['Id'], $formFields['VideoId'], true)) {
+				if($this->mPage->mTfProfile['video_id'] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
+					if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile['id'], $formFields['VideoId'], true)) {
 						// Revert to the previous, valid, id.
-						$this->mForm->mFieldData['VideoId'] = $profile['video_id'];
+						$this->mForm->mFieldData['VideoId'] = $this->mPage->mTfProfile['video_id'];
 						return 'Unable to update your video.'; 
 					} else {
 						$this->mPage->addPostMessage("<p>Updated video id.</p>");
 					}
 				}
-				if(($profile['video_message'] != $formFields['Message']) || ($profile['email_invite_list'] != $formFields['EmailInput'])) {
-					if(!$this->mPage->mDb->updateInvitation($formFields['Id'], $formFields['Message'], $formFields['EmailInput'])) {
+				if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
+					if(!$this->mPage->mDb->updateInvitation($this->mPage->mTfProfile['id'], $formFields['Message'], $formFields['EmailInput'])) {
 						// Revert to the previous, valid, message and email list
-						$profile = $this->mPage->mDb->getUser($formFields['Id']);
-						$this->mForm->mFieldData['Message'] = $profile['video_message'];
-						$this->mForm->mFieldData['EmailInput'] = $profile['email_invite_list'];
+						$this->mForm->mFieldData['Message'] = $this->mPage->mTfProfile['video_message'];
+						$this->mForm->mFieldData['EmailInput'] = $this->mPage->mTfProfile['email_invite_list'];
 						return 'Unable to update invitation.';
 					} else {
-						if($profile['video_message'] != $formFields['Message']) {
+						if($this->mPage->mTfProfile['video_message'] != $formFields['Message']) {
 							$this->mPage->addPostMessage("<p>Updated video message.</p>");
 						}
-						if($profile['email_invite_list'] != $formFields['EmailInput']) {
+						if($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput']) {
 							$this->mPage->addPostMessage("<p>Updated email invitations.</p>");
 						}
 					}
@@ -540,11 +525,6 @@ class TrueFanForm
 					'label' => 'Video Url',
 					'size' => 20,
 				),
-				'ForeignId' => array(
-					'class' => 'HTMLPassableHidden',
-					'section' => $this->mType,
-					'default' => 'FAILURE',
-				),
 			);
 			break;
 		case 'invite':
@@ -567,11 +547,6 @@ class TrueFanForm
 					'id' => 'ose-truefan-email-input',
 					'label' => 'Email',
 					'size' => 20,
-				),
-				'Id' => array(
-					'class' => 'HTMLPassableHidden',
-					'section' => $this->mType,
-					'default' => 'FAILURE',
 				),
 			);
 			break;
@@ -619,10 +594,6 @@ class TrueFanForm
 					'label' => 'Email',
 					'size' => 20,
 				),
-				'Id' => array(
-					'class' => 'HTMLPassableHidden',
-					'section' => $this->mType,
-				),
 			);
 		}
 	}
@@ -658,17 +629,6 @@ class HTMLTextArray extends HTMLTextField
 		} else {
 			return $this->getDefault();
 		}
-	}
-}
-
-class HTMLPassableHidden extends HTMLHiddenField
-{
-	public function getTableRow( $value ){
-		$this->mParent->addHiddenField( 
-			$this->mName,
-			$value
-		);
-		return '';
 	}
 }
 
