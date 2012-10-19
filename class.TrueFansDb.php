@@ -166,6 +166,27 @@ class TrueFansDb
 	}
 
 	
+	/**
+	* Deletes the profile of the truefan referred to by id.
+	* @param Integer $id 
+	* @return Boolean Returns true on success and false on failure.
+	* No rows being updated counts as a failure.
+	*/
+	public function deleteUser($id)
+	{
+		$stmt = $this->pdo->prepare('DELETE FROM true_fans WHERE id=:id');
+		try {
+			if($stmt->execute(array(':id' => $id))) {
+				// success
+				return true;
+			}
+		} catch (PDOException $e) {
+			$this->log('Unable to delete user: ' .$e->getMessage());
+		}
+		return false;
+	}
+
+
 	// *** Get Functions *** \\
 	
 	/**

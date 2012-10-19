@@ -93,7 +93,7 @@ class SpecialShareOSE extends SpecialPage {
 			// Empty requests, go to the welcome page
 			$this->handleViewPage('welcome');
 		}
-		
+
 		// Global HTML added to every page
 		$url = $this->getTitle()->getLocalUrl();
 		$wgOut->addHTML('<ul id="special-links"><li><a href="'.$url.'?page=welcome">True Fans</a></li>');
@@ -178,7 +178,12 @@ class SpecialShareOSE extends SpecialPage {
 
 					if(!$this->mTfProfile) {
 						// Precondition: You don't have a this->mTfProfile in TrueFansDb
-
+				
+						// This loads the youtubeUploader
+						global $wgScriptPath;
+						$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeUploader.js');
+     					$wgOut->addHTML('<div id="widget"></div> <div id="player"></div>');
+						
 						$form = new TrueFanForm($this, 'video');
 						$form->addPreMessage('<p>Create a True Fan Profile and submit a video. </p>');
 						$form->setFieldAttr('Name', 'default', $wgUser->getRealName());
@@ -487,9 +492,6 @@ class TrueFanForm
 					}
 				}
 				
-				// We declare this to be the profile information but we'll change it if got edited
-				$email_str = $this->mPage->mTfProfile['email_invite_list'];
-				
 				if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
 					if(!$this->mPage->mDb->updateInvitation($this->mPage->mTfProfile['id'], $formFields['Message'], $formFields['EmailInput'])) {
 						// Revert to the previous, valid, message and email list
@@ -502,16 +504,13 @@ class TrueFanForm
 						}
 						if($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput']) {
 							$this->mPage->addPostMessage("<p>Updated email invitations.</p>");
-							// FIXME: Temporary code, until email sending is moved to a separate post page
-							$email_str = htmlspecialchars($formFields['EmailInput']);
 						}
 					}
 				}
 				
-				// TODO: This will eventually be a separate form in which the page profile is up to date and invariant
-				// and this business of up email_str and wondering if the senders address has been change won't matter
-				if($formFields['SubmitEmails']) {
-					$emailArray = explode(',',$email_str);
+				
+				if($formFields['SendEmails']) {
+					$emailArray = explode(',',$this->mPage->mTfProfile['email_invite_list']);
 					foreach($emailArray as $friendAddress) {
 						// TODO: Internationalize
 						$sendTo = new MailAddress($friendAddress);
@@ -531,13 +530,22 @@ class TrueFanForm
 						$this->mPage->addPostMessage("<p>Sent email to $friendAddress.</p>");
 					}
 				}
+
+				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
+				if(isset($_POST['DeleteProfile'])) {
+					if($this->mPage->mDb->deleteUser($this->mPage->mTfProfile['id'])) {
+					$this->mPage->addPostMessage('Your profile has been deleted.');
+					} else {
+						return 'Failed to delete profile.';
+					}			
+				}
 				
 				return true;
 				break;
 		}
 		return 'Unknown request.';
 	}
-
+	
 	/**
 	 * Fills the mDescriptor with desired form according to contents
 	 * of mType (passed in and set immediately upon object construction).
@@ -645,11 +653,17 @@ class TrueFanForm
 					'label' => 'Email',
 					'size' => 70,
 				),
-				'SubmitEmails' => array(
+				'SendEmails' => array(
+					'type' => 'check',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-email-check',
+					'label' => 'Send Emails',
+				),
+				'DeleteProfile' => array(
 					'type' => 'submit',
 					'section' => $this->mType,
-					'id' => 'ose-truefan-email-submit',
-					'default' => 'Send Emails',
+					'id' => 'ose-truefan-delete-submit',
+					'default' => 'Delete Profile',
 				),
 			);
 		}
