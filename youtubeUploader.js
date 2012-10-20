@@ -27,7 +27,8 @@ function onYouTubeIframeAPIReady() {
 }				
 
 function onUploadSuccess(event) {
-  alert('Video ID ' + event.data.videoId + ' was uploaded and is currently being processed.');
+	$j('#status').html('Video ID ' + event.data.videoId + ' was uploaded and is currently being processed.');
+ 	$j('.gear').addClass('animate');
 }
 
 function onProcessingComplete(event) {
@@ -38,7 +39,9 @@ function onProcessingComplete(event) {
     	videoId: event.data.videoId,
     	events: {}
   });
-  widget.destroy();
+	$j('#status').html('Your video was uploaded successfully and has been added to this form.');
+ 	$j('.gear').removeClass('animate');
+ 	widget.destroy();
 }
 
 function onApiReady()

@@ -5,7 +5,6 @@
 
 $j(document).ready(function() {
 	console.log('$j says document ready');
-	//$j('#ose-truefan-email-input').blur(addEmailInput);
 	$j('#ose-truefan-email-input').keyup(addEmailInput);
 });
 
@@ -25,5 +24,3 @@ function addEmailInput(e)
 		console.log('added email input');
 	}
 }
-
-

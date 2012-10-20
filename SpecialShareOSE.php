@@ -180,9 +180,10 @@ class SpecialShareOSE extends SpecialPage {
 						// Precondition: You don't have a this->mTfProfile in TrueFansDb
 				
 						// This loads the youtubeUploader
+						// !!! Terrible law of demeter violations here...need a better approach to templating
 						global $wgScriptPath;
 						$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeUploader.js');
-     					$wgOut->addHTML('<div id="widget"></div> <div id="player"></div>');
+     					$wgOut->addHTML('<img class="gear" src="'.$wgScriptPath.'/extensions/ShareOSE/gear.png" /><div id="widget"></div> <div id="player"></div><div id="status-container"><span>Status: </span><span id="status"></span></div>');
 						
 						$form = new TrueFanForm($this, 'video');
 						$form->addPreMessage('<p>Create a True Fan Profile and submit a video. </p>');
@@ -539,13 +540,31 @@ class TrueFanForm
 						return 'Failed to delete profile.';
 					}			
 				}
-				
+
+				// !!	
+				$this->clearRequests();
 				return true;
 				break;
 		}
 		return 'Unknown request.';
 	}
-	
+
+	/**
+	 * Clears requests for a loaded form so that a newly built form can
+	 * load without interference from fields with the same name.
+	 */
+	public function clearRequests()
+	{
+		global $wgRequest;
+		// Make sure we've filled our forms fields
+		$this->build(); 
+
+		foreach($this->mForm->mFieldData as $field => $value) {
+			$wgRequest->setVal('wp'.$field, NULL);
+		}
+	}
+
+
 	/**
 	 * Fills the mDescriptor with desired form according to contents
 	 * of mType (passed in and set immediately upon object construction).
@@ -646,18 +665,18 @@ class TrueFanForm
 					'rows' => 5,
 					'cols' => 70,
 				),
+				'SendEmails' => array(
+					'type' => 'check',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-email-check',
+					'label' => 'Send Emails',
+				),
 				'EmailInput' => array(
 					'class' => 'HTMLTextArray',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email-input',
 					'label' => 'Email',
 					'size' => 70,
-				),
-				'SendEmails' => array(
-					'type' => 'check',
-					'section' => $this->mType,
-					'id' => 'ose-truefan-email-check',
-					'label' => 'Send Emails',
 				),
 				'DeleteProfile' => array(
 					'type' => 'submit',
@@ -683,7 +702,7 @@ class HTMLTextArray extends HTMLTextField
 	}
 
 	function loadDataFromRequest( $request ) {
-		# won't work with getCheck
+		// Arrays don't work with getCheck so we'll look at the edit token and then inspect the array we get
 		if( $request->getCheck( 'wpEditToken' ) ) {
 			$emailArray = $request->getArray($this->mRequestName);
 			
@@ -695,7 +714,11 @@ class HTMLTextArray extends HTMLTextField
 					}
 				}
 				$emailStr = implode(', ', $emailArray);
+			} else {
+				// there's no array, so we'll take the default if it was set
+				return $this->getDefault();
 			}
+
 			return $emailStr; 
 		} else {
 			return $this->getDefault();
