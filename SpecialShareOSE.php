@@ -23,6 +23,7 @@
 */
 
 require_once('class.TrueFansDb.php');
+require_once('SexyForm.php');
  
 class SpecialShareOSE extends SpecialPage {
 
@@ -360,7 +361,7 @@ class TrueFanForm
 		if(!$this->mFormBuilt) {
 			// Reminder: 2nd param in constructor creates messagePrefix which is used to 
 			// name the fieldset. (text of which is .i18n file)
-			$this->mForm = new HTMLForm($this->mDescriptor, "trueFanForm"); 
+			$this->mForm = new SexyForm($this->mDescriptor, "trueFanForm"); 
 			$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-".$this->mType)); 
 			$this->mForm->setSubmitName('submit');
 			$this->mForm->setSubmitCallback(array($this, 'formCallback'));
@@ -581,14 +582,14 @@ class TrueFanForm
 					'section' => $this->mType,
 				),
 				'Name' => array(
-					'type' => 'text',
+					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-name',
 					'label' => 'Name',
 					'size' => 20,
 				),
 				'Email' => array(
-					'type' => 'text',
+					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email',
 					'label' => 'Email',
@@ -596,7 +597,7 @@ class TrueFanForm
 					'readonly' => true,
 				),
 				'VideoId' => array(
-					'type' => 'text',
+					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-url',
 					'label' => 'Video Url',
@@ -612,7 +613,7 @@ class TrueFanForm
 					'section' => $this->mType,
 				),
 				'Message' => array(
-					'type' => 'textarea',
+					'class' => 'HTMLSexyTextArea',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-message',
 					'label' => 'Message',
@@ -635,7 +636,7 @@ class TrueFanForm
 					'section' => $this->mType,
 				),
 				'Name' => array(
-					'type' => 'text',
+					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-name',
 					'label' => 'Name',
@@ -643,7 +644,7 @@ class TrueFanForm
 					'readonly' => true,
 				),
 				'Email' => array(
-					'type' => 'text',
+					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email',
 					'label' => 'Email',
@@ -651,14 +652,14 @@ class TrueFanForm
 					'readonly' => true,
 				),
 				'VideoId' => array(
-					'type' => 'text',
+					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-url',
 					'label' => 'Video Id',
 					'size' => 20,
 				),
 				'Message' => array(
-					'type' => 'textarea',
+					'class' => 'HTMLSexyTextArea',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-message',
 					'label' => 'Message',
@@ -666,7 +667,7 @@ class TrueFanForm
 					'cols' => 70,
 				),
 				'SendEmails' => array(
-					'type' => 'check',
+					'class' => 'HTMLSexyCheckField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-email-check',
 					'label' => 'Send Emails',
@@ -677,6 +678,7 @@ class TrueFanForm
 					'id' => 'ose-truefan-email-input',
 					'label' => 'Email',
 					'size' => 70,
+
 				),
 				'DeleteProfile' => array(
 					'type' => 'submit',
@@ -689,42 +691,7 @@ class TrueFanForm
 	}
 }
 
-/**
- * It's textField that loads as an array -- so you can have multiple repeated textfields.
- */
-class HTMLTextArray extends HTMLTextField
-{
-	protected $mRequestName;
-	function __construct( $params ) {
-		parent::__construct( $params );
-		$this->mRequestName = $this->mName;
-		$this->mName .= '[]';
-	}
 
-	function loadDataFromRequest( $request ) {
-		// Arrays don't work with getCheck so we'll look at the edit token and then inspect the array we get
-		if( $request->getCheck( 'wpEditToken' ) ) {
-			$emailArray = $request->getArray($this->mRequestName);
-			
-			$emailStr = '';
-			if($emailArray) {
-				foreach($emailArray as $key => $email) {
-					if($email == '') {
-						unset($emailArray[$key]);
-					}
-				}
-				$emailStr = implode(', ', $emailArray);
-			} else {
-				// there's no array, so we'll take the default if it was set
-				return $this->getDefault();
-			}
-
-			return $emailStr; 
-		} else {
-			return $this->getDefault();
-		}
-	}
-}
 
 /**
  * Syntactic sugar. Outputs to local extension log.
