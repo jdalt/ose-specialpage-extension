@@ -43,11 +43,34 @@ class SexyForm extends HTMLForm
 
 		//!! probably want to wrap this shit in a div yo
 
-		echo htmlspecialchars($tableHtml);
+	 //	echo htmlspecialchars($tableHtml);
 
 		return $subsectionHtml . "\n" . $tableHtml;
 	}
+
+	/**
+	 * Copy of the original HTMLForm::displayForm method but which outputs to string so we can template it.
+	 */
+	function displayForm( $submitResult ) {
+
+		if ( $submitResult !== false ) {
+			$this->displayErrors( $submitResult );
+		}
+
+		$html = ''
+			. $this->mHeader
+			. $this->getBody()
+			. $this->getHiddenFields()
+			. $this->getButtons()
+		;
+
+		$html = $this->wrapForm( $html );
+
+		return '' .  $this->mPre . $html . $this->mPost;
+	}
 }
+
+
 
 
 

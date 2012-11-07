@@ -47,5 +47,6 @@ function onProcessingComplete(event) {
 function onApiReady()
 {
 	widget.setVideoPrivacy('unlisted');
+	widget.setVideoTitle('UserName - True Fan Introduction');
 	widget.setVideoDescription('OSE True Fan Test');
 }

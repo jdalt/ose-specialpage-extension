@@ -97,11 +97,12 @@ class SpecialShareOSE extends SpecialPage {
 
 		// Global HTML added to every page
 		$url = $this->getTitle()->getLocalUrl();
-		$wgOut->addHTML('<ul id="special-links"><li><a href="'.$url.'?page=welcome">True Fans</a></li>');
+		$wgOut->addHTML('<ul id="special-links" class="inline-links"><li><a href="'.$url.'?page=welcome">True Fans</a></li>');
 		$wgOut->addHTML('<li><a href="'.$url.'?page=myprofile">Your Video</a></li>');
 		$wgOut->addHTML('<li><a href="'.$url.'?page=submit">Submit a Video</a></li>');
 		$wgOut->addHTML('<li><a href="'.$url.'?page=subscribe">Become a True Fan</a></li>');
 		$wgOut->addHTML('<li><a href="'.$url.'?page=viewall">View All Submissions</a></li></ul>');
+		$wgOut->addHTML('<h6>*Development Links*</h6>');
 	}
 
 	/**
@@ -121,20 +122,15 @@ class SpecialShareOSE extends SpecialPage {
 		// Request specific HTML dependent upon the request
 		switch($getRequest) {
 			case 'welcome':
-				$wgOut->addHTML('<p>This is the welcome page. It will be a marvelous gallery of true fans once I build it.</p>');
+				$this->loadTemplate('templates/welcome.html');
 				break;
 			case 'view':
 				$profile = $this->mDb->getUser($this->mReqId);
-				$wgOut->addHTML("<h3>{$profile['name']}</h3>");
-				$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$profile['video_id']."'>No iframes.</iframe>");
-				$wgOut->addHTML("<p>".$profile['video_message']."</p>");
+				$this->loadTemplate('templates/view.html', $profile);
 				break;
 			
 			case 'subscribe':
-				$wgOut->addHTML('<p>True Fans: As a project working for the common good, we rely on a growing group of'.
-									 'crowd-funders called True Fans to keep our mission alive. The True Fans program is a'.
-									 'monthly donation with options for $10, $20, $30, $50, and $100 per month for 24 months. </p>');
-				$wgOut->addHTML($this->getPayPalButton());	
+				$this->loadTemplate('templates/subscribe.html');
 				break;
 			
 			case 'myprofile':
@@ -174,9 +170,10 @@ class SpecialShareOSE extends SpecialPage {
 				if(!$wgUser->isLoggedIn()) {
 					$wgOut->addHTML('<p>You must log in to submit a video.</p>');
 				} else {
-					// Intelligently decide the logged in user's needs based on DB contents
-					$form = NULL;
 
+					$form = $template = NULL;
+
+					// Intelligently decide the logged in user's needs based on DB contents
 					if(!$this->mTfProfile) {
 						// Precondition: You don't have a this->mTfProfile in TrueFansDb
 				
@@ -184,7 +181,10 @@ class SpecialShareOSE extends SpecialPage {
 						// !!! Terrible law of demeter violations here...need a better approach to templating
 						global $wgScriptPath;
 						$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeUploader.js');
-     					$wgOut->addHTML('<img class="gear" src="'.$wgScriptPath.'/extensions/ShareOSE/gear.png" /><div id="widget"></div> <div id="player"></div><div id="status-container"><span>Status: </span><span id="status"></span></div>');
+     					
+						$template = 'templates/upload_video.html';
+
+						//$wgOut->addHTML('<img class="gear" src="'.$wgScriptPath.'/extensions/ShareOSE/gear.png" /><div id="widget"></div> <div id="player"></div><div id="status-container"><span>Status: </span><span id="status"></span></div>');
 						
 						$form = new TrueFanForm($this, 'video');
 						$form->addPreMessage('<p>Create a True Fan Profile and submit a video. </p>');
@@ -196,11 +196,15 @@ class SpecialShareOSE extends SpecialPage {
 					 	// Precondition: User exists with video_id but no message and email list
 						// No video_message: create an 'invite' form 
 						
+						$template = 'templates/write_message.html';
+
 						$form = new TrueFanForm($this, 'invite');
 						$form->addPreMessage('<p>Add a message and invite friends to view your video.</p>');
 					} else {
 						// We have all necessary information, allow the user to edit their information
 						// We need an 'edit' form
+						
+						$template = 'templates/share_with_friends.html';
 
 						$form = new TrueFanForm($this, 'edit');
 						$form->addPreMessage('<p>Edit your message or email invitation.</p>');
@@ -211,14 +215,12 @@ class SpecialShareOSE extends SpecialPage {
 						$form->setFieldAttr('EmailInput', 'default', $this->mTfProfile['email_invite_list']);
 					}
 					
-					// Display available true fan profile information
+					$formStr = $form->displayHandledForm();
+					$profile = NULL;
 					if($this->mTfProfile) {
-						$form->addPreMessage("<div><span>{$this->mTfProfile['name']}: </span><span>{$this->mTfProfile['email']}</span></div>");
+						$profile = $this->mTfProfile;
 					}
-					if($this->mTfProfile['video_id']) {
-						$form->addPreMessage("<iframe src='http://www.youtube.com/embed/".$this->mTfProfile['video_id']."'>No iframes.</iframe>");
-					}
-					$form->displayForm();
+					$this->loadTemplate($template, $profile, $formStr);
 				}
 				break;
 
@@ -289,35 +291,47 @@ class SpecialShareOSE extends SpecialPage {
 	}
 
 	/**
-	 * Heredoc text drop of paypal button.
-	 * You can modify css and add things, but don't mess with names and 
-	 * values of fields. 
-	 * @return String Button text
-	 * TODO: If we upgrade OSE wiki to > 1.18 we could probably rewrite
-	 * this in code and gain a handle on i81n of text fields.
+	 * Loads template for a page
+	 * @return String The link.
 	 */
-	private function getPayPalButton()
+	function loadTemplate($path, $profile=NULL, $form=NULL)
 	{
-		// 
-		$str = <<<EOT
-		<form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
-		<input type="hidden" name="cmd" value="_s-xclick">
-		<input type="hidden" name="hosted_button_id" value="LW3QK7UZWFZ2Y">
-		<table>
-		<tr><td><input type="hidden" name="on0" value=""></td></tr><tr><td><select class="serious-button" name="os0">
-			<option value="Standard">Standard : $10.00 USD - monthly</option>
-			<option value="Gold">Gold : $20.00 USD - monthly</option>
-			<option value="Gold Extra">Gold Extra : $30.00 USD - monthly</option>
-			<option value="Platinum">Platinum : $50.00 USD - monthly</option>
-			<option value="Angel">Angel : $100.00 USD - monthly</option>
-		</select> </td></tr>
-		</table>
-		<input type="hidden" name="currency_code" value="USD">
-		<input type="submit" id="paypal-submit" class="serious-button" name="submit" value="Subscribe">
-		<!-- <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1"> -->
-		</form>
-EOT;
-		return $str;
+		global $wgOut, $wgScriptPath;
+		
+		$user_name = $user_message = $user_video_id = "Undefined";
+		if($profile != NULL) {
+			$user_name = $profile['name'];
+			$user_message = $profile['video_message'];
+			$user_video_id = $profile['video_id'];
+		}
+			
+		
+		$str = file_get_contents($path, FILE_USE_INCLUDE_PATH);
+
+		// Below will load the code as php allowing us to do fun php stuff like il8n
+    	/*if (is_file($path)) {
+        ob_start();
+        include $path;
+        $str = ob_get_clean();
+		}*/
+		
+		$patterns = array();
+		$replacements = array();
+		$patterns[0] = '/\{\{PATH\}\}/';
+		$replacements[0] = $wgScriptPath.'/extensions/ShareOSE/';
+		$patterns[1] = '/\{\{USER_NAME\}\}/';
+		$replacements[1] = $user_name;
+		$patterns[2] = '/\{\{USER_MESSAGE\}\}/';
+		$replacements[2] = $user_message;
+		$patterns[3] = '/\{\{USER_VIDEO_ID\}\}/';
+		$replacements[3] = $user_video_id;
+		$patterns[4] = '/\{\{FORM\}\}/';
+		$replacements[4] = $form;
+
+		//preg_match('/\{\{\w\}\}/g', $str, $matches)
+		$str = preg_replace($patterns, $replacements, $str); 
+
+		$wgOut->addHTML($str);
 	}
 }
 
@@ -388,14 +402,14 @@ class TrueFanForm
 	 * other forms that may trigger a trySubmit from the HTMLForm::show()
 	 * function.
 	 */
-	public function displayForm()
+	public function displayHandledForm()
 	{
 		// You must load a form to have the default fields filled in.
 		// This is down automatically for the ::show() function but
 		// must be done manually when using ::displayForm()
 		$this->load(); 
 		// Anything other than false will be printed as an error message.
-		$this->mForm->displayForm(false); 
+		return $this->mForm->displayForm(false); 
 	}
 
 	/**

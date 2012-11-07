@@ -1,0 +1,56 @@
+<div id="watch-area">
+</div>
+
+<div id="quote-area">
+	<p>Future area for a kick ass animated image thingy. Clouds gears and demo reels oh my.</p>
+	<img class="gear" src="{{PATH}}gear.png" />
+</div>
+
+<div id="main-area">
+	<ul id="form-step-images" class="inline-links">
+		<li id="learn-more">
+			<img class="active" src="{{PATH}}images/webcam_one.png"/>
+		</li>
+		<li id="get-involved">
+			<img src="{{PATH}}images/pen_two.png"/>
+		</li>
+		<li id="join-us">
+			<img src="{{PATH}}images/share_three.png"/>
+		</li>
+	</ul>
+
+	<iframe id="yt-iframe" src="http://www.youtube.com/embed/{{USER_VIDEO_ID}}">Holy cats your browser doesn't support teh iframes.</iframe>
+	{{FORM}}
+
+	<div class="info" onclick="$j('#modal-overlay').css('visibility','visible')">See Directions Again</div>
+	
+</div>
+
+<div id="modal-overlay">
+	<div id="modal-directions">
+		<img id="close-button" src="{{PATH}}images/close_button.png" onclick="$j('#modal-overlay').css('visibility','hidden');" />
+		<h1>Create a True Fan Profile</h1>
+		<ul id="form-steps" class="inline-links">
+			<li id="learn-more">
+				<img src="{{PATH}}images/webcam_one.png"/>
+				<h4>Create a video</h4>
+			</li>
+			<li id="get-involved">
+				<img src="{{PATH}}images/pen_two.png"/>
+				<h4>Write a message</h4>
+			</li>
+			<li id="join-us">
+				<img src="{{PATH}}images/share_three.png"/>
+				<h4>Share</h4>
+			</li>
+		</ul>
+
+		<div id="directions-box">
+			<h2>Directions</h2>
+			<img id="directions-marker" src="{{PATH}}images/pen_two.png"/>
+			<div id="directions">
+				<p>This is the space for directions for writing a message.</p>
+			</div>
+		</div>
+	</div>
+</div>

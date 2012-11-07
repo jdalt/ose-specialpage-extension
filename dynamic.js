@@ -19,8 +19,8 @@ function addEmailInput(e)
 	console.log(this.value);
 	if(this.value != '') {
 		$j(this).unbind('keyup');
-		$j('#trueFanForm tbody:first').append('<tr><td class="mw-label"><label>Email</label></td><td><input type="text" name="wpEmailInput[]"/></td></tr>');
-		$j('#trueFanForm tbody:first td input:last').keyup(addEmailInput);
+		$j('#trueFanForm .mw-htmlform-field-HTMLTextArray').append('<div class="mw-label"><label for="ose-truefan-email-input">Email</label></div><div class="mw-input"><input type="text" name="wpEmailInput[]"/></div>');
+		$j('#trueFanForm .mw-htmlform-field-HTMLTextArray input:last').keyup(addEmailInput);
 		console.log('added email input');
 	}
 }
