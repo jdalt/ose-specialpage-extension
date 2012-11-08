@@ -17,8 +17,9 @@ $messages['en'] = array(
         'trueFanForm-video' => 'True Fan Information',
         'trueFanSubmitText-video' => 'Submit Video',
 
+			// This is no longer semantically correct
         'trueFanForm-invite' => 'Send A Message',
-        'trueFanSubmitText-invite' => 'Send Invite',
+        'trueFanSubmitText-invite' => 'Save Message',
 
         'trueFanForm-edit' => 'Edit True Fan Profile',
         'trueFanSubmitText-edit' => 'Confirm Edit',

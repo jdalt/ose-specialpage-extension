@@ -134,18 +134,9 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 			
 			case 'myprofile':
-				if(!$wgUser->isLoggedIn()) {
-					$wgOut->addHTML('<p>You are not logged in.</p>'); 
-				} else {
-					if(!$this->mTfProfile){
-						$wgOut->addHTML('<p>Unable to find profile. You need to submit a video.</p>'); 
-					} else {
-						$wgOut->addHTML("<h3>{$this->mTfProfile['name']} </h3><h3>{$this->mTfProfile['email']}</h3>");
-						$wgOut->addHTML("<iframe src='http://www.youtube.com/embed/".$this->mTfProfile['video_id']."'>No iframes.</iframe>");
-						$wgOut->addHTML("<p>".$this->mTfProfile['video_message']."</p>");
-						$wgOut->addHTML("<p><strong>Email List: </strong>".$this->mTfProfile['email_invite_list']."</p>");
-					}
-				}
+				// TODO: Add extra information like before - email and contacts sent to...?
+				$profile = $this->mDb->getUser($this->mReqId);
+				$this->loadTemplate('templates/view.html', $this->mTfProfile);
 				break;
 					
 			case 'viewall':

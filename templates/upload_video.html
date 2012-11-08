@@ -1,3 +1,20 @@
+<!-- step 1 -->
+
+<div id="steps-header">
+	<ul class="inline-links form-steps">
+		<li class="active" id="learn-more">
+			<a class="info" onclick="$j('#modal-overlay').css('visibility','visible')">Directions</a>
+			<img src="{{PATH}}images/webcam_one.png"/>
+		</li><li class="back-line">
+		</li><li id="get-involved">
+			<img src="{{PATH}}images/pen_two.png"/>
+		</li><li class="back-line">
+		</li><li id="join-us">
+			<img src="{{PATH}}images/share_three.png"/>
+		</li>
+	</ul>
+</div>
+
 <div id="watch-area">
 </div>
 
@@ -7,24 +24,10 @@
 </div>
 
 <div id="main-area">
-	<ul id="form-step-images" class="inline-links">
-		<li id="learn-more">
-			<img class="active" src="{{PATH}}images/webcam_one.png"/>
-		</li>
-		<li id="get-involved">
-			<img src="{{PATH}}images/pen_two.png"/>
-		</li>
-		<li id="join-us">
-			<img src="{{PATH}}images/share_three.png"/>
-		</li>
-	</ul>
-
 	<div id="widget"></div>
 	<div id="player"></div>
 	<div id="status-container"><span>Status: </span><span id="status"></span></div>
 	{{FORM}}
-
-	<div class="info" onclick="$j('#modal-overlay').css('visibility','visible')">See Directions Again</div>
 	
 </div>
 
@@ -32,8 +35,8 @@
 	<div id="modal-directions">
 		<img id="close-button" src="{{PATH}}images/close_button.png" onclick="$j('#modal-overlay').css('visibility','hidden');" />
 		<h1>Create a True Fan Profile</h1>
-		<ul id="form-steps" class="inline-links">
-			<li id="learn-more">
+		<ul class="inline-links form-steps">
+			<li class="active" id="learn-more">
 				<img src="{{PATH}}images/webcam_one.png"/>
 				<h4>Create a video</h4>
 			</li>

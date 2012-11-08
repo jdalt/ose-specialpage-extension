@@ -6,6 +6,7 @@
 $j(document).ready(function() {
 	console.log('$j says document ready');
 	$j('#ose-truefan-email-input').keyup(addEmailInput);
+	$j('#ose-truefan-message').keyup(function(){$j('#quote-area p').html($j('#ose-truefan-message').val());});
 });
 
 function runOnloadHook()

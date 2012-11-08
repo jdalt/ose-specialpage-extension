@@ -24,8 +24,10 @@ class SexyForm extends HTMLForm
 					$hasLeftColumn = true;
 			} elseif ( is_array( $value ) ) {
 				$section = $this->displaySection( $value, $key );
-				$legend = wfMsg( "{$this->mMessagePrefix}-$key" );
-				$subsectionHtml .= Xml::fieldset( $legend, $section ) . "\n";
+				//$legend = wfMsg( "{$this->mMessagePrefix}-$key" );
+				//$subsectionHtml .= Xml::fieldset( $legend, $section ) . "\n";
+				
+				$subsectionHtml .= $section;
 			}
 		}
 

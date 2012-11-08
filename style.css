@@ -125,12 +125,16 @@ iframe#yt-iframe
 .inline-links li
 { 
 	display: inline-block;
-	margin: 20px 5px 0 0;
 }
 
 h6
 {
 	text-align: center;
+}
+
+#special-links li
+{
+	margin: 20px 5px 0 0;
 }
 
 #special-links li:before
@@ -168,8 +172,9 @@ ul.no-bullets li
 	width: 65%;
 	padding: 10px;
 	margin: 25px auto;
-	border: 1px solid black;
+	/*border: 1px solid black;*/
 	background: #fff;
+	box-shadow: 0 0 10px #fff;
 }
 
 #modal-directions h1
@@ -177,7 +182,7 @@ ul.no-bullets li
 	text-align: center;
 }
 
-#form-steps li
+#modal-directions .form-steps li
 {
 	width: 180px;
 }
@@ -190,12 +195,13 @@ ul.no-bullets li
 #close-button
 {
 	float: right;
-	opacity: .5;
+	opacity: 1;
 }
 
 #close-button:hover
 {
-	opacity: 1;
+	opacity: .7;
+	box-shadow: 0 0 4px #800 inset;
 }
 
 #directions-marker
@@ -232,27 +238,129 @@ ul.no-bullets li
 }	
 
 
-/* upload_video.html style */
-ul#form-step-images
+/* General Form template css */
+/*modal and general form*/
+ul.form-steps
 {
 	margin-bottom: 10px;
 }
 
-#form-step-images li
+.form-steps li
 {
-	width: 100px;
+/*	width: 100px;*/
 }
 
-#form-step-images img
+.form-steps li
 {
 	opacity: .4;
 }
 
-#form-step-images img.active
+.form-steps li.active
 {
 	opacity: 1.0;
 }
 
+.form-steps li.back-line
+{
+	width: 50px;
+	background: url("/wiki/extensions/ShareOSE/images/sm_stripe.png") repeat-x;
+	height: 7px;
+	margin-bottom: -1px;
+	opacity: 1;
+}
+
+/* General Form Header */
+
+#steps-header
+{
+	margin-right: 7%;
+	margin-bottom: 10px;
+}
+
+#steps-header a
+{
+	position: absolute;
+	top: -18px;
+	left: 5px;
+	font-size: 10px;
+	text-align: center;
+	cursor: pointer;
+	text-decoration: none;
+	color: #777;
+}
+
+#steps-header a:hover
+{
+	color: #000;
+}
+
+#steps-header .form-steps
+{
+	margin-bottom: 0;
+}
+
+#steps-header .form-steps li
+{
+	position: relative;
+}
+
+#steps-header .form-steps img
+{
+	width: 60px;
+}
+
+/* General Form Itself */
+#bodyContent .mw-htmlform-submit
+{
+	background-color: #060;
+	color: #fff;
+	border: none;
+	border-radius: 15px;
+	font-size: 16px;
+	margin: 10px 0;
+	padding: 3px 23px;
+	text-align: center;
+	box-shadow: 0 0 7px #999;
+}
+
+#bodyContent .mw-htmlform-submit:hover
+{
+	box-shadow: 0 0 12px #a00;
+}
+
+#bodyContent form
+{
+	text-align: center;
+}
+
+#bodyContent form div
+{
+	text-align: left;
+}
+
+#bodyContent form label
+{
+	font-size: 15px;
+	margin-left: -4px;
+}
+
+
+#bodyContent form input, #bodyContent form textarea
+{
+	padding: 6px;
+	box-shadow: 0 0 4px #777 inset;
+	border: 1px solid #000;
+}
+
+
+/* quote-area quote for some templates */
+#quote-area p
+{
+	background: url('/wiki/extensions/ShareOSE/images/quote.png') no-repeat scroll 0 0 transparent;
+	font-size: 15px;
+	padding-left: 7px;
+	padding-top: 4px;
+}
 
 
 
