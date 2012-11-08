@@ -263,7 +263,7 @@ ul.form-steps
 .form-steps li.back-line
 {
 	width: 50px;
-	background: url("/wiki/extensions/ShareOSE/images/sm_stripe.png") repeat-x;
+	background: url("/w/extensions/ShareOSE/images/sm_stripe.png") repeat-x;
 	height: 7px;
 	margin-bottom: -1px;
 	opacity: 1;
@@ -356,7 +356,7 @@ ul.form-steps
 /* quote-area quote for some templates */
 #quote-area p
 {
-	background: url('/wiki/extensions/ShareOSE/images/quote.png') no-repeat scroll 0 0 transparent;
+	background: url('/w/extensions/ShareOSE/images/quote.png') no-repeat scroll 0 0 transparent;
 	font-size: 15px;
 	padding-left: 7px;
 	padding-top: 4px;
