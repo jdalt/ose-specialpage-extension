@@ -169,7 +169,6 @@ class SpecialShareOSE extends SpecialPage {
 						// Precondition: You don't have a this->mTfProfile in TrueFansDb
 				
 						// This loads the youtubeUploader
-						// !!! Terrible law of demeter violations here...need a better approach to templating
 						global $wgScriptPath;
 						$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeUploader.js');
      					
@@ -633,6 +632,36 @@ class TrueFanForm
 				),
 			);
 			break;
+
+		case 'share':
+			$this->mDescriptor = array(
+				'Page' => array(
+					'type' => 'hidden',
+					'default' => $this->mType, 
+					'section' => $this->mType,
+				),
+				'FriendMessage' => array(
+					'class' => 'HTMLSexyTextArea',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-message',
+					'label' => 'Message',
+					'rows' => 5,
+				),
+				'EmailInput' => array(
+					'class' => 'HTMLTextArray',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-email-input',
+					'label' => 'Email',
+					'size' => 20,
+				),
+				'FacebookFriends' => array(
+					'type' => 'hidden',
+					'default' => $this->mType, 
+					'section' => $this->mType,
+				),
+			);
+			break;
+
 		case 'edit':
 			$this->mDescriptor = array(
 				'Page' => array(
