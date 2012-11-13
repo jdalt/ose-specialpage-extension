@@ -13,36 +13,53 @@
 			<img src="{{PATH}}images/share_three.png"/>
 		</li>
 	</ul>
+
+	<div class="center50">
+		{{FORM}}
+		<script>
+			var emailWrap = '<div class="modal-input-overlay inactive">'+
+								'<div id="email-list-modal" class="modal-input">'+
+									'<div id="email-input-container"></div>'+
+								'</div>'+
+							'</div>';
+			var emailHelpMessage = '<h3>Enter Email Addresses</h3>';
+			var emailButton = '<br/><input type="button" value="Ok" onclick="processEmail()" />';
+		</script>
+		<div id="social-icons-holder">
+			<ul class="inline-links social-icons">
+				<li>
+					<img class="gray" src="{{PATH}}images/facebook.png"/>
+				</li>
+				<li id="get-involved">
+					<img class="gray" src="{{PATH}}images/twitter.png"/>
+				</li>
+				<li class="active" id="join-us">
+					<img src="{{PATH}}images/email.png" onclick="$j('.modal-input-overlay').toggleClass('inactive');" />
+
+				</li>
+			</ul>
+		</div>
+	</div>
+	
 </div>
 
 <div id="watch-area">
 </div>
 
 <div id="quote-area">
-	<p>Probably gonna be a contacts section here.</p>
 </div>
 
 <div id="main-area">
+	<div id="share-email-preview">
+		
+	</div>
 
-	<iframe id="yt-iframe" src="http://www.youtube.com/embed/{{USER_VIDEO_ID}}">Holy cats your browser doesn't support teh iframes.</iframe>
-	<ul class="inline-links social-icons">
-		<li>
-			<img src="{{PATH}}images/facebook.png"/>
-		</li>
-		<li id="get-involved">
-			<img src="{{PATH}}images/twitter.png"/>
-		</li>
-		<li class="active" id="join-us">
-			<img src="{{PATH}}images/email.png"/>
-		</li>
-	</ul>
-	{{FORM}}	
 </div>
 
 <div id="modal-overlay">
 	<div id="modal-directions">
 		<img id="close-button" src="{{PATH}}images/close_button.png" onclick="$j('#modal-overlay').css('visibility','hidden');" />
-		<h1>Create a True Fan Profile</h1>
+		<h1>How to Spread the Word</h1>
 		<ul class="inline-links form-steps">
 			<li id="learn-more">
 				<img src="{{PATH}}images/webcam_one.png"/>
@@ -62,10 +79,29 @@
 			<h2>Directions</h2>
 			<img id="directions-marker" src="{{PATH}}images/share_three.png"/>
 			<div id="directions">
-				<p>You can send your friends a message to view your video. You can also add a personal message to your friends. This message will not be visible publicly.</p>
-				<p>If you need some help writing your message, you can have an automatic message added to your video.</p>
+				<p>You can send your friends a message to view your video. A basic message has been added for you, but you can edit it. This message will not be visible publicly.</p>
+				<p class="gray">If you need some help writing your message, you can have an automatic message added to your video.</p>
 			</div>
 			<img src="{{PATH}}images/multifriend.png" />
 		</div>
+		<button id="close-button-bottom" class="tf-button" onclick="$j('#modal-overlay').css('visibility','hidden');">Share with Friends</button>
 	</div>
 </div>
+
+<div id="social-message" class="auto-replace" style="display: none">Hey {{FRIEND}},
+
+Checkout the video I made for you and the links below as I think you'd be interested in Open Source Ecology.
+{{VIDEO_LiNK}}
+</div>
+
+<script>
+	var autoReplaceArray = {
+		/*"#social-message":"#ose-truefan-friends-message",*/
+		"#social-icons-holder":"#mw-form-section-social-buttons"
+	}
+	var autoInputArray = {
+		"#social-message":"#ose-truefan-friends-message"
+	}
+</script>
+
+<!-- TODO:could create an inject array with tags to inject and run it onDocumentReady -->

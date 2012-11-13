@@ -14,12 +14,15 @@ $messages['en'] = array(
         'shareose' => 'ShareOSE', // shareose must be all lower to be recognized by SpecialSpecialpages
         'shareOSE-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
 		  
-        'trueFanForm-video' => 'True Fan Information',
-        'trueFanSubmitText-video' => 'Submit Video',
+        'trueFanForm-upload' => 'True Fan Information',
+        'trueFanSubmitText-upload' => 'Upload Video',
 
 			// This is no longer semantically correct
-        'trueFanForm-invite' => 'Send A Message',
-        'trueFanSubmitText-invite' => 'Save Message',
+        'trueFanForm-write' => 'Write A Message',
+        'trueFanSubmitText-write' => 'Save Message',
+		  	
+        'trueFanForm-share' => 'Send Messages to Friends',
+        'trueFanSubmitText-share' => 'Send Messages',
 
         'trueFanForm-edit' => 'Edit True Fan Profile',
         'trueFanSubmitText-edit' => 'Confirm Edit',

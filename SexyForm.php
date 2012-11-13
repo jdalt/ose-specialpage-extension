@@ -24,10 +24,8 @@ class SexyForm extends HTMLForm
 					$hasLeftColumn = true;
 			} elseif ( is_array( $value ) ) {
 				$section = $this->displaySection( $value, $key );
-				//$legend = wfMsg( "{$this->mMessagePrefix}-$key" );
-				//$subsectionHtml .= Xml::fieldset( $legend, $section ) . "\n";
-				
-				$subsectionHtml .= $section;
+				$attribs['id'] = 'mw-form-section-'.$key;
+				$subsectionHtml .= Html::rawElement( 'div', $attribs, "\n$section\n" ) . "\n";
 			}
 		}
 
@@ -71,10 +69,6 @@ class SexyForm extends HTMLForm
 		return '' .  $this->mPre . $html . $this->mPost;
 	}
 }
-
-
-
-
 
 class HTMLSexyTextField extends HTMLTextField
 {
@@ -269,3 +263,13 @@ class HTMLSexyTextArea extends HTMLTextAreaField
 	}
 }
 
+class HTMLReturnableHiddenField extends HTMLHiddenField
+{
+	public function getTableRow( $value ){
+		$this->mParent->addHiddenField( 
+			$this->mName,
+			$this->mParams['default']
+		);
+		return '';
+	}	
+}

@@ -19,7 +19,6 @@
 </div>
 
 <div id="quote-area">
-	<p>Future area for a kick ass animated image thingy. Clouds gears and demo reels oh my.</p>
 	<img class="gear" src="{{PATH}}gear.png" />
 </div>
 
@@ -27,14 +26,15 @@
 	<div id="widget"></div>
 	<div id="player"></div>
 	<div id="status-container"><span>Status: </span><span id="status"></span></div>
-	{{FORM}}
-	
+	<div class="center50">
+		{{FORM}}
+	</div>
 </div>
 
 <div id="modal-overlay">
 	<div id="modal-directions">
 		<img id="close-button" src="{{PATH}}images/close_button.png" onclick="$j('#modal-overlay').css('visibility','hidden');" />
-		<h1>Create a True Fan Profile</h1>
+		<h1>How to Spread the Word</h1>
 		<ul class="inline-links form-steps">
 			<li class="active" id="learn-more">
 				<img src="{{PATH}}images/webcam_one.png"/>
@@ -56,8 +56,9 @@
 			<div id="directions">
 				<p>We want to know why you support Open Source Ecology so we're inviting you to create a short 1-2 minute video to tell your friends and everyone else why OSE is changing the world. </p>
 				<p>This app uses your webcam to record videos. If you don't have a webcam or you want to use a different camera, you can upload a video to youtube and paste the video url (or iframe) into the video url field on this page.</p>
-				<p>If you need some inspiration checkout the videos that other True Fans already made.</p>
+				<p class="gray">If you need some inspiration checkout the videos that other True Fans already made.</p>
 			</div>
 		</div>
+		<button id="close-button-bottom" class="tf-button" onclick="$j('#modal-overlay').css('visibility','hidden');">Create Your Video</button>
 	</div>
 </div>

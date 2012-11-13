@@ -138,20 +138,48 @@ class TrueFansDb
 	}
 
 	/**
-	* Updates a row of true_ran table with video_message and email_invite_list
-	* @param Integer $id The row to update
-	* @param String $message The message to add
+	* Updates a row of true_ran table with video_message 
+	* @param Integer $id The row to update.
+	* @param String $message The message to add.
 	* @return Boolean Returns true on success and false on failure.
 	* No rows being updated counts as a failure.
 	*/
-	public function updateInvitation($id, $message, $emailStr)
+	public function updateVideoMessage($id, $video_message)
 	{
-		$message = htmlspecialchars($message, ENT_QUOTES);
+		$video_message = htmlspecialchars($video_message, ENT_QUOTES);
+		//$emailStr = htmlspecialchars($emailStr, ENT_QUOTES);
+
+		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message WHERE id=:id');
+		try {
+			if($stmt->execute(array(':message' => $video_message, ':id' => $id))) {
+				// success
+				if($stmt->rowCount() == 0) {
+					$this->log('No rows were updated via change to message or email_invite_list.');
+					return false;
+				}
+				return true;
+			}
+		} catch (PDOException $e) {
+			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
+		}
+		return false; 
+	}
+	
+	/**
+	* FIXME: Temporary name. 
+	* @param Integer $id The row to update.
+	* @param String $message The message to add.
+	* @return Boolean Returns true on success and false on failure.
+	* No rows being updated counts as a failure.
+	*/
+	public function updateStuff($id, $video_message, $emailStr)
+	{
+		$video_message = htmlspecialchars($video_message, ENT_QUOTES);
 		$emailStr = htmlspecialchars($emailStr, ENT_QUOTES);
 
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
 		try {
-			if($stmt->execute(array(':message' => $message, ':emailStr' => $emailStr, ':id' => $id))) {
+			if($stmt->execute(array(':message' => $video_message, ':emailStr' => $emailStr, ':id' => $id))) {
 				// success
 				if($stmt->rowCount() == 0) {
 					$this->log('No rows were updated via change to message or email_invite_list.');
