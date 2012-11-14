@@ -68,6 +68,26 @@ class SexyForm extends HTMLForm
 
 		return '' .  $this->mPre . $html . $this->mPost;
 	}
+	
+	function loadForm() {
+		$html = '';
+
+		self::addJS();
+
+		# Load data from the request.
+		$this->loadData();
+
+		# Try a submission
+		global $wgUser, $wgRequest;
+		$editToken = $wgRequest->getVal( 'wpEditToken' );
+
+		$result = false;
+		if ( $wgUser->matchEditToken( $editToken ) )
+			$result = $this->trySubmit();
+
+		return $result;
+	}
+
 }
 
 class HTMLSexyTextField extends HTMLTextField

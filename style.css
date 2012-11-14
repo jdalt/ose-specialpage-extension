@@ -156,6 +156,14 @@ ul.no-bullets li
 	display: none;
 }
 
+.error-message
+{
+	color: #fff;
+	background-color: #c00;
+	font-size: 17px;
+	font-weight: bold;
+}
+
 /* TODO: remove, temp dev css */
 
 #special-links li

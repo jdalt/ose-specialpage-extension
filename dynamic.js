@@ -12,7 +12,6 @@ $j(document).ready(function() {
 	// Execute conditional of correct template
 	// The specific html to wrap these elements is stored in the template in a script tag
 	if(emailWrap) {
-
 		// TODO: Consider moving this into a global in script tag within the template to keep separation of concerns clear
 		$j('.mw-htmlform-field-HTMLTextArray').html(
 				'<div class="email-list-combo">'+

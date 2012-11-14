@@ -142,12 +142,11 @@ class TrueFansDb
 	* @param Integer $id The row to update.
 	* @param String $message The message to add.
 	* @return Boolean Returns true on success and false on failure.
-	* No rows being updated counts as a failure.
+	* No rows being updated counts as true TODO: think about this...in the sense of updating you should be able to update to same value...check on your own if it's the same why not...however updating a non profile...check on your own if it exists...
 	*/
 	public function updateVideoMessage($id, $video_message)
 	{
 		$video_message = htmlspecialchars($video_message, ENT_QUOTES);
-		//$emailStr = htmlspecialchars($emailStr, ENT_QUOTES);
 
 		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message WHERE id=:id');
 		try {
@@ -155,7 +154,7 @@ class TrueFansDb
 				// success
 				if($stmt->rowCount() == 0) {
 					$this->log('No rows were updated via change to message or email_invite_list.');
-					return false;
+					// considered making this return false; but I think it would be better to check on your own if updating same data or updating a non-existant profile
 				}
 				return true;
 			}

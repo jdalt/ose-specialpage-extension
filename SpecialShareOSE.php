@@ -30,6 +30,8 @@ class SpecialShareOSE extends SpecialPage {
 	public $mDb;
 	public $mTfProfile;
 	public $mFormStep;
+	public $mErrorMessage;
+	//TODO: get rid of post message, templating all the way baby
 	protected $mPostMessage;
 	 
 	/**
@@ -43,7 +45,7 @@ class SpecialShareOSE extends SpecialPage {
 		parent::__construct( 'ShareOSE');
 
 		$this->loadRequest();
-		$this->mPostMessage = '';
+		$this->mPostMessage = $this->mErrorMessage = '';
 		$this->mFormStep = 'upload';
 		$this->mDb = new TrueFansDb(); // Unit Test Faerie: *Glares* "Beware the new operator!"
 		if($wgUser->isLoggedIn()) {
@@ -108,6 +110,41 @@ class SpecialShareOSE extends SpecialPage {
 	}
 
 	/**
+	 * This function handles posted forms. 
+	 * Adds valid input to the database and ouputs error messages. After completing 
+	 * duties hands control off to handleViewPage.
+	 * @param String $postRequest The Page field in each form refers to one of these
+	 * handlers which handles all the other fields and puts them where they need to go.
+	 */
+	protected function handlePostRequest($postRequest)
+	{
+		// Precondition: Valid mPostedForm of type matching $postRequest
+		global $wgUser, $wgOut;
+
+		// You must be logged in to submit data. Anything else is nonsense.
+		if(!$wgUser->isLoggedIn()) {
+			tfDebug("!Attempt to post without being logged in!");	
+			$wgOut->addHTML('Please login.');
+			return;
+		}
+		
+		$formReturn = $this->mPostedForm->loadHandledForm();
+		if($formReturn === true) { // checks edit token and fires trySubmit --> will not display form if submit is successful 
+			$wgOut->addHTML($this->mPostMessage);
+			if($postRequest != 'share') { 
+				$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); // update the profile that the viewer will use.:w
+				$this->handleViewPage('submit'); // throw it back viewing pages
+			} else {
+				$this->handleViewPage('finish');
+			}
+		} else {
+			// TODO: insert this into the template
+			$this->mErrorMessage = $formReturn;
+			$this->handleViewPage('submit');
+		}
+	}
+
+	/**
 	 * The main html display function.
 	 * Outputs page specific html according to page request or
 	 * artificial page request sent from handlePostRequest().
@@ -120,7 +157,7 @@ class SpecialShareOSE extends SpecialPage {
 	public function handleViewPage($getRequest)
 	{
 		global $wgUser, $wgOut;
-
+		
 		// Request specific HTML dependent upon the request
 		switch($getRequest) {
 			case 'welcome':
@@ -137,7 +174,14 @@ class SpecialShareOSE extends SpecialPage {
 			
 			case 'myprofile':
 				// TODO: Add extra information like before - email and contacts sent to...?
-				$this->loadTemplate('templates/view.html', $this->mTfProfile);
+				if(!$wgUser->isLoggedIn()) {
+					//TODO: redundancy--put in it's own case, put into the template
+					$replace = array();
+					$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE'; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+					$this->loadTemplate('templates/login.html', NULL, NULL, $replace);
+				} else {
+					$this->loadTemplate('templates/view.html', $this->mTfProfile);
+				}
 				break;
 					
 			case 'viewall':
@@ -158,14 +202,16 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 
 			case 'finish':
-				$profile = $this->mDb->getUser($this->mReqId);
 				$this->loadTemplate('templates/finish.html', $this->mTfProfile);
 				break;
 
 			case 'submit':
 				// Only logged in users can submit videos. This ensures valid emails and no spam.
 				if(!$wgUser->isLoggedIn()) {
-					$wgOut->addHTML('<p>You must log in to submit a video.</p>');
+					//TODO: redundancy--put in it's own case, put into the template
+					$replace = array();
+					$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE'; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+					$this->loadTemplate('templates/login.html', NULL, NULL, $replace);
 				} else {
 					
 					$form = $template = NULL;
@@ -243,45 +289,14 @@ class SpecialShareOSE extends SpecialPage {
 		}
 	}
 
-	/**
-	 * This function handles posted forms. 
-	 * Adds valid input to the database and ouputs error messages. After completing 
-	 * duties hands control off to handleViewPage.
-	 * @param String $postRequest The Page field in each form refers to one of these
-	 * handlers which handles all the other fields and puts them where they need to go.
-	 */
-	protected function handlePostRequest($postRequest)
-	{
-		// Precondition: Valid mPostedForm of type matching $postRequest
-		global $wgUser, $wgOut;
-
-		// You must be logged in to submit data. Anything else is nonsense.
-		if(!$wgUser->isLoggedIn()) {
-			tfDebug("!Attempt to post without being logged in!");	
-			$wgOut->addHTML('Please login.');
-			return;
-		}
-		
-
-		if($this->mPostedForm->show()) { // checks edit token and fires trySubmit --> will not display form if submit is successful 
-			$wgOut->addHTML($this->mPostMessage);
-			if($postRequest != 'share') { 
-				$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); // update the profile that the viewer will use.:w
-				$this->handleViewPage('submit'); // throw it back viewing pages
-			} else {
-				$this->handleViewPage('finish');
-			}
-		} 
-	}
-
-
 	/****** Utility Functions *******/
 
 	/**
 	 * Accumulates messages from post callback of TrueFansForm that are displayed at the top of the page alone or before next form. 
 	 */
 	public function addPostMessage($str)
-	{
+	{	
+		//TODO: REMOVE in favor of template based solution
 		$this->mPostMessage .= $str;
 	}
 
@@ -301,29 +316,60 @@ class SpecialShareOSE extends SpecialPage {
 	 */
 	function getUserViewProfileLink() 
 	{
+		//TODO: test not logged in case
 		return $this->getTitle()->getFullUrl()."?page=view&id={$this->mTfProfile['id']}"; 
 	}
+
+	/**
+	 * 
+	 * @return String with things replaced
+	 */
+	function replaceTemplateTags($strContents, $replaceList)
+	{
+		$patterns = array();
+		$replacements = array();
+
+		$replacements = array();
+		foreach($replaceList as $templateTag => $replacement) {
+			$patterns[] = '/\{\{'.$templateTag.'\}\}/';	
+			$replacements[] = $replacement;
+		}
+
+		return preg_replace($patterns, $replacements, $strContents); 
+	}
+
 
 	/**
 	 * Loads template for a page
 	 * @return String The link.
 	 */
-	function loadTemplate($path, $profile=NULL, $form=NULL)
+	function loadTemplate($path, $profile=NULL, $form=NULL, $extraReplace=NULL)
 	{
+		//TODO: Extra consideration about utility of $extraReplace -- do I really need it? If so get rid of $form...template should be for things that repeat on muttiple pages and make formatting easier
 		global $wgOut, $wgScriptPath;
-		
-		$user_name = $user_message = $user_video_id = $video_link = "Undefined";
-		if($profile != NULL) {
-			$user_name = $profile['name'];
-			$user_message = $profile['video_message'];
-			$user_video_id = $profile['video_id'];
-			//FIXME: This will not operate correctly if a different than current user's profile is passed in...!!
-			$video_link = $this->getUserViewProfileLink();
-		}
-			
-		
-		$str = file_get_contents($path, FILE_USE_INCLUDE_PATH);
 
+		$templateStr = array();
+		$templateStr['PATH'] = $wgScriptPath.'/extensions/ShareOSE/';
+		$templateStr['ERROR_MESSAGE'] = $this->mErrorMessage;
+		$templateStr['USER_VIDEO_LINK'] = $this->getUserViewProfileLink();
+
+		if($profile != NULL) {
+			$templateStr['USER_NAME'] = $profile['name'];
+			$templateStr['USER_MESSAGE'] = $profile['video_message'];
+			$templateStr['USER_VIDEO_ID'] = $profile['video_id'];
+		}
+
+		if($form != NULL) {
+			$templateStr['FORM'] = $form;
+		}
+
+		if($extraReplace != NULL) {
+			$templateStr = $templateStr + $extraReplace;
+		}
+
+		$templateContents = file_get_contents($path, FILE_USE_INCLUDE_PATH);
+		$preparedHtml = $this->replaceTemplateTags($templateContents, $templateStr);
+			
 		// Below will load the code as php allowing us to do fun php stuff like il8n
     	/*if (is_file($path)) {
         ob_start();
@@ -331,25 +377,7 @@ class SpecialShareOSE extends SpecialPage {
         $str = ob_get_clean();
 		}*/
 		
-		$patterns = array();
-		$replacements = array();
-		$patterns[0] = '/\{\{PATH\}\}/';
-		$replacements[0] = $wgScriptPath.'/extensions/ShareOSE/';
-		$patterns[1] = '/\{\{USER_NAME\}\}/';
-		$replacements[1] = $user_name;
-		$patterns[2] = '/\{\{USER_MESSAGE\}\}/';
-		$replacements[2] = $user_message;
-		$patterns[3] = '/\{\{USER_VIDEO_ID\}\}/';
-		$replacements[3] = $user_video_id;
-		$patterns[4] = '/\{\{FORM\}\}/';
-		$replacements[4] = $form;
-		$patterns[5] = '/\{\{VIDEO_LINK\}\}/';
-		$replacements[5] = $video_link;
-
-		//preg_match('/\{\{\w\}\}/g', $str, $matches)
-		$str = preg_replace($patterns, $replacements, $str); 
-
-		$wgOut->addHTML($str);
+		$wgOut->addHTML($preparedHtml);
 	}
 }
 
@@ -408,10 +436,10 @@ class TrueFanForm
 	/**
 	 * Wraps HTMLForm function which builds unbuilt form, analyzes requests, and outputs html or submits form	
 	 */
-	public function show()
+	public function loadHandledForm()
 	{
 		$this->build();
-		return $this->mForm->show();
+		return $this->mForm->loadForm();
 	}
 
 	/**
@@ -486,6 +514,7 @@ class TrueFanForm
 					return true;
 				} else {
 					echo 'bad sumission';
+					$this->mPage->mFormStep = 'upload';
 					if(!$this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
 						return 'Unable to extract video id from URL.';
 					} 
@@ -497,22 +526,11 @@ class TrueFanForm
 			case 'write':
 				//if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
 				if($this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile['id'], $formFields['Message'])) { 
-					//FIXME: Potential XSS security flaw - non-escaped $formFields directly displayed, consider getting a return form db of escaped via htmlspecialchars
-					
-					/* $this->mPage->addPostMessage("<p>{$formFields['Message']}</p><ul>"); 
-					$emails = explode(',', $formFields['EmailInput']);
-					foreach($emails as $email) {
-						$this->mPage->addPostMessage("<li>$email</li>");
-					}
-					$this->mPage->addPostMessage("</ul>");	
-					*/
-					//$link = $this->mPage->getUserViewProfileLink();
-					//$this->mPage->addPostMessage("<span>View your video and message at this link: </span><p><a href='$link'>$link</a></p>");
 					
 					$this->mPage->mFormStep = 'share';
 					return true;
 				} else {
-					$this->mPage->mFormStep = 'invite';
+					$this->mPage->mFormStep = 'write';
 					return 'Unable to add invitation.';
 				}
 				break;
@@ -525,30 +543,35 @@ class TrueFanForm
 			
 				if($formFields['EmailList']) {
 					$emailArray = explode(',', $formFields['EmailList']);
+					$templateMessage = $formFields['FriendMessage'];
+					$replace = array();
+					$link = $this->mPage->getUserViewProfileLink();
+					$replace['EMAIL_VIDEO_LINK'] = '<a href="'.$link.'">'.$link.'</a>';
 					foreach($emailArray as $friendAddress) {
+						//FIXME: Potential XSS security flaw - non-escaped $formFields directly displayed, consider getting a return form db of escaped via htmlspecialchars
+						
+						list($name, $address) = explode(':',$friendAddress);
+						$replace['FRIEND'] = $name;
+						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
+
+						if($formFields['SendEmails']) {
+							$friendAddress = str_replace(':',' ',$friendAddress);
+							$sendTo = new MailAddress($friendAddress);
+							$from = new MailAddress($this->mPage->mTfProfile['email']);
+							$subject = 'A Message From Open Source Ecology';
+							$contentType = 'text/html';
+							$result = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);
+							if($result != true) {
+								//TODO: Make this smarter -- save all errors and then return them at the end
+								return $result;
+							} 
+						}
+						
 						$friendAddress = str_replace('<','&lt',$friendAddress);
 						$friendAddress = str_replace('>','&gt',$friendAddress);
 						$wgOut->addHtml($friendAddress.'<br />');
-						// TODO: Internationalize
-						/*
-						$sendTo = new MailAddress($friendAddress);
-						$from = new MailAddress($this->mPage->mTfProfile['email']);
-						$subject = 'A Message From Open Source Ecology';
-						// TODO: consider putting the following into a function, it's used twice, if we change url scheme...more edits
-						$link = $this->mPage->getUserViewProfileLink();
-						$message = 	'<p>Hello from the interwebs. This is a message from Open Source Ecology. <strong>'
-										.$this->mPage->mTfProfile['name'].'</strong> wanted to let you know that OSE is building '
-										.'an open source post scarcity economy. '.$this->mPage->mTfProfile['name'].' even make a video for you: </p>'
-										.'<a href="'.$link.'">'.$link.'</a>';
-						$contentType = 'text/html';
-						$result = UserMailer::send($sendTo, $from, $subject, $message, $from, $contentType);
-						if($result != true) {
-							return $result;
-						}
-						*/
-						//$this->mPage->addPostMessage("<p>Sent email to $friendAddress.</p>");
-					}
-					//TODO: delete
+						$wgOut->addHtml($currentMessage.'<br /><br />');
+					} //TODO: delete
 					$wgOut->addHtml($formFields['FriendMessage'].'<br/><br/><br/>');
 				}
 
@@ -722,6 +745,12 @@ class TrueFanForm
 					'label' => 'Email',
 					'size' => 20,
 				),
+				'SendEmails' => array(
+					'class' => 'HTMLSexyCheckField',
+					'section' => 'email',
+					'id' => 'ose-truefan-email-check',
+					'label' => 'Send Emails',
+				),
 				'TemplateButtons' => array(
 					'type' => 'info',
 					'default' => '',
@@ -800,8 +829,6 @@ class TrueFanForm
 		}
 	}
 }
-
-
 
 /**
  * Syntactic sugar. Outputs to local extension log.
