@@ -15,7 +15,7 @@ $messages['en'] = array(
         'shareOSE-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
 		  
         'trueFanForm-upload' => 'True Fan Information',
-        'trueFanSubmitText-upload' => 'Upload Video',
+        'trueFanSubmitText-upload' => 'Save Video',
 
 			// This is no longer semantically correct
         'trueFanForm-write' => 'Write A Message',

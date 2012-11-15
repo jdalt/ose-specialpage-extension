@@ -19,23 +19,20 @@
 	<div class="center50">
 		{{FORM}}
 		<script>
-			var emailWrap = '<div class="modal-input-overlay inactive">'+
-								'<div id="email-list-modal" class="modal-input">'+
-									'<div id="email-input-container"></div>'+
-								'</div>'+
-							'</div>';
-			var emailHelpMessage = '<h3>Enter Email Addresses</h3>';
-			var emailButton = '<br/><input type="button" value="Ok" onclick="processEmail()" />';
 		</script>
 		<div id="social-icons-holder">
+			<h4>Contact Method</h4>
 			<ul class="inline-links social-icons">
 				<li>
+					<span>facebook</span>
 					<img class="gray" src="{{PATH}}images/facebook.png"/>
 				</li>
 				<li id="get-involved">
+					<span>twitter</span>
 					<img class="gray" src="{{PATH}}images/twitter.png"/>
 				</li>
 				<li class="active" id="join-us">
+					<span>email</span>
 					<img src="{{PATH}}images/email.png" onclick="$j('.modal-input-overlay').toggleClass('inactive');" />
 
 				</li>
@@ -99,13 +96,106 @@ Checkout the video I made for you and the links below as I think you'd be intere
 </div>
 
 <script>
+	// These two json objects take content from first selector and put it in second; see dynamic.js
 	var autoReplaceArray = {
-		/*"#social-message":"#ose-truefan-friends-message",*/
 		"#social-icons-holder":"#mw-form-section-social-buttons"
 	}
 	var autoInputArray = {
 		"#social-message":"#ose-truefan-friends-message"
 	}
+	
+	$j(document).ready(function() {
+		var emailWrap =	'<div class="modal-input-overlay inactive">'+
+									'<div id="email-list-modal" class="modal-input">'+
+										'<div id="email-input-container"></div>'+
+									'</div>'+
+								'</div>';
+		var emailHelpMessage = '<h3>Enter Email Addresses</h3>';
+		var emailButton = '<br/><input id="email-list-ok" type="button" value="Ok" />';
+	
+		$j('.mw-htmlform-field-HTMLTextArray').html(
+				'<div class="email-list-combo">'+
+					'<div class="email-input-cluster">'+
+						'<div class="mw-label">'+
+							'<label>Name</label>'+
+						'</div>'+
+						'<div class="mw-input">'+
+							'<input class="email-names" type="text" />'+
+						'</div>'+
+					'</div>'+
+					'<div class="email-input-cluster">'+
+						'<div class="mw-label">'+
+							'<label for="ose-truefan-email-input">Email</label>'+
+						'</div>'+
+						'<div class="mw-input">'+
+							'<input class="email-addresses" type="text" name="wpEmailInput[]"/>'+
+						'</div>'+
+					'</div>'+
+				'</div>');
+		$j('.email-addresses').keyup(addEmailInput);
+		$j('#mw-form-section-email .mw-htmlform-field-HTMLTextArray').children().wrapAll(emailWrap);
+		$j('#email-list-modal').prepend(emailHelpMessage);
+		$j('#email-list-modal').append(emailButton);
+		$j('#email-list-ok').click(processEmail);
+
+		
+		function processEmail()
+		{
+			var addresses = new Array();
+			// TODO: Remove empty email inputs
+			$j('.modal-input-overlay').addClass('inactive');
+			$j('#share-email-preview').empty('');
+			$j('#email-input-container .email-list-combo').each( function(index) {
+				var name = $j(this).find('.email-names').val();
+				var address = $j(this).find('.email-addresses').val();
+				if(address != '') {
+					addresses.push(name + ':<' + address + '>');
+				}
+			});
+			$j('input[name=wpEmailList]').val(addresses.join(','));
+		
+			if(addresses.length > 0) {
+				$j('#share-email-preview').append('<h3>Email List</h3>');
+				for(var i=0; i<addresses.length; i++) {
+					addresses[i] = addresses[i].replace('<','&lt');
+					addresses[i] = addresses[i].replace('>','&gt');
+					addresses[i] = addresses[i].replace(':',' ');
+					$j('#share-email-preview').append('<div class="email-preview-item"><img src="/w/extensions/ShareOSE/images/email_sm.png" /><div class="preview-address">'+addresses[i]+'</div></div>');
+				}
+			}
+		}
+		
+		function addEmailInput(e)
+		{
+			// Any input that contains value creates a single new input, and pays the process forward
+			if(this.value != '') {
+				$j(this).unbind('keyup');
+				// FIXME: for tags are incorrect
+				$j('#email-input-container').append(
+						'<div class="email-list-combo">'+
+							'<div class="email-input-cluster">'+
+								'<div class="mw-label">'+
+									'<label>Name</label>'+
+								'</div>'+
+								'<div class="mw-input">'+
+									'<input class="email-names" type="text" />'+
+								'</div>'+
+							'</div>'+
+							'<div class="email-input-cluster">'+
+								'<div class="mw-label">'+
+									'<label for="ose-truefan-email-input">Email</label>'+
+								'</div>'+
+								'<div class="mw-input">'+
+									'<input class="email-addresses" type="text" name="wpEmailInput[]"/>'+
+								'</div>'+
+							'</div>'+
+						'</div>');
+				$j('#trueFanForm .email-input-cluster input:last').keyup(addEmailInput);
+			}
+		}
+	});
+
+
 </script>
 
 <!-- TODO:could create an inject array with tags to inject and run it onDocumentReady -->

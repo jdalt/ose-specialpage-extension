@@ -26,165 +26,142 @@ require_once('class.TrueFansDb.php');
 require_once('SexyForm.php');
  
 class SpecialShareOSE extends SpecialPage {
-
+	// This variables directly affect the html structure of page and contents of the db
 	public $mDb;
 	public $mTfProfile;
 	public $mFormStep;
 	public $mErrorMessage;
-	//TODO: get rid of post message, templating all the way baby
-	protected $mPostMessage;
+	public $mStatusMessage;
+	
+	// GET Request variables. These are loaded manually unlike POST variables.	
+	protected $mReqGetPage;
+	protected $mReqId;
+	protected $mReqPostPage; 
+	protected $mPostedForm;
 	 
 	/**
 	 * Load requests and build TrueFansDb
-	 * CONSIDER: Can I please the unit test faeries and pass in the database?
+	 * TODO: Consider - Any useful unit tests for special page or is that something for Symfony/Webdriver/Integration testing frameworks?
 	 */
 	public function __construct() {
-		global $wgUser;
-		tfDebug('***  Constructing SpecialShareOSE  ***');
+		global $wgUser, $wgRequest;
+		tfDebug('--Constructing SpecialShareOSE--');
 		
 		parent::__construct( 'ShareOSE');
-
-		$this->loadRequest();
-		$this->mPostMessage = $this->mErrorMessage = '';
+		
+		// Initialize string member variables
+		$this->mErrorMessage = $this->mStatusMessage = '';
 		$this->mFormStep = 'upload';
-		$this->mDb = new TrueFansDb(); // Unit Test Faerie: *Glares* "Beware the new operator!"
+
+		// Initialize GET request variables. 	
+		$this->mReqGetPage = $wgRequest->getText('page');
+		$this->mReqId = $wgRequest->getText('id');
+
+		// Build the almighty database.
+		$this->mDb = new TrueFansDb(); 
+		
+		// If the user is logged in load their profile via their wiki id
+		$this->mTfProfile = NULL;
 		if($wgUser->isLoggedIn()) {
-			$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); // Unit Testing Kosher?
+			$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId());
 		}
-	}
-
-	/** Misc variables **/
-	protected $mReqGetPage;
-	protected $mReqPostPage; 
-	protected $mPostedForm;
-	protected $mReqId;
-
-	/**
-	 * Initialize instance variables from request.
-	 */
-	protected function loadRequest() {
-		global $wgRequest;
-
-		// This request is loaded before the form and straight off of the global $wgRequest variable
-		// because it will determine which posted form is to be built. All other posted variables
-		// are loaded via forms.
+		
+		// Use the POST variable Page to build correct form to auto load the rest of the POST request.
 		$this->mReqPostPage = $wgRequest->getText('Page');
 		if($wgRequest->wasPosted()) {
 			$this->mPostedForm = new TrueFanForm($this, $this->mReqPostPage);
 		}
-		
-		$this->mReqGetPage = $wgRequest->getText('page');
-		$this->mReqId = $wgRequest->getText('id');
 	}
 
 	/**
-	 * Special page entry point
+	 * Special page entry point. This function outputs universal scripts
+	 * and then hands off to handleViewPage according to content of POST 
+	 * GET or default requests.  
 	 * @param $par 
 	 */
 	public function execute( $par ) {
-		global $wgUser, $wgOut, $wgRequest, $wgScriptPath;
+		global $wgUser, $wgOut, $wgScriptPath;
 
+		// Basic style and interaction scripts for these pages
 		$this->setHeaders();
 		$this->outputHeader();
 		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/style.css');
 		$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/dynamic.js');
 		
 		// Request logic. POST > GET. Empty request = 'welcome' GET request. 
-		if($this->mReqPostPage) {
-			$this->handlePostRequest($this->mReqPostPage);
-		} elseif($this->mReqGetPage) {
+		if($this->mReqPostPage) { // Handle POST
+			// You must be logged in to submit data. Anything else is nonsense.
+			if(!$wgUser->isLoggedIn()) {
+				$this->handleViewPage('login');
+			} else {
+				// loadHandledForm will check load data from the POST request and check the edit token to prevent CSRF attacks
+				$formReturn = $this->mPostedForm->loadHandledForm();
+				if($formReturn === true) { 
+					if($this->mReqPostPage != 'share') { 
+						// Update the profile that the viewer will use.
+						$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); 
+						// Throw control into the page viewing system. Submit will select a page based on $this->mFormStep
+						$this->handleViewPage('submit'); 
+					} else {
+						$this->handleViewPage('finish');
+					}
+				} else {
+					$this->mPostedForm->clearRequests();
+					$this->mErrorMessage = $formReturn;
+					$this->handleViewPage('submit');
+				}
+			}
+		} elseif($this->mReqGetPage) { // Handle GET
 			$this->handleViewPage($this->mReqGetPage);
-		} else {
-			// Empty requests, go to the welcome page
+		} else { // Empty requests, go to the welcome page
 			$this->handleViewPage('welcome');
 		}
 
-		// Global HTML added to every page
-		$url = $this->getTitle()->getLocalUrl();
-		$wgOut->addHTML('<ul id="special-links" class="inline-links"><li><a href="'.$url.'?page=welcome">True Fans</a></li>');
-		$wgOut->addHTML('<li><a href="'.$url.'?page=myprofile">Your Video</a></li>');
-		$wgOut->addHTML('<li><a href="'.$url.'?page=submit">Submit a Video</a></li>');
-		$wgOut->addHTML('<li><a href="'.$url.'?page=subscribe">Become a True Fan</a></li>');
-		$wgOut->addHTML('<li><a href="'.$url.'?page=viewall">View All Submissions</a></li></ul>');
-		$wgOut->addHTML('<h6>*Development Links*</h6>');
-	}
-
-	/**
-	 * This function handles posted forms. 
-	 * Adds valid input to the database and ouputs error messages. After completing 
-	 * duties hands control off to handleViewPage.
-	 * @param String $postRequest The Page field in each form refers to one of these
-	 * handlers which handles all the other fields and puts them where they need to go.
-	 */
-	protected function handlePostRequest($postRequest)
-	{
-		// Precondition: Valid mPostedForm of type matching $postRequest
-		global $wgUser, $wgOut;
-
-		// You must be logged in to submit data. Anything else is nonsense.
-		if(!$wgUser->isLoggedIn()) {
-			tfDebug("!Attempt to post without being logged in!");	
-			$wgOut->addHTML('Please login.');
-			return;
-		}
-		
-		$formReturn = $this->mPostedForm->loadHandledForm();
-		if($formReturn === true) { // checks edit token and fires trySubmit --> will not display form if submit is successful 
-			$wgOut->addHTML($this->mPostMessage);
-			if($postRequest != 'share') { 
-				$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); // update the profile that the viewer will use.:w
-				$this->handleViewPage('submit'); // throw it back viewing pages
-			} else {
-				$this->handleViewPage('finish');
-			}
-		} else {
-			// TODO: insert this into the template
-			$this->mErrorMessage = $formReturn;
-			$this->handleViewPage('submit');
-		}
+		// TODO: Remove - development links
+		$replace = array();
+		$replace['BASE_URL'] = $this->getTitle()->getLocalUrl();
+		$this->loadTemplate('dev_links.html', NULL, $replace);
 	}
 
 	/**
 	 * The main html display function.
-	 * Outputs page specific html according to page request or
-	 * artificial page request sent from handlePostRequest().
-	 * Basically this injects nearly all page specific view html
-	 * except small messages that come back from post and global
-	 * messages stamped on every page.
-	 * @param String $getRequest page requested from GET, 
-	 * handlePostRequest, or generated by execute request logic. 
+	 * Outputs page specific html according to page request and
+	 * (for forms) based on the contents of $this->mFormStep
+	 * Page specific HTML is injected here using $this->loadTemplate
+	 * @param String $request page requested from GET or
+	 * explicitly called by $this->execute or called recursively.
 	 */
-	public function handleViewPage($getRequest)
+	public function handleViewPage($request)
 	{
-		global $wgUser, $wgOut;
+		global $wgUser;
 		
 		// Request specific HTML dependent upon the request
-		switch($getRequest) {
+		switch($request) {
 			case 'welcome':
-				$this->loadTemplate('templates/welcome.html');
+				$this->loadTemplate('welcome.html');
 				break;
 			case 'view':
 				$profile = $this->mDb->getUser($this->mReqId);
-				$this->loadTemplate('templates/view.html', $profile);
+				$this->loadTemplate('view.html', $profile);
 				break;
 			
 			case 'subscribe':
-				$this->loadTemplate('templates/subscribe.html');
+				$this->loadTemplate('subscribe.html');
 				break;
 			
 			case 'myprofile':
 				// TODO: Add extra information like before - email and contacts sent to...?
 				if(!$wgUser->isLoggedIn()) {
-					//TODO: redundancy--put in it's own case, put into the template
-					$replace = array();
-					$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE'; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
-					$this->loadTemplate('templates/login.html', NULL, NULL, $replace);
+					$this->handleViewPage('login');
+					return;
 				} else {
-					$this->loadTemplate('templates/view.html', $this->mTfProfile);
+					$this->loadTemplate('view.html', $this->mTfProfile);
 				}
 				break;
 					
 			case 'viewall':
+				global $wgOut;
+
 				$result = $this->mDb->getAllEntries();
 				$wgOut->addHTML('<table id="submissions"><tbody>');
 				foreach($result as $row) {
@@ -202,103 +179,154 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 
 			case 'finish':
-				$this->loadTemplate('templates/finish.html', $this->mTfProfile);
+				$this->loadTemplate('finish.html', $this->mTfProfile);
+				break;
+
+			case 'login':
+				//TODO: redundancy--put in it's own case, put into the template
+				$replace = array();
+				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE'; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+				$this->loadTemplate('login.html', NULL, $replace);
+
 				break;
 
 			case 'submit':
-				// Only logged in users can submit videos. This ensures valid emails and no spam.
+				// Only logged in users can submit videos.
 				if(!$wgUser->isLoggedIn()) {
-					//TODO: redundancy--put in it's own case, put into the template
-					$replace = array();
-					$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE'; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
-					$this->loadTemplate('templates/login.html', NULL, NULL, $replace);
+					$this->handleViewPage('login');					
+					return;
 				} else {
 					
+					// All form steps require $form and $templates objects
 					$form = $template = NULL;
 					
 					switch($this->mFormStep) {
 						case 'upload':
-							// Precondition: You don't have a $this->mTfProfile in TrueFansDb
+							// Precondition: You don't have a $this->mTfProfile in the database
 							if($this->mTfProfile != NULL) {	
 								$this->mFormStep = 'edit';
 								$this->handleViewPage('submit');
 								return;
 							} 
 
-							global $wgScriptPath;
+							//TODO: load this through the templating system
+							global $wgScriptPath, $wgOut;
 							$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeUploader.js');
-							$template = 'templates/upload_video.html';
-	
+
+							$template = 'upload_video.html';
 							$form = new TrueFanForm($this, 'upload');
 							$form->setFieldAttr('Name', 'default', $wgUser->getRealName());
-							// TODO: Internationalize
-							$form->setFieldAttr('Name', 'help', 'Your name was added from your wiki profile. You may edit it.');
+							$form->setFieldAttr('Name', 'help', 'Your name was added from your wiki profile. You may edit it.'); // TODO: style this or change html structure
 							$form->setFieldAttr('Email', 'default', $wgUser->getEmail());					
 
 							break;
 
 						case 'write':
-						 	// Precondition: User exists with video_id but no video_message
-							// No video_message: create an 'invite' form 
-							
-							$template = 'templates/write_message.html';
-	
+							// Precondition: User exists in db
+							$template = 'write_message.html';
 							$form = new TrueFanForm($this, 'write');
-
 							break;
 
 						case 'share':
-							$template = 'templates/share_with_friends.html';
-	
+							// Precondition: User exists in db
+							$template = 'share_with_friends.html';
 							$form = new TrueFanForm($this, 'share');
-
 							break;
 						
 						case 'edit':
-							// Precondition: finished profile. Allow the user to edit their information.
-							
-							$template = 'templates/edit.html';
-	
+							// Precondition: User exists in db
+							// Users are bounced to this form explicity or get sent here by 'upload' when profile exists
+							$template = 'edit.html';
 							$form = new TrueFanForm($this, 'edit');
-							$form->addPreMessage('<p>Edit your message or email invitation.</p>');
-							$form->setFieldAttr('Name', 'default', $this->mTfProfile['name']);
-							$form->setFieldAttr('Email', 'default', $this->mTfProfile['email']);					
+							// We're using htmlspecialchars_decode because db entries htmlspecialchars encoded. 
+							// This allows us to sanely round trip editing so that apostrophes don't matastisize in textboxes.
+							$form->setFieldAttr('Name', 'default', htmlspecialchars_decode($this->mTfProfile['name'], ENT_QUOTES));
 							$form->setFieldAttr('VideoId', 'default', $this->mTfProfile['video_id']);									
-							$form->setFieldAttr('Message', 'default', $this->mTfProfile['video_message']);
-							$form->setFieldAttr('EmailInput', 'default', $this->mTfProfile['email_invite_list']);
+							$form->setFieldAttr('VideoMessage', 'default', htmlspecialchars_decode($this->mTfProfile['video_message'], ENT_QUOTES));
 							break;
 
 						default:
-							echo 'wtf default reached';
+							tfDebug('Invalid form step reached within submit page switch statement.');
 							break;
 					}
 					
-					$formStr = $form->displayHandledForm();
 					$profile = NULL;
 					if($this->mTfProfile) {
 						$profile = $this->mTfProfile;
 					}
-					$this->loadTemplate($template, $profile, $formStr);
+					$replace = array();
+					$replace['FORM'] = $form->writeHandledForm();
+					$this->loadTemplate($template, $profile, $replace);
 				}
 				break;
 
 			default:
-				$wgOut->addHTML('<p>Unknown get request.</p>');
+				// TODO: Consider - Should we display an error template?
+				tfDebug('Unknown GET request.');
 				break;
 
 		}
 	}
 
-	/****** Utility Functions *******/
+	/**
+	 * This function replaces {{TAGS}} with the $contentsof['TAGS'] = 'inAnAssociativeArray'; 
+	 * @param $strContents The target string
+	 * @param $replaceList The associative array with tags and replacements
+	 * @return String with things replaced
+	 */
+	function replaceTemplateTags($strContents, $replaceList)
+	{
+		$patterns = array();
+		$replacements = array();
+		foreach($replaceList as $templateTag => $replacement) {
+			$patterns[] = '/\{\{'.$templateTag.'\}\}/';	
+			$replacements[] = $replacement;
+		}
+		return preg_replace($patterns, $replacements, $strContents); 
+	}
 
 	/**
-	 * Accumulates messages from post callback of TrueFansForm that are displayed at the top of the page alone or before next form. 
+	 * Loads template for a page and outputs content as HTML.
+	 * @param String $path A path relative to *template* directory.
+	 * @param Array $profile An array representing a True Fan profile to use in tag replacement.
+	 * @param Array $extraReplace An array of custom tags and their replacements.
+	 * @return String The link.
 	 */
-	public function addPostMessage($str)
-	{	
-		//TODO: REMOVE in favor of template based solution
-		$this->mPostMessage .= $str;
+	function loadTemplate($path, $profile=NULL, $extraReplace=NULL)
+	{
+		global $wgOut, $wgScriptPath;
+
+		// These are default replacement tags for templates
+		$templateStr = array();
+		$templateStr['PATH'] = $wgScriptPath.'/extensions/ShareOSE/';
+		$templateStr['ERROR_MESSAGE'] = $this->mErrorMessage;
+		$templateStr['STATUS_MESSAGE'] = $this->mStatusMessage;
+		$templateStr['USER_VIDEO_LINK'] = $this->getUserViewProfileLink();
+
+		if($profile != NULL) {
+			$templateStr['USER_NAME'] = $profile['name'];
+			$templateStr['USER_MESSAGE'] = $profile['video_message'];
+			$templateStr['USER_VIDEO_ID'] = $profile['video_id'];
+		}
+
+		if($extraReplace != NULL) {
+			$templateStr = $templateStr + $extraReplace;
+		}
+
+		$templateContents = file_get_contents('templates/'.$path, FILE_USE_INCLUDE_PATH);
+		$preparedHtml = $this->replaceTemplateTags($templateContents, $templateStr);
+			
+		// Below will load the file as php allowing us to do fun php stuff like il8n
+    	/*if (is_file($path)) {
+        ob_start();
+        include $path;
+        $str = ob_get_clean();
+		}*/
+		
+		$wgOut->addHTML($preparedHtml);
 	}
+
+	/****** Utility Functions *******/
 
 	/**
 	 * Returns foreign Id for TrueFansDb
@@ -318,66 +346,6 @@ class SpecialShareOSE extends SpecialPage {
 	{
 		//TODO: test not logged in case
 		return $this->getTitle()->getFullUrl()."?page=view&id={$this->mTfProfile['id']}"; 
-	}
-
-	/**
-	 * 
-	 * @return String with things replaced
-	 */
-	function replaceTemplateTags($strContents, $replaceList)
-	{
-		$patterns = array();
-		$replacements = array();
-
-		$replacements = array();
-		foreach($replaceList as $templateTag => $replacement) {
-			$patterns[] = '/\{\{'.$templateTag.'\}\}/';	
-			$replacements[] = $replacement;
-		}
-
-		return preg_replace($patterns, $replacements, $strContents); 
-	}
-
-
-	/**
-	 * Loads template for a page
-	 * @return String The link.
-	 */
-	function loadTemplate($path, $profile=NULL, $form=NULL, $extraReplace=NULL)
-	{
-		//TODO: Extra consideration about utility of $extraReplace -- do I really need it? If so get rid of $form...template should be for things that repeat on muttiple pages and make formatting easier
-		global $wgOut, $wgScriptPath;
-
-		$templateStr = array();
-		$templateStr['PATH'] = $wgScriptPath.'/extensions/ShareOSE/';
-		$templateStr['ERROR_MESSAGE'] = $this->mErrorMessage;
-		$templateStr['USER_VIDEO_LINK'] = $this->getUserViewProfileLink();
-
-		if($profile != NULL) {
-			$templateStr['USER_NAME'] = $profile['name'];
-			$templateStr['USER_MESSAGE'] = $profile['video_message'];
-			$templateStr['USER_VIDEO_ID'] = $profile['video_id'];
-		}
-
-		if($form != NULL) {
-			$templateStr['FORM'] = $form;
-		}
-
-		if($extraReplace != NULL) {
-			$templateStr = $templateStr + $extraReplace;
-		}
-
-		$templateContents = file_get_contents($path, FILE_USE_INCLUDE_PATH);
-		$preparedHtml = $this->replaceTemplateTags($templateContents, $templateStr);
-			
-		// Below will load the code as php allowing us to do fun php stuff like il8n
-    	/*if (is_file($path)) {
-        ob_start();
-        include $path;
-        $str = ob_get_clean();
-		}*/
-		
-		$wgOut->addHTML($preparedHtml);
 	}
 }
 
@@ -429,7 +397,6 @@ class TrueFanForm
 			$this->mForm->setTitle($this->mPage->getTitle());
 			$this->mForm->addPreText($this->mPreText);
 			$this->mFormBuilt = true;
-			tfDebug("Built: {$this->mType}");
 		}
 	}
 
@@ -443,18 +410,19 @@ class TrueFanForm
 	}
 
 	/**
-	 * Builds and loads unbuilt form and outputs html.
+	 * Builds and loads unbuilt form and outputs html as a string.
 	 * This function is useful to avoid interference of posted fields from
 	 * other forms that may trigger a trySubmit from the HTMLForm::show()
 	 * function.
+	 * @return String An HTML string for writing the form
 	 */
-	public function displayHandledForm()
+	public function writeHandledForm()
 	{
 		// You must load a form to have the default fields filled in.
 		// This is down automatically for the ::show() function but
 		// must be done manually when using ::displayForm()
 		$this->load(); 
-		// Anything other than false will be printed as an error message.
+		// Anything other than false will be printed as an error by HTMLForm::displayForm
 		return $this->mForm->displayForm(false); 
 	}
 
@@ -467,7 +435,6 @@ class TrueFanForm
 			$this->build();
 			$this->mForm->loadData();
 			$this->mFormLoaded = true;
-			tfDebug("Loaded {$this->mType}");
 		}
 	}
 	
@@ -486,14 +453,6 @@ class TrueFanForm
 			tfDebug("Can't add $attr to a built form.");
 		}
 	}
-
-	/**
-	 * Wraps HTMLForm function to add html before form 
-	 */
-	public function addPreMessage($str)
-	{
-		$this->mPreText .= $str;
-	}
 	
 	/**
 	 * This is a callback function that handles post requests for TrueFanForm(s).
@@ -501,7 +460,8 @@ class TrueFanForm
 	 * and add html feedback to the special page.
 	 * @param Array $formFields The data passed into form from HTMLForm class.
 	 * @return Mixed Returns true on success and a String message on an error.
-	 * The error message is then output by HTMLForm::displayForm() method.
+	 * The error message is then output via the template via a member variable on the page
+	 * Also the page will manually clear the form on errors and load from the database instead
 	 */
 	public function formCallback($formFields)
 	{ 
@@ -509,148 +469,120 @@ class TrueFanForm
 			case 'upload':
 				//TODO: Guarantee that we're XSS safe and that we can round trip text with special characters
 				if($this->mPage->mDb->addUser($this->mPage->getMwId(), $formFields['Name'], $formFields['Email'], $formFields['VideoId'])) { 
-					echo 'successful submission';
 					$this->mPage->mFormStep = 'write';
 					return true;
 				} else {
-					echo 'bad sumission';
 					$this->mPage->mFormStep = 'upload';
-					if(!$this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
+					if($formFields['VideoId'] == '') {
+						return 'You did not upload a video or paste a video url.';
+					} elseif(!$this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
 						return 'Unable to extract video id from URL.';
 					} 
-					$this->mPage->mFormStep = 'upload';
 					return 'Unable to add request to DB.';
 				}
 				break;
 
 			case 'write':
-				//if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
-				if($this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile['id'], $formFields['Message'])) { 
-					
+				if($this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile['id'], $formFields['VideoMessage'])) { 
 					$this->mPage->mFormStep = 'share';
-					return true;
 				} else {
+					// With the updateVideoMessage function configured to return true on a none update this else should never be tripped
 					$this->mPage->mFormStep = 'write';
 					return 'Unable to add invitation.';
 				}
+				return true;
 				break;
 
 			case 'share':
-						
+				// TODO: Consider - Save emailList in the database or not? Save the sent message or not?		
+
 				global $wgOut;
-						
-				$wgOut->addHtml('<h4>Email Debug Output</h4>');
 			
+				//TODO: Delete temporary $wgOut of email for debugging purposes.
 				if($formFields['EmailList']) {
+					$wgOut->addHtml('<h4>Email Debug Output</h4>');
 					$emailArray = explode(',', $formFields['EmailList']);
 					$templateMessage = $formFields['FriendMessage'];
 					$replace = array();
 					$link = $this->mPage->getUserViewProfileLink();
 					$replace['EMAIL_VIDEO_LINK'] = '<a href="'.$link.'">'.$link.'</a>';
+
+					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
-						//FIXME: Potential XSS security flaw - non-escaped $formFields directly displayed, consider getting a return form db of escaped via htmlspecialchars
-						
 						list($name, $address) = explode(':',$friendAddress);
 						$replace['FRIEND'] = $name;
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
+						// This code actually sends the emails, for purposes of debugging it requires SendEmails checkbox to actually send emails
 						if($formFields['SendEmails']) {
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
 							$from = new MailAddress($this->mPage->mTfProfile['email']);
-							$subject = 'A Message From Open Source Ecology';
+							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
 							$result = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);
-							if($result != true) {
-								//TODO: Make this smarter -- save all errors and then return them at the end
+							if($result !== true) {
+								$errors .= $result.'\n';
 								return $result;
 							} 
-						}
-						
+						}						
 						$friendAddress = str_replace('<','&lt',$friendAddress);
 						$friendAddress = str_replace('>','&gt',$friendAddress);
 						$wgOut->addHtml($friendAddress.'<br />');
 						$wgOut->addHtml($currentMessage.'<br /><br />');
-					} //TODO: delete
-					$wgOut->addHtml($formFields['FriendMessage'].'<br/><br/><br/>');
+					} 
+					if($errors) {
+						return $errors;
+					}
 				}
-
-				//TODO: Handle emailes and incoming message, send emails with message
 				return true;
 				break;
 
 			case 'edit':
-				// TODO: Make name editable and report change to name.
-				// Should there be a generalized update function mDm->update($id, $field, $value)?
-				// Or should I just update the entire profile no matter what mDb->updateAll($fields)?
-				//if($this->mPage->mTfProfile['name'] != $formFields['Name'])
+				// TODO: Consider-We could have a simpler database class with a single update function and
+				// we would reduce database requests. However I think the current code is better in terms 
+				// of usability because the user is told exactly why their submission wasn't accepted.
 				
-				//$this->mPage->mRedirectRequest = 'Edit'; // edit routes back to edit
+				if($this->mPage->mTfProfile['name'] != htmlspecialchars($formFields['Name'], ENT_QUOTES)) {
+					if(!$this->mPage->mDb->updateName($this->mPage->mTfProfile['id'], $formFields['Name'])) {
+						return 'Unable to update your name.';
+					} else {
+						$this->mPage->mStatusMessage .= 'Updated your name. ';
+					}
+				}
 
 				if($this->mPage->mTfProfile['video_id'] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
 					if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile['id'], $formFields['VideoId'], true)) {
-						// Revert to the previous, valid, id.
-						$this->mForm->mFieldData['VideoId'] = $this->mPage->mTfProfile['video_id'];
 						return 'Unable to update your video.'; 
 					} else {
-						$this->mPage->addPostMessage("<p>Updated video id.</p>");
+						$this->mPage->mStatusMessage .= 'Updated video id. ';
 					}
 				}
 				
-				if(($this->mPage->mTfProfile['video_message'] != $formFields['Message']) || ($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput'])) {
-					if(!$this->mPage->mDb->updateStuff($this->mPage->mTfProfile['id'], $formFields['Message'], $formFields['EmailInput'])) {
-						// Revert to the previous, valid, message and email list
-						$this->mForm->mFieldData['Message'] = $this->mPage->mTfProfile['video_message'];
-						$this->mForm->mFieldData['EmailInput'] = $this->mPage->mTfProfile['email_invite_list'];
-						return 'Unable to update invitation.';
+				if($this->mPage->mTfProfile['video_message'] != htmlspecialchars($formFields['VideoMessage'], ENT_QUOTES)) {
+					if(!$this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile['id'], $formFields['VideoMessage'])) {
+						return 'Unable to update your video message.';
 					} else {
-						if($this->mPage->mTfProfile['video_message'] != $formFields['Message']) {
-							$this->mPage->addPostMessage("<p>Updated video message.</p>");
-						}
-						if($this->mPage->mTfProfile['email_invite_list'] != $formFields['EmailInput']) {
-							$this->mPage->addPostMessage("<p>Updated email invitations.</p>");
-						}
+						$this->mPage->mStatusMessage .= 'Updated video message. ';
 					}
 				}
 				
-				if($formFields['SendEmails']) {
-					$emailArray = explode(',',$this->mPage->mTfProfile['email_invite_list']);
-					foreach($emailArray as $friendAddress) {
-						// TODO: Internationalize
-						$sendTo = new MailAddress($friendAddress);
-						$from = new MailAddress($this->mPage->mTfProfile['email']);
-						$subject = 'A Message From Open Source Ecology';
-						// TODO: consider putting the following into a function, it's used twice, if we change url scheme...more edits
-						$link = $this->mPage->getUserViewProfileLink();
-						$message = 	'<p>Hello from the interwebs. This is a message from Open Source Ecology. <strong>'
-										.$this->mPage->mTfProfile['name'].'</strong> wanted to let you know that OSE is building '
-										.'an open source post scarcity economy. '.$this->mPage->mTfProfile['name'].' even make a video for you: </p>'
-										.'<a href="'.$link.'">'.$link.'</a>';
-						$contentType = 'text/html';
-						$result = UserMailer::send($sendTo, $from, $subject, $message, $from, $contentType);
-						if($result != true) {
-							return $result;
-						}
-						$this->mPage->addPostMessage("<p>Sent email to $friendAddress.</p>");
-					}
-				}
-
 				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
 				if(isset($_POST['DeleteProfile'])) {
-					if($this->mPage->mDb->deleteUser($this->mPage->mTfProfile['id'])) {
-					$this->mPage->addPostMessage('Your profile has been deleted.');
-					} else {
+					if(!$this->mPage->mDb->deleteUser($this->mPage->mTfProfile['id'])) {
 						return 'Failed to delete profile.';
+					} else {
+						$this->mPage->mStatusMessage .= 'Your profile has been deleted. ';
 					}			
-					//$this->mPage->mRedirectRequest = 'Upload_Video'; // edit routes back to edit
 				}
-
-				// !!	
 				$this->clearRequests();
 				return true;
 				break;
+
 		}
-		return 'Unknown request.';
+		// Anything that falls through to here is likely a curl request or some other tomfoolery
+		tfDebug('Unknown request posted: '.$formFields['Page']);
+		return false;
 	}
 
 	/**
@@ -660,7 +592,7 @@ class TrueFanForm
 	public function clearRequests()
 	{
 		global $wgRequest;
-		// Make sure we've filled our forms fields
+		// Make sure we've filled our forms fields so we can use them to empty $wgRequest
 		$this->build(); 
 
 		foreach($this->mForm->mFieldData as $field => $value) {
@@ -690,20 +622,16 @@ class TrueFanForm
 					'label' => 'Name',
 					'size' => 20,
 				),
-				'Email' => array(
-					'class' => 'HTMLSexyTextField',
-					'section' => $this->mType,
-					'id' => 'ose-truefan-email',
-					'label' => 'Email',
-					'size' => 20,
-					'readonly' => true,
-				),
 				'VideoId' => array(
 					'class' => 'HTMLSexyTextField',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-url',
 					'label' => 'Video Url',
 					'size' => 20,
+				),
+				'Email' => array(
+					'class' => 'HTMLReturnableHiddenField',
+					'default' => 'Invalid Email', 
 				),
 			);
 			break;
@@ -714,11 +642,11 @@ class TrueFanForm
 					'default' => $this->mType, 
 					'section' => $this->mType,
 				),
-				'Message' => array(
+				'VideoMessage' => array(
 					'class' => 'HTMLSexyTextArea',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-message',
-					'label' => 'Message',
+					'label' => 'Video Message',
 					'rows' => 5,
 				),
 			);
@@ -762,7 +690,7 @@ class TrueFanForm
 				),
 				'EmailList' => array(
 					'class' => 'HTMLReturnableHiddenField',
-					'default' => $this->mType, 
+					'default' => '', 
 				),
 			);
 			break;
@@ -780,15 +708,6 @@ class TrueFanForm
 					'id' => 'ose-truefan-name',
 					'label' => 'Name',
 					'size' => 20,
-					'readonly' => true,
-				),
-				'Email' => array(
-					'class' => 'HTMLSexyTextField',
-					'section' => $this->mType,
-					'id' => 'ose-truefan-email',
-					'label' => 'Email',
-					'size' => 20,
-					'readonly' => true,
 				),
 				'VideoId' => array(
 					'class' => 'HTMLSexyTextField',
@@ -797,27 +716,12 @@ class TrueFanForm
 					'label' => 'Video Id',
 					'size' => 20,
 				),
-				'Message' => array(
+				'VideoMessage' => array(
 					'class' => 'HTMLSexyTextArea',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-message',
-					'label' => 'Message',
+					'label' => 'Video Message',
 					'rows' => 5,
-					'cols' => 70,
-				),
-				'SendEmails' => array(
-					'class' => 'HTMLSexyCheckField',
-					'section' => $this->mType,
-					'id' => 'ose-truefan-email-check',
-					'label' => 'Send Emails',
-				),
-				'EmailInput' => array(
-					'class' => 'HTMLTextArray',
-					'section' => $this->mType,
-					'id' => 'ose-truefan-email-input',
-					'label' => 'Email',
-					'size' => 70,
-
 				),
 				'DeleteProfile' => array(
 					'type' => 'submit',
@@ -826,6 +730,20 @@ class TrueFanForm
 					'default' => 'Delete Profile',
 				),
 			);
+			break;
+
+		// Basically this is here to prevent the edge case where someone messes with the form
+		// and changes the Page field to some nonesense--this prevents error messages from
+		// being coughed up and allows us to log such weird behavior.
+		default:	
+			$this->mDescriptor = array(
+				'Page' => array(
+					'type' => 'hidden',
+					'default' => $this->mType, 
+					'section' => $this->mType,
+				),
+			);
+			break;
 		}
 	}
 }

@@ -99,6 +99,33 @@ class TrueFansDb
 		}
 		return NULL;
 	}
+	
+	/**
+	* Updates a row of true_ran table with name
+	* @param Integer $id The row to update.
+	* @param String $name The message to add.
+	* @return Boolean Returns true on success and false on failure.
+	* No rows being updated counts as true TODO: think about this...in the sense of updating you should be able to update to same value...check on your own if it's the same why not...however updating a non profile...check on your own if it exists...
+	*/
+	public function updateName($id, $name)
+	{
+		$name = htmlspecialchars($name, ENT_QUOTES);
+
+		$stmt = $this->pdo->prepare('UPDATE true_fans SET name=:name WHERE id=:id');
+		try {
+			if($stmt->execute(array(':name' => $name, ':id' => $id))) {
+				// success
+				if($stmt->rowCount() == 0) {
+					$this->log('No rows were updated via change to message or email_invite_list.');
+					// considered making this return false; but I think it would be better to check on your own if updating same data or updating a non-existant profile
+				}
+				return true;
+			}
+		} catch (PDOException $e) {
+			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
+		}
+		return false; 
+	}
 
 	/**
 	* Updates a video_id
@@ -159,38 +186,11 @@ class TrueFansDb
 				return true;
 			}
 		} catch (PDOException $e) {
-			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
+			$this->log('Unable to add video message for '.$id.': ' .$e->getMessage());
 		}
 		return false; 
 	}
 	
-	/**
-	* FIXME: Temporary name. 
-	* @param Integer $id The row to update.
-	* @param String $message The message to add.
-	* @return Boolean Returns true on success and false on failure.
-	* No rows being updated counts as a failure.
-	*/
-	public function updateStuff($id, $video_message, $emailStr)
-	{
-		$video_message = htmlspecialchars($video_message, ENT_QUOTES);
-		$emailStr = htmlspecialchars($emailStr, ENT_QUOTES);
-
-		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message, email_invite_list=:emailStr WHERE id=:id');
-		try {
-			if($stmt->execute(array(':message' => $video_message, ':emailStr' => $emailStr, ':id' => $id))) {
-				// success
-				if($stmt->rowCount() == 0) {
-					$this->log('No rows were updated via change to message or email_invite_list.');
-					return false;
-				}
-				return true;
-			}
-		} catch (PDOException $e) {
-			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
-		}
-		return false; 
-	}
 
 	
 	/**

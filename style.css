@@ -164,11 +164,31 @@ ul.no-bullets li
 	font-weight: bold;
 }
 
+.status-message
+{
+	color: #00f;
+	font-size: 17px;
+	font-weight: bold;
+}
+
 /* TODO: remove, temp dev css */
+.dev-links h6
+{
+	margin: 25px 0 0 0;
+	padding: 0;
+}
+
+.dev-links span
+{
+	display: block;
+	margin: 0 auto;
+	color: blue;
+	text-align: center;
+}
 
 #special-links li
 {
-	margin: 20px 5px 0 0;
+	margin: 0 5px 0 0;
 }
 
 #special-links li:before
@@ -409,6 +429,22 @@ ul.form-steps
 	width: 75px;
 }
 
+.social-icons img
+{
+	border-radius: 9px;
+	box-shadow: 0 0 7px #444;
+}
+
+.social-icons img:hover
+{
+	box-shadow: 0 0 15px #f00;
+}
+
+.social-icons img:active
+{
+	box-shadow: 0 0 15px #ff0;
+}
+
 /* input modal for share form page/step */
 .modal-input-overlay
 {
@@ -436,6 +472,13 @@ ul.form-steps
 #mw-form-section-social-buttons
 {
 	margin: 10px 0;
+}
+
+#mw-form-section-social-buttons h4
+{
+	text-align: center;
+	padding: 0;
+	margin-top: -25px; /* !!temporary!! */
 }
 
 .email-input-cluster
@@ -471,6 +514,9 @@ ul.form-steps
 {
 	background-color: #aaa;
 }
+
+
+/**************************************************Experiment Land*********************************/
 /*** Rotating Gear ****/
 
 /* keyframes for animation;  simple 0 to 360 */

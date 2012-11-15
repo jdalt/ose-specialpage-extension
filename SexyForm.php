@@ -1,9 +1,9 @@
 <?php
 
-
 /**
  * This class is built purely to rewire the display code to break free of 
- * table based forms.
+ * table based forms. Very little is changed between this code and orginal
+ * HTMLForm.
  */
 
 class SexyForm extends HTMLForm
@@ -41,9 +41,6 @@ class SexyForm extends HTMLForm
 		//$tableHtml = Html::rawElement( 'table', $attribs,
 		//	Html::rawElement( 'tbody', array(), "\n$tableHtml\n" ) ) . "\n";
 
-		//!! probably want to wrap this shit in a div yo
-
-	 //	echo htmlspecialchars($tableHtml);
 
 		return $subsectionHtml . "\n" . $tableHtml;
 	}
@@ -90,6 +87,9 @@ class SexyForm extends HTMLForm
 
 }
 
+/* Each input class has to overridden so that it doesn't
+ * output <tr> tags.
+ */
 class HTMLSexyTextField extends HTMLTextField
 {
 	/**
@@ -283,6 +283,12 @@ class HTMLSexyTextArea extends HTMLTextAreaField
 	}
 }
 
+/* This override is done so that we can stuff new data
+ * in hidden fields and have it autoload correctly.
+ * All that's changed is that the actual name is reported
+ * back--this augments the fields name with 'wp' and
+ * allows the autoloader to pick it up.
+ */
 class HTMLReturnableHiddenField extends HTMLHiddenField
 {
 	public function getTableRow( $value ){
