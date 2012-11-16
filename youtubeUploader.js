@@ -4,6 +4,8 @@
 
 // !! The following is based on sample code from Google. !!
 
+// TODO: Handle processing error from google.
+
 var tag = document.createElement('script');
 tag.src = "//www.youtube.com/iframe_api";
 console.log(tag.src);
@@ -21,10 +23,18 @@ function onYouTubeIframeAPIReady() {
    	events: {
    		'onUploadSuccess': onUploadSuccess,
     		'onProcessingComplete': onProcessingComplete,
-			'onApiReady': onApiReady
+			'onApiReady': onApiReady,
+			'onStateChange': onStateChange
    	}
 	});
 }				
+
+function onStateChange(event) {
+	console.log(event.data.state);
+	if(event.data.state == YT.UploadWidgetState.ERROR) {
+		alert('Error Occurred');
+	}
+}
 
 function onUploadSuccess(event) {
 	$j('#status').html('Video ID ' + event.data.videoId + ' was uploaded and is currently being processed.');
@@ -47,6 +57,8 @@ function onProcessingComplete(event) {
 function onApiReady()
 {
 	widget.setVideoPrivacy('unlisted');
-	widget.setVideoTitle('UserName - True Fan Introduction');
+	// TODO: Consider - is jQuery guaranteed to be loaded at this time?
+	var name = $j('#ose-truefan-name').val();
+	widget.setVideoTitle(name + ' - Open Source Ecology True Fan Video');
 	widget.setVideoDescription('OSE True Fan Test');
 }

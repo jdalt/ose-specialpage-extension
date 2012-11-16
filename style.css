@@ -6,7 +6,7 @@
 {
 	font-family: ubuntu;
 	padding-top: 10px;
-	min-height: 650px;
+	min-height: 675px;
 }
 
 #bodyContent h1
@@ -42,6 +42,7 @@ iframe#yt-iframe
 	height: 480px;
 	border: none;
 	margin-bottom: 15px;
+	box-shadow: 0 0 5px #aaa;
 }
 
 /* View css */
@@ -53,8 +54,26 @@ iframe#yt-iframe
 
 #playlist-container
 {
-	width: 75%;
+	width: 100%;
 	margin: 0 auto;
+	box-shadow: 0 0 3px #aaa;
+}
+
+#playlist-container h3
+{
+	font-size: 24px;
+	background: url('/w/extensions/ShareOSE/images/video_bg.png') repeat-x scroll;
+	color: #fff;
+	padding: 10px 0;
+
+	
+}
+
+#playlist-container ul
+{
+	margin: 0;
+	padding-bottom: 10px;
+	text-align: center;
 }
 
 #quote-area
@@ -172,6 +191,10 @@ ul.no-bullets li
 }
 
 /* TODO: remove, temp dev css */
+.dev-links
+{	
+	display: none; /* TEMP !!! */
+}
 .dev-links h6
 {
 	margin: 25px 0 0 0;
@@ -267,9 +290,9 @@ ul.no-bullets li
 #directions-marker
 {
 	float: left;
-	margin-top: 3px;
-	margin-left: 5%;
-	width: 25px;
+	margin-top: 5px;
+	margin-left: 4%;
+	width: 35px;
 }
 
 #directions-box h2
@@ -371,7 +394,7 @@ ul.form-steps
 }
 
 /* General Form Itself */
-#bodyContent .mw-htmlform-submit
+#bodyContent .mw-htmlform-submit, #close-button-bottom, #bodyContent form #email-list-ok
 {
 	background-color: #060;
 	color: #fff;
@@ -389,14 +412,21 @@ ul.form-steps
 	box-shadow: 0 0 12px #a00;
 }
 
+#bodyContent form #mw-form-section-upload div
+{
+	text-align: center;
+	display: inline-block;
+}
+
 #bodyContent form
 {
 	text-align: center;
 }
 
-#bodyContent form div
+#bodyContent form #mw-form-section-upload .mw-label
 {
 	text-align: left;
+	display: block;
 }
 
 #bodyContent form label
@@ -406,7 +436,7 @@ ul.form-steps
 }
 
 
-#bodyContent form input, #bodyContent form textarea, .tf-button
+#bodyContent form input, #bodyContent form textarea 
 {
 	padding: 6px;
 	box-shadow: 0 0 4px #777 inset;
@@ -478,7 +508,16 @@ ul.form-steps
 {
 	text-align: center;
 	padding: 0;
-	margin-top: -25px; /* !!temporary!! */
+} 
+
+#bodyContent form div #email-list-modal 
+{
+	text-align: center;
+}
+
+#email-input-container .mw-label
+{
+	text-align: left;
 }
 
 .email-input-cluster
@@ -489,7 +528,7 @@ ul.form-steps
 
 #share-email-preview
 {
-	width: 30%;
+	width: 40%;
 	text-align: left;
 }
 
@@ -542,7 +581,7 @@ ul.form-steps
 .gear  
 { 
 	/* with animation properties */
-	background: url(gear.png) 0 0 no-repeat; 
+	background: url(images/gear.png) 0 0 no-repeat; 
 	height: 75px;
 	width: 75px;
 }

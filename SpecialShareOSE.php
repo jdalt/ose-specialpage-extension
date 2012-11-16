@@ -118,9 +118,7 @@ class SpecialShareOSE extends SpecialPage {
 		}
 
 		// TODO: Remove - development links
-		$replace = array();
-		$replace['BASE_URL'] = $this->getTitle()->getLocalUrl();
-		$this->loadTemplate('dev_links.html', NULL, $replace);
+		$this->loadTemplate('dev_links.html');
 	}
 
 	/**
@@ -137,12 +135,21 @@ class SpecialShareOSE extends SpecialPage {
 		
 		// Request specific HTML dependent upon the request
 		switch($request) {
+			//TODO: delete me!!!
+			case 'letter':
+				$this->loadTemplate('_temp_letter.html');
+				break;
+			
 			case 'welcome':
 				$this->loadTemplate('welcome.html');
 				break;
 			case 'view':
 				$profile = $this->mDb->getUser($this->mReqId);
-				$this->loadTemplate('view.html', $profile);
+				if($profile) {
+					$this->loadTemplate('view.html', $profile);
+				} else {
+					$this->loadTemplate('no_profile_exists.html');
+				}
 				break;
 			
 			case 'subscribe':
@@ -155,7 +162,11 @@ class SpecialShareOSE extends SpecialPage {
 					$this->handleViewPage('login');
 					return;
 				} else {
-					$this->loadTemplate('view.html', $this->mTfProfile);
+					if(!$this->mTfProfile){
+						$this->loadTemplate('no_profile_created.html');
+					} else {
+						$this->loadTemplate('view.html', $this->mTfProfile);
+					}
 				}
 				break;
 					
@@ -185,9 +196,8 @@ class SpecialShareOSE extends SpecialPage {
 			case 'login':
 				//TODO: redundancy--put in it's own case, put into the template
 				$replace = array();
-				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE'; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
 				$this->loadTemplate('login.html', NULL, $replace);
-
 				break;
 
 			case 'submit':
@@ -216,7 +226,7 @@ class SpecialShareOSE extends SpecialPage {
 							$template = 'upload_video.html';
 							$form = new TrueFanForm($this, 'upload');
 							$form->setFieldAttr('Name', 'default', $wgUser->getRealName());
-							$form->setFieldAttr('Name', 'help', 'Your name was added from your wiki profile. You may edit it.'); // TODO: style this or change html structure
+							//$form->setFieldAttr('Name', 'help', 'Your name was added from your wiki profile. You may edit it.'); // TODO: style this or change html structure
 							$form->setFieldAttr('Email', 'default', $wgUser->getEmail());					
 
 							break;
@@ -299,6 +309,7 @@ class SpecialShareOSE extends SpecialPage {
 		// These are default replacement tags for templates
 		$templateStr = array();
 		$templateStr['PATH'] = $wgScriptPath.'/extensions/ShareOSE/';
+		$templateStr['BASE_URL'] = $this->getTitle()->getLocalUrl();
 		$templateStr['ERROR_MESSAGE'] = $this->mErrorMessage;
 		$templateStr['STATUS_MESSAGE'] = $this->mStatusMessage;
 		$templateStr['USER_VIDEO_LINK'] = $this->getUserViewProfileLink();
