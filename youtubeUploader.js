@@ -18,8 +18,8 @@ console.log(firstScriptTag);
 var widget;
 var player;
 function onYouTubeIframeAPIReady() {
-  	widget = new YT.UploadWidget('widget', {
-   	width: 500,
+  	widget = new YT.UploadWidget('video-viewer', {
+   	width: parseInt($j('#video-viewer').css('width')),
    	events: {
    		'onUploadSuccess': onUploadSuccess,
     		'onProcessingComplete': onProcessingComplete,
@@ -42,16 +42,16 @@ function onUploadSuccess(event) {
 }
 
 function onProcessingComplete(event) {
+ 	widget.destroy();
 	$j('#ose-truefan-url').val(event.data.videoId);
-	player = new YT.Player('player', {
-		height: 390,
-    	width: 640,
+	player = new YT.Player('vieo-viewer', {
+		height: parseInt($j('#video-viewer').css('height')),
+    	width: parseInt($j('.#video-viewer').css('width')),
     	videoId: event.data.videoId,
     	events: {}
   });
 	$j('#status').html('Your video was uploaded successfully and has been added to this form.');
  	$j('.gear').removeClass('animate');
- 	widget.destroy();
 }
 
 function onApiReady()

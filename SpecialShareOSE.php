@@ -135,11 +135,6 @@ class SpecialShareOSE extends SpecialPage {
 		
 		// Request specific HTML dependent upon the request
 		switch($request) {
-			//TODO: delete me!!!
-			case 'letter':
-				$this->loadTemplate('_temp_letter.html');
-				break;
-			
 			case 'welcome':
 				$this->loadTemplate('welcome.html');
 				break;
@@ -190,12 +185,21 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 
 			case 'finish':
-				$this->loadTemplate('finish.html', $this->mTfProfile);
+				if($this->mTfProfile) {
+					$this->loadTemplate('finish.html', $this->mTfProfile);
+				} else {
+					// Error, profile deleted or never existed and sent to finish...
+					tfDebug('User without profile attempted to send a message.');
+					$this->loadTemplate('no_profile_created.html');
+				}
 				break;
 
 			case 'login':
 				//TODO: redundancy--put in it's own case, put into the template
 				$replace = array();
+				if(!$this->mReqGetPage) {
+					$this->mReqGetPage  = 'submit';
+				}
 				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
 				$this->loadTemplate('login.html', NULL, $replace);
 				break;
@@ -624,7 +628,6 @@ class TrueFanForm
 				'Page' => array(
 					'type' => 'hidden',
 					'default' => $this->mType, 
-					'section' => $this->mType,
 				),
 				'Name' => array(
 					'class' => 'HTMLSexyTextField',
@@ -651,7 +654,6 @@ class TrueFanForm
 				'Page' => array(
 					'type' => 'hidden',
 					'default' => $this->mType, 
-					'section' => $this->mType,
 				),
 				'VideoMessage' => array(
 					'class' => 'HTMLSexyTextArea',
@@ -668,7 +670,6 @@ class TrueFanForm
 				'Page' => array(
 					'type' => 'hidden',
 					'default' => $this->mType, 
-					'section' => $this->mType,
 				),
 				'FriendMessage' => array(
 					'class' => 'HTMLSexyTextArea',
@@ -711,18 +712,17 @@ class TrueFanForm
 				'Page' => array(
 					'type' => 'hidden',
 					'default' => $this->mType, 
-					'section' => $this->mType,
 				),
 				'Name' => array(
 					'class' => 'HTMLSexyTextField',
-					'section' => $this->mType,
+					'section' => 'upload',
 					'id' => 'ose-truefan-name',
 					'label' => 'Name',
 					'size' => 20,
 				),
 				'VideoId' => array(
 					'class' => 'HTMLSexyTextField',
-					'section' => $this->mType,
+					'section' => 'upload',
 					'id' => 'ose-truefan-url',
 					'label' => 'Video Id',
 					'size' => 20,

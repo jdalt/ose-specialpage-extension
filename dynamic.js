@@ -10,6 +10,12 @@ $j(document).ready(function() {
 		
 	$j('#ose-truefan-message').keyup(function(){$j('#quote-area p').html($j('#ose-truefan-message').val());});
 
+	
+	$j('#video-viewer').css('height',parseFloat($j('#video-viewer').css('width')) * 9/16);
+	$j(window).resize(function() {
+		$j('#video-viewer').css('height',parseFloat($j('#video-viewer').css('width')) * 9/16);
+	});
+
 	for (var source in autoReplaceArray) {
   		if (autoReplaceArray.hasOwnProperty(source)) {
 			var sourceHtml = $j(source).html();

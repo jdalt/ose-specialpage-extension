@@ -2,6 +2,11 @@
  * style.css - style for SpecialPageOSE extension
  */
 
+#globalWrapper
+{
+	min-width: 1024px;
+}
+
 #bodyContent
 {
 	font-family: ubuntu;
@@ -35,46 +40,18 @@ h4
 	font-size: 20px;
 }
 
-iframe#yt-iframe
+h6
 {
-	width: 100%;
-	min-width: 480px;
-	height: 480px;
-	border: none;
-	margin-bottom: 15px;
-	box-shadow: 0 0 5px #aaa;
+	text-align: center;
 }
 
-/* View css */
+/******************** Basic Page Structure *********************/
 #watch-area
 {
 	width: 14%;
 	float:left;
 }
 
-#playlist-container
-{
-	width: 100%;
-	margin: 0 auto;
-	box-shadow: 0 0 3px #aaa;
-}
-
-#playlist-container h3
-{
-	font-size: 24px;
-	background: url('/w/extensions/ShareOSE/images/video_bg.png') repeat-x scroll;
-	color: #fff;
-	padding: 10px 0;
-
-	
-}
-
-#playlist-container ul
-{
-	margin: 0;
-	padding-bottom: 10px;
-	text-align: center;
-}
 
 #quote-area
 {
@@ -82,6 +59,15 @@ iframe#yt-iframe
 	float: right;
 	padding: 2%;
 	padding-top: 0;
+}
+
+#quote-area p
+{
+	background: url('/w/extensions/ShareOSE/images/quote.png') no-repeat scroll 0 0 transparent;
+	font-size: 15px;
+	padding-left: 7px;
+	padding-top: 4px;
+	min-height: 50px;
 }
 
 #main-area
@@ -110,34 +96,19 @@ iframe#yt-iframe
 	color: blue;
 }
 
-/* End view.html Css */
-
-/* paypal button styles */
-.serious-button
+#video-viewer
 {
-    background-color: #fff;
-    border: 1px solid black;
-}
-
-.serious-button:hover
-{
-	box-shadow: 0 0 2px 1px #f00;
-}
-
-
-/* view all page */
-#submissions
-{
-	margin: 0 auto;
-}
-
-#submissions tbody tr:nth-child(odd) {
-   background-color: #ccc;
+	width: 100%;
+	min-width: 480px;
+	height: 480px;
+	border: none;
+	margin-bottom: 15px;
+	box-shadow: 0 0 5px #aaa;
 }
 
 
 
-/* utility css classes */
+/***************** Utility CSS Classes *******************/
 .inline-links
 {
 	margin: 0;
@@ -149,10 +120,6 @@ iframe#yt-iframe
 	display: inline-block;
 }
 
-h6
-{
-	text-align: center;
-}
 
 ul.no-bullets li
 {
@@ -190,42 +157,7 @@ ul.no-bullets li
 	font-weight: bold;
 }
 
-/* TODO: remove, temp dev css */
-.dev-links
-{	
-	display: none; /* TEMP !!! */
-}
-.dev-links h6
-{
-	margin: 25px 0 0 0;
-	padding: 0;
-}
-
-.dev-links span
-{
-	display: block;
-	margin: 0 auto;
-	color: blue;
-	text-align: center;
-}
-
-#special-links li
-{
-	margin: 0 5px 0 0;
-}
-
-#special-links li:before
-{
-	content: "\ \7C \ ";
-}
-
-#special-links li:first-child:before
-{
-	content: "";
-}
-
-
-/* modal window styles */
+/************* Modal Direction Window Styles *******************/
 #modal-overlay
 {
 	visibility: visible;
@@ -282,9 +214,11 @@ ul.no-bullets li
 	box-shadow: 0 0 4px #800 inset;
 }
 
-#close-button-bottom
+#directions 
 {
-
+	text-align: left;
+	margin-left: 9%;
+	margin-right: 25px;
 }
 
 #directions-marker
@@ -302,13 +236,6 @@ ul.no-bullets li
 	margin: 20px 0 5px 9%;
 }
 
-#directions 
-{
-	text-align: left;
-	margin-left: 9%;
-	margin-right: 25px;
-}
-
 #directions p
 {
 	font-size: 16px;
@@ -321,44 +248,28 @@ ul.no-bullets li
 }	
 
 
-/* General Form template css */
-/*modal and general form*/
-ul.form-steps
-{
-	margin-bottom: 10px;
-}
-
-.form-steps li
-{
-/*	width: 100px;*/
-}
-
-.form-steps li
-{
-	opacity: .4;
-}
-
-.form-steps li.active
-{
-	opacity: 1.0;
-}
-
-.form-steps li.back-line
-{
-	width: 50px;
-	background: url("/w/extensions/ShareOSE/images/sm_stripe.png") repeat-x;
-	height: 7px;
-	margin-bottom: -1px;
-	opacity: 1;
-}
-
-/* General Form Header */
-
+/************* General Steps Header Styles (most form templates) *******************/
 #steps-header
 {
 	margin-right: 10%;
 	margin-bottom: 10px;
 	text-align: center;
+}
+
+#steps-header .form-steps
+{
+	margin-bottom: 20px;
+}
+
+#steps-header img
+{
+	width: 60px;
+}
+
+#steps-header li
+{
+	position: relative;
+	opacity: .4;
 }
 
 #steps-header li a
@@ -378,55 +289,44 @@ ul.form-steps
 	color: #000;
 }
 
-#steps-header .form-steps
+#steps-header li.active
 {
-	margin-bottom: 0;
+	opacity: 1.0;
 }
 
-#steps-header .form-steps li
+#steps-header li.back-line
 {
-	position: relative;
+	width: 50px;
+	background: url("/w/extensions/ShareOSE/images/sm_stripe.png") repeat-x;
+	height: 7px;
+	margin-bottom: -1px;
+	opacity: 1;
 }
 
-#steps-header .form-steps img
-{
-	width: 60px;
-}
-
-/* General Form Itself */
-#bodyContent .mw-htmlform-submit, #close-button-bottom, #bodyContent form #email-list-ok
-{
-	background-color: #060;
-	color: #fff;
-	border: none;
-	border-radius: 15px;
-	font-size: 16px;
-	margin: 10px 0;
-	padding: 3px 23px;
-	text-align: center;
-	box-shadow: 0 0 7px #999;
-}
-
-#bodyContent .mw-htmlform-submit:hover
-{
-	box-shadow: 0 0 12px #a00;
-}
-
-#bodyContent form #mw-form-section-upload div
-{
-	text-align: center;
-	display: inline-block;
-}
-
+/************************ FORM Styles ***************************/
 #bodyContent form
 {
 	text-align: center;
 }
 
-#bodyContent form #mw-form-section-upload .mw-label
+#mw-form-section-upload
+{
+	display: inline-block;
+}
+
+#bodyContent .mw-htmlform-field-HTMLSexyTextField
+{
+	margin: 10px 0;
+}
+
+#bodyContent .mw-htmlform-field-HTMLSexyTextField .mw-input input
+{
+	width: 150px;
+}
+
+#bodyContent form .mw-label, .mw-htmlform-field-HTMLSexyTextArea
 {
 	text-align: left;
-	display: block;
 }
 
 #bodyContent form label
@@ -435,7 +335,7 @@ ul.form-steps
 	margin-left: -4px;
 }
 
-
+/*Untouchable*/
 #bodyContent form input, #bodyContent form textarea 
 {
 	padding: 6px;
@@ -443,17 +343,59 @@ ul.form-steps
 	border: 1px solid #000;
 }
 
-
-/* quote-area quote for some templates */
-#quote-area p
+#bodyContent .mw-htmlform-submit, #close-button-bottom, #bodyContent form #email-list-ok, #bodyContent #ose-truefan-delete-submit
 {
-	background: url('/w/extensions/ShareOSE/images/quote.png') no-repeat scroll 0 0 transparent;
-	font-size: 15px;
-	padding-left: 7px;
-	padding-top: 4px;
+	background-color: #060;
+	color: #fff;
+	border: none;
+	border-radius: 15px;
+	font-size: 16px;
+	text-align: center;
+	box-shadow: 0 0 7px #999;
+	display: block;
+	padding: 3px 23px;
+	margin: 10px auto;
 }
 
-/* just the share_with_friends page */
+#bodyContent .mw-htmlform-submit:hover
+{
+	box-shadow: 0 0 12px #a00;
+}
+
+#bodyContent #ose-truefan-delete-submit
+{ 
+	background-color: #a00;
+}
+
+/************** Style for Playlist (welcome and view templates) *************/
+#playlist-container
+{
+	width: 100%;
+	margin: 0 auto;
+	box-shadow: 0 0 3px #aaa;
+}
+
+#playlist-container h3
+{
+	font-size: 24px;
+	background: url('/w/extensions/ShareOSE/images/video_bg.png') repeat-x scroll;
+	color: #fff;
+	padding: 10px 0;
+
+	
+}
+
+#playlist-container ul
+{
+	margin: 0;
+	padding-bottom: 10px;
+	text-align: center;
+}
+
+
+
+/*** Style for share_with_friends Template Social Icons (which activate contact input interfaces) ***/
+/* TODO: Put this style directly into the template */
 .social-icons li
 {
 	width: 75px;
@@ -475,7 +417,7 @@ ul.form-steps
 	box-shadow: 0 0 15px #ff0;
 }
 
-/* input modal for share form page/step */
+/*** Style for share_with_friends Modal Input Interface ***/
 .modal-input-overlay
 {
 	visibility: visible;
@@ -555,8 +497,8 @@ ul.form-steps
 }
 
 
-/**************************************************Experiment Land*********************************/
-/*** Rotating Gear ****/
+/******* Style for upload Template - Creates Rotating Gear ********/
+/* TODO: Move this into the upload template directly */
 
 /* keyframes for animation;  simple 0 to 360 */
 @-webkit-keyframes spin 
@@ -607,3 +549,60 @@ ul.form-steps
 	-ms-animation-timing-function: linear;
 }
 
+/*** subscribe.html ***/
+/* TODO: Move into page itself */
+.serious-button
+{
+    background-color: #fff;
+    border: 1px solid black;
+}
+
+.serious-button:hover
+{
+	box-shadow: 0 0 2px 1px #f00;
+}
+
+/*** dev page -  viewall p ***/
+#submissions
+{
+	margin: 0 auto;
+}
+
+#submissions tbody tr:nth-child(odd) {
+   background-color: #ccc;
+}
+
+
+/*** temp dev global css ****/
+.dev-links
+{	
+	display: none; /* TEMP !!! */
+}
+.dev-links h6
+{
+	margin: 25px 0 0 0;
+	padding: 0;
+}
+
+.dev-links span
+{
+	display: block;
+	margin: 0 auto;
+	color: blue;
+	text-align: center;
+}
+
+#special-links li
+{
+	margin: 0 5px 0 0;
+}
+
+#special-links li:before
+{
+	content: "\ \7C \ ";
+}
+
+#special-links li:first-child:before
+{
+	content: "";
+}
