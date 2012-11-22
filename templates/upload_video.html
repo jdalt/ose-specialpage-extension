@@ -23,8 +23,12 @@
 </div>
 
 <div id="main-area">
-	<div id="video-viewer"></div>
-	<div id="status-container"><span>Status: </span><span id="status"></span></div>
+
+	<div id="video-overlay-container">
+		<div id="status"><div id="status-text"></div></div>
+		<div id="video-viewer"></div>
+	</div>
+
 
 	<div class="center50">
 		<p class="error-message">{{ERROR_MESSAGE}}</p>
@@ -65,3 +69,25 @@
 		<button id="close-button-bottom" class="tf-button" onclick="$j('#modal-overlay').css('visibility','hidden');">Create Your Video</button>
 	</div>
 </div>
+
+<script>
+	$j(document).ready(function() {
+		// Only display Name input when the user clicks the edit-tag
+		$j('#ose-truefan-name').parent().parent().css('display', 'none');
+		var name = $j('#ose-truefan-name').val();
+		$j('#mw-form-section-upload').prepend(
+			'<div id="show-ose-truefan-name">'+
+				'<div id="video-author-label">Display Name</div>'+
+				'<div><span id="video-author">'+name+'</span><span class="edit-tag" onclick="showEdit(\'ose-truefan-name\')">edit</span>'+
+			'</div></div>');
+
+		// Only display the Video Url input when the user clicks edit-tag
+		$j('#ose-truefan-url').parent().parent().css('display','none');
+		$j('#mw-form-section-upload').append('<div id="show-ose-truefan-url"><span class="edit-tag" onclick="showEdit(\'ose-truefan-url\')">Manually input video url.</span></div>');
+	});
+
+	function showEdit(element){
+		$j('#show-' + element).remove();
+		$j('#' + element).parent().parent().css('display', 'block');
+	}
+</script>

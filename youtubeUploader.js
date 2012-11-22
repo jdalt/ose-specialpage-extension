@@ -37,21 +37,29 @@ function onStateChange(event) {
 }
 
 function onUploadSuccess(event) {
-	$j('#status').html('Video ID ' + event.data.videoId + ' was uploaded and is currently being processed.');
  	$j('.gear').addClass('animate');
+	$j('#status').addClass('overlay');
+	$j('#status-text').html('Video ID ' + event.data.videoId + ' was uploaded and is currently being processed.');
 }
 
 function onProcessingComplete(event) {
- 	widget.destroy();
+	widget.destroy();
+
+	var h = parseInt($j('#video-viewer').css('height'));
+	var w = parseInt($j('#video-viewer').css('width'));
 	$j('#ose-truefan-url').val(event.data.videoId);
-	player = new YT.Player('vieo-viewer', {
-		height: parseInt($j('#video-viewer').css('height')),
-    	width: parseInt($j('.#video-viewer').css('width')),
+
+	console.log($j('#ose-truefan-url').val(event.data.videoId));
+	player = new YT.Player('video-viewer', {
+		height: h,
+    	width: w,
     	videoId: event.data.videoId,
     	events: {}
-  });
-	$j('#status').html('Your video was uploaded successfully and has been added to this form.');
+  	});
+	//$j('#status').html('Your video was uploaded successfully and has been added to this form.');
  	$j('.gear').removeClass('animate');
+	$j('#status').removeClass('overlay');
+	$j('#status-text').html('');
 }
 
 function onApiReady()

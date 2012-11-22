@@ -512,6 +512,8 @@ class TrueFanForm
 				// TODO: Consider - Save emailList in the database or not? Save the sent message or not?		
 
 				global $wgOut;
+					
+				$this->mPage->mFormStep = 'share';
 			
 				//TODO: Delete temporary $wgOut of email for debugging purposes.
 				if($formFields['EmailList']) {
@@ -522,6 +524,7 @@ class TrueFanForm
 					$link = $this->mPage->getUserViewProfileLink();
 					$replace['EMAIL_VIDEO_LINK'] = '<a href="'.$link.'">'.$link.'</a>';
 
+					// initialize error collector variable
 					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
 						list($name, $address) = explode(':',$friendAddress);
@@ -537,8 +540,7 @@ class TrueFanForm
 							$contentType = 'text/html';
 							$result = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);
 							if($result !== true) {
-								$errors .= $result.'\n';
-								return $result;
+								$errors .= $result->getMessage().'\n';
 							} 
 						}						
 						$friendAddress = str_replace('<','&lt',$friendAddress);
@@ -547,7 +549,8 @@ class TrueFanForm
 						$wgOut->addHtml($currentMessage.'<br /><br />');
 					} 
 					if($errors) {
-						return $errors;
+						tfDebug($errors);
+						return 'Unable to mail messages.';
 					}
 				}
 				return true;

@@ -150,11 +150,27 @@ ul.no-bullets li
 	font-weight: bold;
 }
 
-.status-message
+#status
 {
 	color: #00f;
 	font-size: 17px;
 	font-weight: bold;
+}
+
+.overlay
+{
+	background-color: #fff;
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.edit-tag
+{
+	color: #00a;
+	font-size:  100%;
+	padding-left: 5px;
+	cursor: pointer;
 }
 
 /************* Modal Direction Window Styles *******************/
@@ -572,6 +588,47 @@ ul.no-bullets li
    background-color: #ccc;
 }
 
+/*** upload_video.html ***/
+#video-author
+{
+	font-size: 21px;
+	font-weight: bold;
+}
+
+#video-author-label
+{
+	/* text-align: left; */
+}
+
+#show-ose-truefan-url
+{
+	font-size: 110%;
+	margin: 10px 0;
+}
+
+#video-overlay-container
+{
+	position: relative;
+	margin-bottom: 15px;
+	box-shadow: 0 0 5px #aaa;
+}
+
+#video-overlay-container #video-viewer
+{
+	box-shadow: none;
+	margin-bottom: 0;
+}
+
+#video-overlay-container iframe
+{
+	display: block;
+}
+
+#status-text
+{
+	top: 50%;
+	position: relative;
+}
 
 /*** temp dev global css ****/
 .dev-links
