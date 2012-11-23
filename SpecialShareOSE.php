@@ -243,6 +243,10 @@ class SpecialShareOSE extends SpecialPage {
 
 						case 'share':
 							// Precondition: User exists in db
+							global $wgScriptPath, $wgOut;
+							$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/facebook.js');
+							$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/lib/tdfriendselector.js');
+							$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/lib/tdfriendselector.css');
 							$template = 'share_with_friends.html';
 							$form = new TrueFanForm($this, 'share');
 							break;
