@@ -31,6 +31,16 @@ window.fbAsyncInit = function() {
 
 		$j("#selectFriends").click(function (e) {
 			console.log('Yo we should be popping a friend selector...')
+			FB.login(function(response) {
+				if (response.authResponse) {
+					console.log('Welcome!  Fetching your information.... ');
+			    	FB.api('/me', function(response) {
+						console.log('Good to see you, ' + response.name + '.');
+			    	 });
+			  	} else {
+					console.log('User cancelled login or did not fully authorize.');
+			  	}
+			});
 			e.preventDefault();
 			friendSelector.showFriendSelector();
 		});
@@ -98,6 +108,8 @@ function updateAuthElements() {
 	//Depending on if they have or haven't, we'll set the body to reflect that so we show/hide the correct elements on the page
 	else {
 		preFetchData();
+
+		// !!!! this needs to be deleted !!!
 
 		FB.api({method: 'fql.query', query: 'SELECT user_checkins, publish_checkins FROM permissions WHERE uid = ' + session.authResponse['userID']}, function(response) {
 		if (document.body.className != 'not_connected') {
