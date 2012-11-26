@@ -171,9 +171,9 @@ function postRobotMessage()
 
 function uninstallApp() {
 FB.api({method: 'auth.revokeAuthorization'},
-	console.log('Revoked authorization.');
 	function(response) {
-	window.location.reload();
+		console.log('Revoked authorization.');
+		window.location.reload();
 	});
 }
 
