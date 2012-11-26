@@ -287,6 +287,11 @@ ul.no-bullets li
 	opacity: .4;
 }
 
+#steps-header li.active
+{
+	opacity: 1;
+}
+
 #steps-header li a
 {
 	position: absolute;
@@ -409,6 +414,7 @@ ul.no-bullets li
 .social-icons li
 {
 	width: 75px;
+	cursor: pointer;
 }
 
 .social-icons img

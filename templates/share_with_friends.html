@@ -25,27 +25,25 @@
 </div>
 
 <div id="main-area">
-	<div class="center50">
-		<p class="error-message">{{ERROR_MESSAGE}}</p>
-		{{FORM}}
-		<div id="social-icons-holder">
-			<h4>Contact Method</h4>
-			<ul id="social-icons" class="inline-links social-icons">
-				<li id="facebook-button">
-					<span>facebook</span>
-					<img src="{{PATH}}images/facebook.png"/>
-				</li>
-				<li class="gray">
-					<span>twitter</span>
-					<img class="gray" src="{{PATH}}images/twitter.png"/>
-				</li>
-				<li id="email-button">
-					<span>email</span>
-					<img src="{{PATH}}images/email.png" onclick="$j('.modal-input-overlay').toggleClass('inactive');" />
+	<p class="error-message">{{ERROR_MESSAGE}}</p>
+	{{FORM}}
+	<div id="social-icons-holder">
+		<h4>Contact Method</h4>
+		<ul id="social-icons" class="inline-links social-icons">
+			<li id="facebook-button"><!-- onclick TDFriendSelector modal pop up -->
+				<span>facebook</span>
+				<img src="{{PATH}}images/facebook.png"/>
+			</li>
+			<li class="gray">
+				<span>twitter</span>
+				<img src="{{PATH}}images/twitter.png"/>
+			</li>
+			<li id="email-button" onclick="$j('.modal-input-overlay').toggleClass('inactive');">
+				<span>email</span>
+				<img src="{{PATH}}images/email.png" />
 
-				</li>
-			</ul>
-		</div>
+			</li>
+		</ul>
 	</div>
 
 	<div id="share-email-preview"></div>
