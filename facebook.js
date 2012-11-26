@@ -21,7 +21,7 @@ window.fbAsyncInit = function() {
 	$j(document).ready(function () {
 
 		/* Friend selector stuff */
-		TDFriendSelector.init({debug: false});
+		TDFriendSelector.init({debug: false, speed: 125});
 		friendSelector = TDFriendSelector.newInstance({
 			callbackSubmit: function(selectedFriendIds) {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
@@ -29,7 +29,7 @@ window.fbAsyncInit = function() {
 			}
 		});
 
-		$j("#selectFriends").click(function (e) {
+		$j("#facebook-button").click(function (e) {
 			console.log('Yo we should be popping a friend selector...')
 			FB.login(function(response) {
 				if (response.authResponse) {
