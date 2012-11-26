@@ -263,7 +263,6 @@ ul.no-bullets li
 	margin-top: 0;
 }	
 
-
 /************* General Steps Header Styles (most form templates) *******************/
 #steps-header
 {
@@ -303,11 +302,6 @@ ul.no-bullets li
 #steps-header li a:hover
 {
 	color: #000;
-}
-
-#steps-header li.active
-{
-	opacity: 1.0;
 }
 
 #steps-header li.back-line
