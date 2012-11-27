@@ -27,27 +27,6 @@
 <div id="main-area">
 	<p class="error-message">{{ERROR_MESSAGE}}</p>
 	{{FORM}}
-	<div id="social-icons-holder">
-		<h4>Contact Method</h4>
-		<ul id="social-icons" class="inline-links social-icons">
-			<li id="facebook-button"><!-- onclick TDFriendSelector modal pop up -->
-				<span>facebook</span>
-				<img src="{{PATH}}images/facebook.png"/>
-			</li>
-			<li class="gray">
-				<span>twitter</span>
-				<img src="{{PATH}}images/twitter.png"/>
-			</li>
-			<li id="email-button" onclick="$j('.modal-input-overlay').toggleClass('inactive');">
-				<span>email</span>
-				<img src="{{PATH}}images/email.png" />
-
-			</li>
-		</ul>
-	</div>
-
-	<div id="share-email-preview" class="contact-preview"></div>
-	<div id="share-facebook-preview" class="contact-preview"></div>
 
 </div>
 
@@ -83,6 +62,22 @@
 		</div>
 		<button id="close-button-bottom" class="tf-button" onclick="$j('#modal-overlay').css('visibility','hidden');">Share with Friends</button>
 	</div>
+</div>
+
+<!-- Auto Replace and Hidden Land - this HTML will be redirected via javascript -->
+
+<div class="auto-replace" id="contact-holder">
+	<div class="contact-tag">To:</div>
+	<div id="email-button" class="contact-tag social-icons" onclick="$j('.modal-input-overlay').toggleClass('inactive');"><!-- onclick TDFriendSelector modal pop up -->
+		<div class="button-hover-tag">email</div>
+		<img src="{{PATH}}images/email.png" alt="email"/>
+	</div>
+	<div id="share-email-preview" class="contact-preview"></div>
+	<div id="facebook-button" class="contact-tag social-icons"><!-- onclick TDFriendSelector modal pop up -->
+		<div class="button-hover-tag">facebook</div>
+		<img src="{{PATH}}images/facebook.png" alt="facebook"/>
+	</div>
+	<div id="share-facebook-preview" class="contact-preview"></div>
 </div>
 
 <div id="social-message" class="auto-replace" style="display: none">Hey {{FRIEND}},
@@ -126,7 +121,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 <script>
 	// These two json objects take content from first selector and put it in second; see dynamic.js
 	var autoReplaceArray = {
-		"#social-icons-holder":"#mw-form-section-social-buttons"
+		"#contact-holder":"#mw-form-section-contact-area"
 	}
 	var autoInputArray = {
 		"#social-message":"#ose-truefan-friends-message"
@@ -183,7 +178,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 			$j('input[name=wpEmailList]').val(addresses.join(','));
 		
 			if(addresses.length > 0) {
-				var html = '<h3>Email List</h3>\n<ul>\n';
+				var html = '<ul>\n';
 				for(var i=0; i<addresses.length; i++) {
 					addresses[i] = addresses[i].replace('<','&lt');
 					addresses[i] = addresses[i].replace('>','&gt');

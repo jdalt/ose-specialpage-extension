@@ -148,6 +148,7 @@ ul.no-bullets li
 	background-color: #c00;
 	font-size: 17px;
 	font-weight: bold;
+	margin: 0;
 }
 
 #status
@@ -273,7 +274,6 @@ ul.no-bullets li
 
 #steps-header .form-steps
 {
-	margin-bottom: 20px;
 }
 
 #steps-header img
@@ -411,15 +411,30 @@ ul.no-bullets li
 
 /*** Style for share_with_friends Template Social Icons (which activate contact input interfaces) ***/
 /* TODO: Put this style directly into the template */
-.social-icons li
+.social-icons
 {
-	width: 75px;
 	cursor: pointer;
+}
+
+.button-hover-tag
+{
+	visibility: hidden;
+	font-size: 9px;
+	text-align: center;
+	position: absolute;
+	top: -20px;
+	width: 35px;
+}
+
+.social-icons:hover .button-hover-tag
+{
+	visibility: visible;
 }
 
 .social-icons img
 {
-	border-radius: 9px;
+	width: 36px;
+	border-radius: 4px;
 	box-shadow: 0 0 7px #444;
 }
 
@@ -432,6 +447,71 @@ ul.no-bullets li
 {
 	box-shadow: 0 0 15px #ff0;
 }
+
+#mw-form-section-contact-area
+{
+	min-height: 50px;
+	overflow: hidden;
+	padding-top: 16px;
+}
+
+.contact-tag
+{
+	font-size: 16px;
+	float: left;
+	margin-right: 10px;
+	position: relative;
+}
+
+.contact-preview
+{
+	text-align: left;
+	margin: 0 1% 10px 0;
+	float: left;
+}
+
+.contact-preview h3
+{
+	text-align: left;
+}
+
+.contact-preview img
+{
+	height: 15px;
+	margin-right: 5px;
+}
+
+.contact-preview ul
+{
+	margin-left: 0;
+}
+
+.contact-preview li
+{
+	list-style: none;
+}
+
+.facebook-button li:hover img
+{
+	height: 30px;
+}
+
+.contact-preview li:hover
+{
+	font-weight: bold;
+}
+
+.contact-preview .preview-address
+{
+	display: inline-block;
+	margin-left: 5px;
+}
+
+.contact-preview .email-preview-item:odd
+{
+	background-color: #aaa;
+}
+
 
 /*** Style for share_with_friends Modal Input Interface ***/
 .modal-input-overlay
@@ -488,52 +568,6 @@ ul.no-bullets li
 {
 	opacity: .2;
 	text-decoration: line-through;
-}
-
-/* ?? share-with-friends template only ?? */
-.contact-preview
-{
-	width: 40%;
-	text-align: left;
-	margin-right: 3%;
-	float: left;
-}
-
-.contact-preview h3
-{
-	text-align: left;
-}
-
-.contact-preview img
-{
-	height: 15px;
-	margin-right: 5px;
-}
-
-.contact-preview ul
-{
-	margin-left: 0;
-}
-
-.contact-preview li
-{
-	list-style: none;
-}
-
-.contact-preview li:hover img
-{
-	height: 30px;
-}
-
-.contact-preview .preview-address
-{
-	display: inline-block;
-	margin-left: 5px;
-}
-
-.contact-preview .email-preview-item:odd
-{
-	background-color: #aaa;
 }
 
 /******* Style for upload Template - Creates Rotating Gear ********/

@@ -25,7 +25,7 @@ window.fbAsyncInit = function() {
 		friendSelector = TDFriendSelector.newInstance({
 			callbackSubmit: function(selectedFriendIds) {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
-				var html = '<h3>Facebook</h3>\n<ul>';
+				var html = '<ul>\n';
 				for(var i=0; i < selectedFriendIds.length; i++) {
 					console.log(selectedFriendIds[i]);
 					var friend = TDFriendSelector.getFriendById(selectedFriendIds[i]);

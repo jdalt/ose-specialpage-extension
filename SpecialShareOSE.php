@@ -678,6 +678,11 @@ class TrueFanForm
 					'type' => 'hidden',
 					'default' => $this->mType, 
 				),
+				'ContactDisplay' => array(
+					'type' => 'info',
+					'default' => '',
+					'section' => 'contact-area',
+				),
 				'FriendMessage' => array(
 					'class' => 'HTMLSexyTextArea',
 					'section' => $this->mType,
