@@ -21,11 +21,17 @@ window.fbAsyncInit = function() {
 	$j(document).ready(function () {
 
 		/* Friend selector stuff */
-		TDFriendSelector.init({debug: false, speed: 125});
+		TDFriendSelector.init({debug: true, speed: 25});
 		friendSelector = TDFriendSelector.newInstance({
 			callbackSubmit: function(selectedFriendIds) {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
-				$j('#RobotMessage').val(selectedFriendIds.join(", "));
+				var html = '';
+				for(id in selectedFriendIds) {
+					var friend = TDFriendSelector.getFriend(id);
+					console.log(TDFriendSelector.getFriend(id));
+					html += '<div><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></div>'; 
+				}
+				$j('#share-facebook-preview').val(html);
 			}
 		});
 
