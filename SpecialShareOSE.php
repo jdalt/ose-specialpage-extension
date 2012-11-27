@@ -703,11 +703,6 @@ class TrueFanForm
 					'id' => 'ose-truefan-email-check',
 					'label' => 'Send Emails',
 				),
-				'TemplateButtons' => array(
-					'type' => 'info',
-					'default' => '',
-					'section' => 'social-buttons',
-				),
 				'FacebookFriends' => array(
 					'type' => 'hidden',
 					'default' => $this->mType, 
