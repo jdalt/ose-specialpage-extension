@@ -27,8 +27,8 @@ window.fbAsyncInit = function() {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
 				var html = '';
 				for(id in selectedFriendIds) {
-					var friend = TDFriendSelector.getFriend(id);
-					console.log(TDFriendSelector.getFriend(id));
+					var friend = TDFriendSelector.getFriendById(id);
+					console.log(TDFriendSelector.getFriendById(id));
 					html += '<div><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></div>'; 
 				}
 				$j('#share-facebook-preview').val(html);
