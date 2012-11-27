@@ -484,34 +484,41 @@ ul.no-bullets li
 	margin-left: 5px;
 }
 
-#share-email-preview
-{
-	width: 40%;
-	text-align: left;
-}
-
-#share-email-preview h3
-{
-	text-align: left;
-}
-
-#share-email-preview .preview-address
-{
-	display: inline-block;
-	margin-left: 5px;
-}
-
 .gray
 {
 	opacity: .2;
 	text-decoration: line-through;
 }
 
-#share-email-preview .email-preview-item:odd
+/* ?? share-with-friends template only ?? */
+.contact-preview
+{
+	width: 40%;
+	text-align: left;
+	margin-right: 3%;
+}
+
+.contact-preview h3
+{
+	text-align: left;
+}
+
+.contact-preview img
+{
+	height: 15px;
+	margin-right: 5px;
+}
+
+.contact-preview .preview-address
+{
+	display: inline-block;
+	margin-left: 5px;
+}
+
+.contact-preview .email-preview-item:odd
 {
 	background-color: #aaa;
 }
-
 
 /******* Style for upload Template - Creates Rotating Gear ********/
 /* TODO: Move this into the upload template directly */
