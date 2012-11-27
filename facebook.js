@@ -32,7 +32,7 @@ window.fbAsyncInit = function() {
 					console.log(friend);
 					html += '<div><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></div>'; 
 				}
-				$j('#share-facebook-preview').val(html);
+				$j('#share-facebook-preview').html(html);
 			}
 		});
 
