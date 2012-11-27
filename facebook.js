@@ -25,13 +25,14 @@ window.fbAsyncInit = function() {
 		friendSelector = TDFriendSelector.newInstance({
 			callbackSubmit: function(selectedFriendIds) {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
-				var html = '<h3>Facebook</h3>\n';
+				var html = '<h3>Facebook</h3>\n<ul>';
 				for(var i=0; i < selectedFriendIds.length; i++) {
 					console.log(selectedFriendIds[i]);
 					var friend = TDFriendSelector.getFriendById(selectedFriendIds[i]);
 					console.log(friend);
-					html += '<div><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></div>\n'; 
+					html += '<li><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></li>\n'; 
 				}
+				html += '</ul>\n';
 				$j('#share-facebook-preview').html(html);
 			}
 		});

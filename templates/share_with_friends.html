@@ -183,13 +183,15 @@ Checkout the video I made for you and the links below as I think you'd be intere
 			$j('input[name=wpEmailList]').val(addresses.join(','));
 		
 			if(addresses.length > 0) {
-				$j('#share-email-preview').append('<h3>Email List</h3>');
+				
+				var html = '<h3>Email List</h3>\n<ul>\n';
 				for(var i=0; i<addresses.length; i++) {
 					addresses[i] = addresses[i].replace('<','&lt');
 					addresses[i] = addresses[i].replace('>','&gt');
 					addresses[i] = addresses[i].replace(':',' ');
-					$j('#share-email-preview').append('<div class="email-preview-item"><img src="/w/extensions/ShareOSE/images/email_sm.png" /><div class="preview-address">'+addresses[i]+'</div></div>');
+					html += '<li class="email-preview-item"><img src="/w/extensions/ShareOSE/images/email_sm.png" /><span class="preview-address">'+addresses[i]+'</span></span>');
 				}
+				$j('#share-email-preview').append(hmtl);
 			}
 		}
 		

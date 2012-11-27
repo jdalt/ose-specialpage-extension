@@ -510,7 +510,7 @@ ul.no-bullets li
 	margin-right: 5px;
 }
 
-.contact-preview img:hover
+.contact-preview li:hover img
 {
 	height: 30px;
 }
