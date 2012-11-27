@@ -510,6 +510,16 @@ ul.no-bullets li
 	margin-right: 5px;
 }
 
+.contact-preview ul
+{
+	margin-left: 0;
+}
+
+.contact-preview li
+{
+	list-style: none;
+}
+
 .contact-preview li:hover img
 {
 	height: 30px;
