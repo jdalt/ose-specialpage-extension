@@ -496,6 +496,7 @@ ul.no-bullets li
 	width: 40%;
 	text-align: left;
 	margin-right: 3%;
+	float: left;
 }
 
 .contact-preview h3
@@ -507,6 +508,11 @@ ul.no-bullets li
 {
 	height: 15px;
 	margin-right: 5px;
+}
+
+.contact-preview img:hover
+{
+	height: 30px;
 }
 
 .contact-preview .preview-address

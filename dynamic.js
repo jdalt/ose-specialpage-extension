@@ -14,10 +14,8 @@ $j(document).ready(function() {
 		});
 		return true;
 	});
-			
 		
 	$j('#ose-truefan-message').keyup(function(){$j('#quote-area p').html($j('#ose-truefan-message').val());});
-
 	
 	$j('#video-viewer').css('height',parseFloat($j('#video-viewer').css('width')) * 9/16);
 	$j(window).resize(function() {
