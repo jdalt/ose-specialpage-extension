@@ -38,6 +38,7 @@ window.fbAsyncInit = function() {
 		});
 
 		$j("#facebook-button").click(function (e) {
+			$j('#friend-selector-holder').css('display', 'block');
 			console.log('Yo we should be popping a friend selector...')
 			FB.login(function(response) {
 				if (response.authResponse) {
