@@ -34,6 +34,7 @@ window.fbAsyncInit = function() {
 				}
 				html += '</ul>\n';
 				$j('#share-facebook-preview').html(html);
+				$j('#friend-selector-holder').css('display', 'none');
 			}
 		});
 

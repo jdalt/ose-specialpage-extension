@@ -188,7 +188,7 @@ ul.no-bullets li
 	z-index: 1000;
 }
 
-#modal-directions
+#modal-directions, .modal-interior
 {
 	width: 65%;
 	padding: 10px;
