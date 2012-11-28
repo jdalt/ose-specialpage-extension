@@ -16,6 +16,7 @@ window.fbAsyncInit = function() {
 		oauth: true
 	});
 
+	// ? is this necessary ?
 	authUser();
 
 	$j(document).ready(function () {
@@ -56,6 +57,11 @@ window.fbAsyncInit = function() {
 				friendSelector.showFriendSelector();
 			});
 			e.preventDefault();
+		});
+		$j('#trueFanForm').submit(function(e) {
+			e.preventDefault();
+			postFacebookFeed(friendSelector.getFriends());
+			return false;
 		});
 	});
 };
@@ -108,48 +114,14 @@ function authUser() {
 	});
 }
 
-//Detect when Facebook tells us that the user's session has been returned
-function updateAuthElements() {
-	FB.Event.subscribe('auth.statusChange', function(session) {
-	//If the user isn't logged in, set the body class so that we show/hide the correct elements
-	if (session == undefined || session.status == 'not_authorized') {
-		if (document.body.className != 'not_connected') {
-			document.body.className = 'not_permissioned';
-		}
-	}
-	//The user is logged in, so let's see if they've granted the check-in permission and pre-fetch some data
-	//Depending on if they have or haven't, we'll set the body to reflect that so we show/hide the correct elements on the page
-	else {
-		preFetchData();
-
-		// !!!! this needs to be deleted !!!
-
-		FB.api({method: 'fql.query', query: 'SELECT user_checkins, publish_checkins FROM permissions WHERE uid = ' + session.authResponse['userID']}, function(response) {
-		if (document.body.className != 'not_connected') {
-			//We couldn't get a check-in for the user, so they haven't granted the permission
-			if (response[0].user_checkins == 1) {
-			document.body.className = 'permissioned';
-			}
-			//We were able to get a check-in for the user, so they have granted the permission already
-			else {
-				document.body.className = 'not_permissioned';
-			}
-		}
-		});
-	}
-});
-}
-
-
-function postRobotMessage()
+function postFacebookFeed(friendArray)
 {
 	FB.login(function(response) {
 		console.log(response);
 		if (response.authResponse) {
 			console.log('got publish stream permissions');
 
-			var friendArray = $j('#RobotMessage').val().split(", ");
-			var messageText = $j('#message-text').val();
+			var messageText = $j('#ose-truefan-friends-message').val();
 
 			for(var i=0; i<friendArray.length; i++) {
 				postFriend = TDFriendSelector.getFriendById(friendArray[i]);
@@ -176,6 +148,7 @@ function postRobotMessage()
 				});
 			}
 
+/*
 			// Now publish an action the user who made the video's wall/timeline
 			FB.api('/me/osetruefantest:join', 'post',
 			{ cause: 'http://www.wordpages.org/facebook/fb_obj.html' },
@@ -186,12 +159,14 @@ function postRobotMessage()
 					} else {
 						alert('Join Cause action was successful! Action ID: ' + response.id);
 					}
-				});
-			} else {
-				console.log('User cancelled login or did not fully authorize.');
-				alert('stop you are not authorized');
-			}
+			});*/
+		} else {
+			console.log('User cancelled login or did not fully authorize.');
+			alert('stop you are not authorized');
+		}
+		$j('#trueFanForm').submit();
 	}, {scope: 'publish_stream'});
+	//$j('#trueFanForm').submit();
 }
 
 function uninstallApp() {
