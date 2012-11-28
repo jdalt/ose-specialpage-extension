@@ -39,7 +39,7 @@ window.fbAsyncInit = function() {
 		});
 
 		$j('#CancelFriendSelect').click(friendSelector.hideFriendSelector);
-		$j('#TDFriendSelector_buttonClose').click(function(){console.log('clicked close button for friendselector');friendSelector.hideFriendSelector()});
+		$j('#TDFriendSelector_buttonClose').click(function(){console.log('clicked close button for friendselector'); $j('#friend-selector-holder').css('display','none');});
 
 		$j("#facebook-button").click(function (e) {
 			$j('#friend-selector-holder').css('display', 'block');
