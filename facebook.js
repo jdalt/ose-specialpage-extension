@@ -63,9 +63,10 @@ window.fbAsyncInit = function() {
 			console.log('Attempting to submit.');
 			console.log(e);
 			if(facebookSubmit == 0) {
-				console.log('Posting to feed. Hold on to your butts.');
+				console.log('No previous submission attempts');
 				//!! Error --- TDFriendSelector is null no submit !!
 				if(TDFriendSelector.getFriends()) {
+					console.log('Posting to feed. Hold on to your butts.');
 					postFacebookFeed(TDFriendSelector.getFriends());
 					console.log('postFacebookFeed function returned; submit return false.');
 					return false;
