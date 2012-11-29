@@ -168,7 +168,7 @@ function postFacebookFeed(friendArray)
 					}
 					console.log('Attempting to submit form.');
 					facebookSubmit++;
-					$j('#trueFanForm').submit(); // form will actually submit after confirming tabulation of all responses.
+					$j('.mw-htmlform-submit').click(); // form will actually submit after confirming tabulation of all responses.
 				});
 			}
 
