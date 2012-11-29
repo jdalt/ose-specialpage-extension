@@ -8,13 +8,14 @@ var autoReplaceArray, autoInputArray;
 $j(document).ready(function() {
 	console.log('$j says document ready');
 
+/*
 	$j('form').submit(function() {
 		$(this).submit(function() {
 			return false;
 		});
 		return true;
 	});
-		
+*/		
 	$j('#ose-truefan-message').keyup(function(){$j('#quote-area p').html($j('#ose-truefan-message').val());});
 	
 	$j('#video-viewer').css('height',parseFloat($j('#video-viewer').css('width')) * 9/16);
