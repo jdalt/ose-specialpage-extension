@@ -60,6 +60,7 @@ window.fbAsyncInit = function() {
 		});
 		$j('#trueFanForm').submit(function(e) {
 			e.preventDefault();
+			console.log('Posting to feed. Hold on to your butts.');
 			console.log(TDFriendSelector);
 			postFacebookFeed(TDFriendSelector.getFriends());
 			return false;
@@ -125,7 +126,7 @@ function postFacebookFeed(friendArray)
 			var messageText = $j('#ose-truefan-friends-message').val();
 
 			for(var i=0; i<friendArray.length; i++) {
-				postFriend = TDFriendSelector.getFriendById(friendArray[i]);
+				postFriend = friendArray[i];
 				console.log(postFriend);
 
 				var postData =
