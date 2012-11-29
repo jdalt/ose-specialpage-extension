@@ -147,6 +147,8 @@ function postFacebookFeed(friendArray)
 					} else {
 						alert('Post ID: ' + response.id);
 					}
+					console.log('Attempting to submit form.');
+					$j('#trueFanForm').submit();
 				});
 			}
 
@@ -166,9 +168,7 @@ function postFacebookFeed(friendArray)
 			console.log('User cancelled login or did not fully authorize.');
 			alert('stop you are not authorized');
 		}
-		$j('#trueFanForm').submit();
 	}, {scope: 'publish_stream'});
-	//$j('#trueFanForm').submit();
 }
 
 function uninstallApp() {
