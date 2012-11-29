@@ -55,7 +55,7 @@ window.fbAsyncInit = function() {
 					console.log('User cancelled login or did not fully authorize.');
 			  	}
 				friendSelector.showFriendSelector();
-			}), {scope: 'publish_stream'});
+			}, {scope: 'publish_stream'});
 			e.preventDefault(); // ??
 		});
 		$j('#trueFanForm').submit(function() {
