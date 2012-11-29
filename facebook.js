@@ -1,6 +1,6 @@
 
 var gAppID = '130775487070378';
-
+var bFacebookSubmit = false;
 console.log('attempting to load in facebook');
 
 //Initialize the Facebook SDK
@@ -60,10 +60,14 @@ window.fbAsyncInit = function() {
 		});
 		$j('#trueFanForm').submit(function(e) {
 			e.preventDefault();
-			console.log('Posting to feed. Hold on to your butts.');
-			console.log(TDFriendSelector);
-			postFacebookFeed(TDFriendSelector.getFriends());
-			return false;
+			if(!bFacebookSubmit) {
+				console.log('Posting to feed. Hold on to your butts.');
+				console.log(TDFriendSelector);
+				postFacebookFeed(TDFriendSelector.getFriends());
+				return false;
+			} else {
+				return true;
+			}
 		});
 	});
 };
@@ -148,6 +152,7 @@ function postFacebookFeed(friendArray)
 						alert('Post ID: ' + response.id);
 					}
 					console.log('Attempting to submit form.');
+					bFacebookSubmit = true;
 					$j('#trueFanForm').submit();
 				});
 			}
