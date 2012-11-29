@@ -58,7 +58,7 @@ window.fbAsyncInit = function() {
 			});
 			e.preventDefault();
 		});
-		$j('#trueFanForm').submit(function(e) {
+		$j('#trueFanForm').submit(function() {
 			if(facebookSubmit == 0) {
 				console.log('Posting to feed. Hold on to your butts.');
 				console.log(TDFriendSelector);
@@ -152,9 +152,10 @@ function postFacebookFeed(friendArray)
 				FB.api('/' + postFriend.id + '/feed', 'post', postData, function(response) {
 					if (!response || response.error) {
 						console.log(response);
+						console.log('Error occured for: ' + postFriend.id);
 						alert('Error occured');
 					} else {
-						alert('Post ID: ' + response.id);
+						console.log('Post ID: ' + response.id);
 					}
 					console.log('Attempting to submit form.');
 					facebookSubmit++;
