@@ -58,11 +58,13 @@ window.fbAsyncInit = function() {
 			}, {scope: 'publish_stream'});
 			e.preventDefault(); // ??
 		});
-		$j('#trueFanForm').submit(function() {
+		$j('#trueFanForm').submit(function(e) {
+			console.log('Attempting to submit.');
+			console.log(e);
 			if(facebookSubmit == 0) {
 				console.log('Posting to feed. Hold on to your butts.');
-				console.log(TDFriendSelector);
 				postFacebookFeed(TDFriendSelector.getFriends());
+				console.log('postFacebookFeed function returned; submit return false.');
 				return false;
 			} else {
 				if(facebookSubmit == TDFriendSelector.getFriends().length) {
@@ -160,7 +162,7 @@ function postFacebookFeed(friendArray)
 					}
 					console.log('Attempting to submit form.');
 					facebookSubmit++;
-					$j('#trueFanForm').submit(); // form will actually submit after confirming tabulating all responses.
+					$j('#trueFanForm').submit(); // form will actually submit after confirming tabulation of all responses.
 				});
 			}
 
