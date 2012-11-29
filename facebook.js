@@ -59,7 +59,8 @@ window.fbAsyncInit = function() {
 			e.preventDefault();
 		});
 		$j('#trueFanForm').submit(function() {
-			if(facebookSubmit == 0) {
+			return true;
+			/*if(facebookSubmit == 0) {
 				console.log('Posting to feed. Hold on to your butts.');
 				console.log(TDFriendSelector);
 				postFacebookFeed(TDFriendSelector.getFriends());
@@ -72,7 +73,7 @@ window.fbAsyncInit = function() {
 					console.log(facebookSubmit);
 					return false;
 				}
-			}
+			}*/
 		});
 	});
 };
