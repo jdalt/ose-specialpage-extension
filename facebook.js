@@ -11,7 +11,7 @@ window.fbAsyncInit = function() {
 		status: true,
 		cookie: true,
 		xfbml: false,
-		frictionlessRequests: false,
+		frictionlessRequests: true,
 		useCachedDialogs: true,
 		oauth: true
 	});
@@ -55,12 +55,11 @@ window.fbAsyncInit = function() {
 					console.log('User cancelled login or did not fully authorize.');
 			  	}
 				friendSelector.showFriendSelector();
-			});
-			e.preventDefault();
+			}), {scope: 'publish_stream'});
+			e.preventDefault(); // ??
 		});
 		$j('#trueFanForm').submit(function() {
-			return true;
-			/*if(facebookSubmit == 0) {
+			if(facebookSubmit == 0) {
 				console.log('Posting to feed. Hold on to your butts.');
 				console.log(TDFriendSelector);
 				postFacebookFeed(TDFriendSelector.getFriends());
@@ -69,11 +68,12 @@ window.fbAsyncInit = function() {
 				if(facebookSubmit == TDFriendSelector.getFriends().length) {
 					console.log('Submit true');
 					return true;
+					console.log('this should not post!');
 				} else {
 					console.log(facebookSubmit);
 					return false;
 				}
-			}*/
+			}
 		});
 	});
 };
