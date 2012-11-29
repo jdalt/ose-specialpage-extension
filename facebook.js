@@ -60,7 +60,8 @@ window.fbAsyncInit = function() {
 		});
 		$j('#trueFanForm').submit(function(e) {
 			e.preventDefault();
-			postFacebookFeed(friendSelector.getFriends());
+			console.log(TDFriendSelector);
+			postFacebookFeed(TDFriendSelector.getFriends());
 			return false;
 		});
 	});
