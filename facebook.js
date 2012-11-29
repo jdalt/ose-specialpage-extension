@@ -59,13 +59,19 @@ window.fbAsyncInit = function() {
 			e.preventDefault(); // ??
 		});
 		$j('#trueFanForm').submit(function(e) {
+			console.log(facebookSubmit);
 			console.log('Attempting to submit.');
 			console.log(e);
 			if(facebookSubmit == 0) {
 				console.log('Posting to feed. Hold on to your butts.');
-				postFacebookFeed(TDFriendSelector.getFriends());
-				console.log('postFacebookFeed function returned; submit return false.');
-				return false;
+				//!! Error --- TDFriendSelector is null no submit !!
+				if(TDFriendSelector.getFriends()) {
+					postFacebookFeed(TDFriendSelector.getFriends());
+					console.log('postFacebookFeed function returned; submit return false.');
+					return false;
+				} else { 
+					return true;
+				}
 			} else {
 				if(facebookSubmit == TDFriendSelector.getFriends().length) {
 					console.log('Submit true');
