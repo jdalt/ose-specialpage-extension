@@ -145,7 +145,7 @@ function postFacebookFeed(friendIdArray)
 
 			var messageText = $j('#ose-truefan-friends-message').val();
 
-			for(var i=0; i<friendArray.length; i++) {
+			for(var i=0; i<friendIdArray.length; i++) {
 				postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
 				console.log(postFriend);
 
