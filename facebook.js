@@ -64,8 +64,9 @@ window.fbAsyncInit = function() {
 			console.log(e);
 			if(facebookSubmit == 0) {
 				console.log('No previous submission attempts');
+				console.log(friendSelector.getselectedFriendIds());
 				//!! Error --- TDFriendSelector is null no submit !!
-				if(TDFriendSelector.getFriends()) {
+				if(friendSelector.getselectedFriendIds()) {
 					console.log('Posting to feed. Hold on to your butts.');
 					postFacebookFeed(TDFriendSelector.getFriends());
 					console.log('postFacebookFeed function returned; submit return false.');
@@ -155,7 +156,7 @@ function postFacebookFeed(friendArray)
 					name: 'Open Source Ecology True Fans',
 					caption: 'Build yourself.',
 					description: 'Moar machines...!!',
-					link: 'http://wwwtest.collaborative-revolution.com/wiki/',
+					link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
 					picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
 				};
 
@@ -166,10 +167,10 @@ function postFacebookFeed(friendArray)
 						alert('Error occured');
 					} else {
 						console.log('Post ID: ' + response.id);
+						console.log('Attempting to submit form.');
+						facebookSubmit++;
+						$j('.mw-htmlform-submit').click(); // form will actually submit after confirming tabulation of all responses.
 					}
-					console.log('Attempting to submit form.');
-					facebookSubmit++;
-					$j('.mw-htmlform-submit').click(); // form will actually submit after confirming tabulation of all responses.
 				});
 			}
 
