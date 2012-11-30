@@ -68,14 +68,14 @@ window.fbAsyncInit = function() {
 				//!! Error --- TDFriendSelector is null no submit !!
 				if(friendSelector.getselectedFriendIds()) {
 					console.log('Posting to feed. Hold on to your butts.');
-					postFacebookFeed(TDFriendSelector.getFriends());
+					postFacebookFeed(friendSelector.getselectedFriendIds());
 					console.log('postFacebookFeed function returned; submit return false.');
 					return false;
 				} else { 
 					return true;
 				}
 			} else {
-				if(facebookSubmit == TDFriendSelector.getFriends().length) {
+				if(facebookSubmit == friendSelector.getselectedFriendIds().length) {
 					console.log('Submit true');
 					return true;
 					console.log('this should not post!');
