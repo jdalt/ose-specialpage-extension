@@ -98,6 +98,80 @@ window.fbAsyncInit = function() {
 	ref.parentNode.insertBefore(js, ref);
 }(document));
 
+function postFacebookFeed(friendIdArray)
+{
+	FB.login(function(response) {
+		console.log(response);
+		if (response.authResponse) {
+			console.log('got publish stream permissions');
+
+			var messageText = $j('#ose-truefan-friends-message').val();
+
+			for(var i=0; i<friendIdArray.length; i++) {
+				postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
+				console.log(postFriend);
+
+				var postData =
+				{
+					to: postFriend.id,
+					message: messageText,
+					name: 'Open Source Ecology True Fans',
+					caption: 'Build yourself.',
+					description: 'Moar machines...!!',
+					link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
+					picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
+				};
+
+				FB.api('/' + postFriend.id + '/feed', 'post', postData, function(response) {
+					if (!response || response.error) {
+						console.log(response);
+						console.log('Error occured for: ' + postFriend.id);
+						alert('Error occured');
+					} else {
+						console.log('Post ID: ' + response.id);
+						console.log('Attempting to submit form.');
+						facebookSubmit++;
+						if(facebookSubmit == friendIdArray.length) {
+							console.log('Submitting form by firing click.');
+							$j('.mw-htmlform-submit').click(); 
+						}
+					}
+				});
+			}
+
+/*
+			// Now publish an action the user who made the video's wall/timeline
+			FB.api('/me/osetruefantest:join', 'post',
+			{ cause: 'http://www.wordpages.org/facebook/fb_obj.html' },
+				function(response) {
+					if (!response || response.error) {
+						console.log(response);
+						alert('Error occured. Unable to publish action on your timeline.'+response.error);
+					} else {
+						alert('Join Cause action was successful! Action ID: ' + response.id);
+					}
+			});*/
+		} else {
+			console.log('User cancelled login or did not fully authorize.');
+			alert('stop you are not authorized');
+		}
+	}, {scope: 'publish_stream'});
+}
+
+function uninstallApp() {
+FB.api({method: 'auth.revokeAuthorization'},
+	function(response) {
+		console.log('Revoked authorization.');
+		window.location.reload();
+	});
+}
+
+function logout() {
+	FB.logout(function(response) {
+		window.location.reload();
+	});
+}
+
 var user = [];
 //Detect when Facebook tells us that the user's session has been returned
 function authUser() {
@@ -134,76 +208,5 @@ function authUser() {
 	else if (session && session.status == 'not_authorized') {
 		document.body.className = 'not_connected';
 	}
-	});
-}
-
-function postFacebookFeed(friendIdArray)
-{
-	FB.login(function(response) {
-		console.log(response);
-		if (response.authResponse) {
-			console.log('got publish stream permissions');
-
-			var messageText = $j('#ose-truefan-friends-message').val();
-
-			for(var i=0; i<friendIdArray.length; i++) {
-				postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
-				console.log(postFriend);
-
-				var postData =
-				{
-					to: postFriend.id,
-					message: messageText,
-					name: 'Open Source Ecology True Fans',
-					caption: 'Build yourself.',
-					description: 'Moar machines...!!',
-					link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
-					picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
-				};
-
-				FB.api('/' + postFriend.id + '/feed', 'post', postData, function(response) {
-					if (!response || response.error) {
-						console.log(response);
-						console.log('Error occured for: ' + postFriend.id);
-						alert('Error occured');
-					} else {
-						console.log('Post ID: ' + response.id);
-						console.log('Attempting to submit form.');
-						facebookSubmit++;
-						//$j('.mw-htmlform-submit').click(); // form will actually submit after confirming tabulation of all responses.
-					}
-				});
-			}
-
-/*
-			// Now publish an action the user who made the video's wall/timeline
-			FB.api('/me/osetruefantest:join', 'post',
-			{ cause: 'http://www.wordpages.org/facebook/fb_obj.html' },
-				function(response) {
-					if (!response || response.error) {
-						console.log(response);
-						alert('Error occured. Unable to publish action on your timeline.'+response.error);
-					} else {
-						alert('Join Cause action was successful! Action ID: ' + response.id);
-					}
-			});*/
-		} else {
-			console.log('User cancelled login or did not fully authorize.');
-			alert('stop you are not authorized');
-		}
-	}, {scope: 'publish_stream'});
-}
-
-function uninstallApp() {
-FB.api({method: 'auth.revokeAuthorization'},
-	function(response) {
-		console.log('Revoked authorization.');
-		window.location.reload();
-	});
-}
-
-function logout() {
-	FB.logout(function(response) {
-		window.location.reload();
 	});
 }
