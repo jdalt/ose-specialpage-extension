@@ -72,18 +72,19 @@ window.fbAsyncInit = function() {
 					console.log('postFacebookFeed function returned; submit return false.');
 					return false;
 				} else { 
-					return true;
+					//return true;
 				}
 			} else {
 				if(facebookSubmit == friendSelector.getselectedFriendIds().length) {
 					console.log('Submit true');
-					return true;
+					//return true;
 					console.log('this should not post!');
 				} else {
 					console.log(facebookSubmit);
 					return false;
 				}
 			}
+			return false; // temp
 		});
 	});
 };
