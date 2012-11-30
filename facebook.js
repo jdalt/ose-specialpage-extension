@@ -1,7 +1,17 @@
 
 var gAppID = '130775487070378';
 var facebookSubmit = 0;
+var FB_AUTH_STATUS = 'undefined';
 console.log('attempting to load in facebook');
+
+// Load the SDK Asynchronously
+(function(d){
+	var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+	if (d.getElementById(id)) {return;}
+	js = d.createElement('script'); js.id = id; js.async = true;
+	js.src = "//connect.facebook.net/en_US/all.js";
+	ref.parentNode.insertBefore(js, ref);
+}(document));
 
 //Initialize the Facebook SDK
 window.fbAsyncInit = function() {
@@ -16,8 +26,26 @@ window.fbAsyncInit = function() {
 		oauth: true
 	});
 
-	// ? is this necessary ?
-	//authUser();
+	FB.Event.subscribe('auth.statusChange', function(session) {
+		console.log('Got the user\'s session: ', session);
+		console.log(session.status);
+	
+		if (session && session.status != 'not_authorized') {
+			if (session.authResponse['accessToken']) {
+				// connected
+				FB_AUTH_STATUS = 'connected';
+			}
+		} else if (session === undefined) {
+			// not connected
+			FB_AUTH_STATUS = 'not_connected';
+		}
+		else if (session && session.status == 'not_authorized') {
+			// not authorized
+			FB_AUTH_STATUS = 'not_authorized';
+		}
+	});
+
+	executeOnAuth(function{console.log('you be authed son...')});
 
 	$j(document).ready(function () {
 
@@ -28,7 +56,7 @@ window.fbAsyncInit = function() {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
 				var html = '<ul>\n';
 				for(var i=0; i < selectedFriendIds.length; i++) {
-					console.log(selectedFriendIds[i]);
+					onsole.log(selectedFriendIds[i]);
 					var friend = TDFriendSelector.getFriendById(selectedFriendIds[i]);
 					console.log(friend);
 					html += '<li><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></li>\n'; 
@@ -88,15 +116,6 @@ window.fbAsyncInit = function() {
 	});
 };
 
-// Load the SDK Asynchronously
-(function(d){
-	var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-	if (d.getElementById(id)) {return;}
-	js = d.createElement('script'); js.id = id; js.async = true;
-	js.src = "//connect.facebook.net/en_US/all.js";
-	ref.parentNode.insertBefore(js, ref);
-}(document));
-
 function postFacebookFeed(friendIdArray)
 {
 	FB.login(function(response) {
@@ -138,7 +157,7 @@ function postFacebookFeed(friendIdArray)
 				});
 			}
 
-/*
+		  /*
 			// Now publish an action the user who made the video's wall/timeline
 			FB.api('/me/osetruefantest:join', 'post',
 			{ cause: 'http://www.wordpages.org/facebook/fb_obj.html' },
@@ -171,41 +190,18 @@ function logout() {
 	});
 }
 
-var user = [];
-//Detect when Facebook tells us that the user's session has been returned
-function authUser() {
-	FB.Event.subscribe('auth.statusChange', function(session) {
-	console.log('Got the user\'s session: ', session);
-
-	if (session && session.status != 'not_authorized') {
-		if (session.authResponse['accessToken']) {
-		document.body.className = 'connected';
-
-		//Fetch user's id, name, and picture
-		FB.api('/me', {
-			fields: 'name, picture'
-			},
-			function(response) {
-			if (!response.error) {
-				user = response;
-
-				console.log('authUser::Got the user\'s name and picture: ', response);
-
-				//Update display of user name and picture
-				if (document.getElementById('user-name')) {
-					document.getElementById('user-name').innerHTML = user.name;
-				}
-				if (document.getElementById('user-picture')) {
-					document.getElementById('user-picture').src = user.picture.data.url;
-				}
+function executeOnAuth(callback)
+{
+	console.log(FB_AUTH_STATUS);
+	if(FB_AUTH_STATUS == 'connected') {
+		callback();
+	} else {
+		FB.login(function(response) {
+			if(response.authResponse) {
+				callback();
+			} else {
+				console.log('User did not fully authorize. Callback function did not execute.');
 			}
-			});
-		}
-	} else if (session === undefined) {
-		document.body.className = 'not_connected';
+		}, {scope: 'publish_stream'}); 
 	}
-	else if (session && session.status == 'not_authorized') {
-		document.body.className = 'not_connected';
-	}
-	});
 }
