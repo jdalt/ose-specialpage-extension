@@ -72,13 +72,12 @@ window.fbAsyncInit = function() {
 					console.log('postFacebookFeed function returned; submit return false.');
 					return false;
 				} else { 
-					//return true;
+					return true;
 				}
 			} else {
 				if(facebookSubmit == friendSelector.getselectedFriendIds().length) {
 					console.log('Responses already sent; Submit true');
-					//return true;
-					console.log('this should not post!');
+					return true;
 				} else {
 					console.log(facebookSubmit);
 					return false;
