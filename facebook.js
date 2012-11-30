@@ -17,7 +17,7 @@ window.fbAsyncInit = function() {
 	});
 
 	// ? is this necessary ?
-	authUser();
+	//authUser();
 
 	$j(document).ready(function () {
 
@@ -76,7 +76,7 @@ window.fbAsyncInit = function() {
 				}
 			} else {
 				if(facebookSubmit == friendSelector.getselectedFriendIds().length) {
-					console.log('Submit true');
+					console.log('Responses already sent; Submit true');
 					//return true;
 					console.log('this should not post!');
 				} else {
