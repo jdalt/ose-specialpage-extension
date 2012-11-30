@@ -136,7 +136,7 @@ function authUser() {
 	});
 }
 
-function postFacebookFeed(friendArray)
+function postFacebookFeed(friendIdArray)
 {
 	FB.login(function(response) {
 		console.log(response);
@@ -146,7 +146,7 @@ function postFacebookFeed(friendArray)
 			var messageText = $j('#ose-truefan-friends-message').val();
 
 			for(var i=0; i<friendArray.length; i++) {
-				postFriend = friendArray[i];
+				postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
 				console.log(postFriend);
 
 				var postData =
