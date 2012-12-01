@@ -76,7 +76,7 @@ window.fbAsyncInit = function() {
 			console.log('Yo we should be popping a friend selector...')
 			executeOnAuth(function(response) {
 				friendSelector.showFriendSelector();
-			}
+			});
 			e.preventDefault(); // ??
 		});
 		// !! overly complicated ??
