@@ -47,6 +47,7 @@ window.fbAsyncInit = function() {
 
 	executeOnAuth(function(){console.log('you be authed son...')});
 
+	// ?? Do I need to auth first -- debug and try no login and no auth...although really only want to auth if user clicks fb button
 	$j(document).ready(function () {
 
 		/* Friend selector stuff */
@@ -56,7 +57,7 @@ window.fbAsyncInit = function() {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
 				var html = '<ul>\n';
 				for(var i=0; i < selectedFriendIds.length; i++) {
-					onsole.log(selectedFriendIds[i]);
+					console.log(selectedFriendIds[i]);
 					var friend = TDFriendSelector.getFriendById(selectedFriendIds[i]);
 					console.log(friend);
 					html += '<li><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></li>\n'; 
@@ -73,19 +74,12 @@ window.fbAsyncInit = function() {
 		$j("#facebook-button").click(function (e) {
 			$j('#friend-selector-holder').css('display', 'block');
 			console.log('Yo we should be popping a friend selector...')
-			FB.login(function(response) {
-				if (response.authResponse) {
-					console.log('Welcome!  Fetching your information.... ');
-			    	FB.api('/me', function(response) {
-						console.log('Good to see you, ' + response.name + '.');
-			    	 });
-			  	} else {
-					console.log('User cancelled login or did not fully authorize.');
-			  	}
+			executeOnAuth(function(response) {
 				friendSelector.showFriendSelector();
-			}, {scope: 'publish_stream'});
+			}
 			e.preventDefault(); // ??
 		});
+		// !! overly complicated ??
 		$j('#trueFanForm').submit(function(e) {
 			console.log(facebookSubmit);
 			console.log('Attempting to submit.');
@@ -118,62 +112,56 @@ window.fbAsyncInit = function() {
 
 function postFacebookFeed(friendIdArray)
 {
-	FB.login(function(response) {
-		console.log(response);
-		if (response.authResponse) {
-			console.log('got publish stream permissions');
+	executeOnAuth(function(response) {
+		console.log('got publish stream permissions');
 
-			var messageText = $j('#ose-truefan-friends-message').val();
+		var messageText = $j('#ose-truefan-friends-message').val();
 
-			for(var i=0; i<friendIdArray.length; i++) {
-				postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
-				console.log(postFriend);
+		for(var i=0; i<friendIdArray.length; i++) {
+			postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
+			console.log(postFriend);
 
-				var postData =
-				{
-					to: postFriend.id,
-					message: messageText,
-					name: 'Open Source Ecology True Fans',
-					caption: 'Build yourself.',
-					description: 'Moar machines...!!',
-					link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
-					picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
-				};
+			var postData =
+			{
+				to: postFriend.id,
+				message: messageText,
+				name: 'Open Source Ecology True Fans',
+				caption: 'Build yourself.',
+				description: 'Moar machines...!!',
+				link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
+				picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
+			};
 
-				FB.api('/' + postFriend.id + '/feed', 'post', postData, function(response) {
-					if (!response || response.error) {
-						console.log(response);
-						console.log('Error occured for: ' + postFriend.id);
-						alert('Error occured');
-					} else {
-						console.log('Post ID: ' + response.id);
-						console.log('Attempting to submit form.');
-						facebookSubmit++;
-						if(facebookSubmit == friendIdArray.length) {
-							console.log('Submitting form by firing click.');
-							$j('.mw-htmlform-submit').click(); 
-						}
+			FB.api('/' + postFriend.id + '/feed', 'post', postData, function(response) {
+				if (!response || response.error) {
+					console.log(response);
+					console.log('Error occured for: ' + postFriend.id);
+					alert('Error occured');
+				} else {
+					console.log('Post ID: ' + response.id);
+					console.log('Attempting to submit form.');
+					facebookSubmit++;
+					if(facebookSubmit == friendIdArray.length) {
+						console.log('Submitting form by firing click.');
+						$j('.mw-htmlform-submit').click(); 
 					}
-				});
-			}
-
-		  /*
-			// Now publish an action the user who made the video's wall/timeline
-			FB.api('/me/osetruefantest:join', 'post',
-			{ cause: 'http://www.wordpages.org/facebook/fb_obj.html' },
-				function(response) {
-					if (!response || response.error) {
-						console.log(response);
-						alert('Error occured. Unable to publish action on your timeline.'+response.error);
-					} else {
-						alert('Join Cause action was successful! Action ID: ' + response.id);
-					}
-			});*/
-		} else {
-			console.log('User cancelled login or did not fully authorize.');
-			alert('stop you are not authorized');
+				}
+			});
 		}
-	}, {scope: 'publish_stream'});
+
+	  /*
+		// Now publish an action the user who made the video's wall/timeline
+		FB.api('/me/osetruefantest:join', 'post',
+		{ cause: 'http://www.wordpages.org/facebook/fb_obj.html' },
+			function(response) {
+				if (!response || response.error) {
+					console.log(response);
+					alert('Error occured. Unable to publish action on your timeline.'+response.error);
+				} else {
+					alert('Join Cause action was successful! Action ID: ' + response.id);
+				}
+		});*/
+	} 
 }
 
 function uninstallApp() {
@@ -200,6 +188,7 @@ function executeOnAuth(callback)
 			if(response.authResponse) {
 				callback();
 			} else {
+				// !! Output do common App debug outlets
 				console.log('User did not fully authorize. Callback function did not execute.');
 			}
 		}, {scope: 'publish_stream'}); 
