@@ -161,7 +161,7 @@ function postFacebookFeed(friendIdArray)
 					alert('Join Cause action was successful! Action ID: ' + response.id);
 				}
 		});*/
-	} 
+	}); 
 }
 
 function uninstallApp() {
