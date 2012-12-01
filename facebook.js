@@ -45,7 +45,7 @@ window.fbAsyncInit = function() {
 		}
 	});
 
-	executeOnAuth(function{console.log('you be authed son...')});
+	executeOnAuth(function(){console.log('you be authed son...')});
 
 	$j(document).ready(function () {
 
