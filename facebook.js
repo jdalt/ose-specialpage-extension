@@ -45,8 +45,6 @@ window.fbAsyncInit = function() {
 		}
 	});
 
-	executeOnAuth(function(){console.log('you be authed son...')});
-
 	// ?? Do I need to auth first -- debug and try no login and no auth...although really only want to auth if user clicks fb button
 	$j(document).ready(function () {
 
