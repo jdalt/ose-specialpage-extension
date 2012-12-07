@@ -1,0 +1,38 @@
+<div id="modal-button-show-container">
+	<button id="icon-credits-show"class="modal-button-show">Icon Credits</button>
+	<div class="modal-overlay-container">
+		<div class="modal-overlay-pane" id="icon-credits">
+			<img class="modal-close-button" src="{{PATH}}images/close_button.png"/>
+			<h1>Icon Credits</h1>
+			<p>All icons for the True Fans Microfunding Platform are from or were derived from <a href="http://thenounproject.com">The Noun Project</a> which is a wonderful project that deserves your attention and gratitude.</p>
+			<br />
+
+			<div id="icon-credits-container">
+				<div class="credit-item"><img src="{{PATH}}images/webcam_one.png"/><span>Derived from <a href="http://thenounproject.com/noun/webcam/#icon-No3624" target="_blank">Webcam</a> designed by <a href="http://thenounproject.com/alexpav" target="_blank">Alex Pavlovski</a> from The Noun Project</span></div>
+				<div class="credit-item"><img src="{{PATH}}images/pen_two.png"/><span>Derived from <a href="http://thenounproject.com/noun/pen/#icon-No6558">Pen</a> Public Domain Designed by <a href="http://thenounproject.com/jmkeuning/#">James Keuning</a></span></div>
+				<div class="credit-item"><img src="{{PATH}}images/share_three.png"/><span>Derived from <a href="http://thenounproject.com/noun/community/#icon-No5040" target="_blank">Community</a> designed by <a href="http://thenounproject.com/DmitryBaranovskiy" target="_blank">Dmitry Baranovskiy</a> from The Noun Project</span></div>
+
+				<div class="credit-item"><img src="{{PATH}}images/learn_more.png" /><span><a href="http://thenounproject.com/noun/idea/#icon-No6770">Idea</a> Public Domain Designed by <a href="http://thenounproject.com/dirk.austin.7/#">Dirk Austin Rowe</a> 2012</span></div>
+				<div class="credit-item"><img src="{{PATH}}images/get_involved.png" /><span>Derived from <a href="http://thenounproject.com/noun/hammer/#icon-No1306" target="_blank">Hammer</a> designed by <a href="http://thenounproject.com/johncaserta" target="_blank">John Caserta</a> and <a href="http://thenounproject.com/noun/wrench/#icon-No1320" target="_blank">Wrench</a> designed by <a href="http://thenounproject.com/johncaserta" target="_blank">John Caserta</a> both from The Noun Project</span></div>
+
+				<div class="credit-item"><img src="{{PATH}}images/email.png" /><span><a href="http://thenounproject.com/noun/email/#icon-No1674">Email</a> Public Domain Designed by <a href="http://thenounproject.com/dougthenash">Douglas Nash</a> 2012</span></div>
+				<div class="credit-item"><img src="{{PATH}}images/gear.png" /><span><a href="http://thenounproject.com/noun/gear/#icon-No2789" target="_blank">Gear</a> designed by <a href="http://thenounproject.com/somerandomdude" target="_blank">P.J. Onori</a> from The Noun Project</span></div>
+				<div class="credit-item"><img src="{{PATH}}images/video.png" /><span><a href="http://thenounproject.com/noun/video/#icon-No5068" target="_blank">Video</a> designed by <a href="http://thenounproject.com/DmitryBaranovskiy" target="_blank">Dmitry Baranovskiy</a> from The Noun Project</span></div>
+				<button class="modal-close-window">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$j(document).ready(function() {
+		function centerCreditsButton(){
+			console.log('centered');
+			var adjusted_midpoint = parseInt($j('#main-area').css('margin-left')) + $j('#main-area').width()/2 - $j('#icon-credits-show').width()/2 - parseInt($j('#icon-credits-show').css('padding-left')) + 12; //$j('#bodyContent').width()/2 - $j('#icon-credits-show').width()/2;
+			$j('#icon-credits-show').css('left', adjusted_midpoint);
+		}
+		centerCreditsButton();
+		$j(window).resize(centerCreditsButton);
+	});
+
+</script>

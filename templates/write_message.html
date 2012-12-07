@@ -7,7 +7,7 @@
 		</li><li class="back-line">
 		</li><li class="active">
 			<img src="{{PATH}}images/pen_two.png"/>
-			<a class="info" onclick="$j('#modal-overlay').css('visibility','visible')">Directions</a>
+			<a class="info" data-target="#directions-container">Directions</a>
 		</li><li class="back-line">
 		</li><li>
 			<img src="{{PATH}}images/share_three.png"/>
@@ -37,9 +37,9 @@
 
 </div>
 
-<div id="modal-overlay">
-	<div id="modal-directions">
-		<img id="close-button" src="{{PATH}}images/close_button.png" onclick="$j('#modal-overlay').css('visibility','hidden');" />
+<div class="modal-overlay-container" id="directions-container">
+	<div class="modal-overlay-pane" id="modal-directions">
+		<img class="modal-close-button" src="{{PATH}}images/close_button.png"/>
 		<h1>How to Spread the Word</h1>
 		<ul class="inline-links form-steps">
 			<li>
@@ -62,10 +62,10 @@
 			<h2>Directions</h2>
 			<img id="directions-marker" src="{{PATH}}images/pen_two_35.png"/>
 			<div id="directions">
-				<p>Every video is displayed with a message next to it. This is an oppurtunity to summarize your reason for supporting OSE.</p>
+				<p>Every video is displayed with a message next to it. This is an opportunity to summarize your reason for supporting OSE.</p>
 				<p class="gray">If you need some help writing your message, you can have an automatic message added to your video.</p>
 			</div>
 		</div>
-		<button id="close-button-bottom" class="tf-button" onclick="$j('#modal-overlay').css('visibility','hidden');">Write Your Message</button>
+		<button id="close-button-bottom" class="modal-close-window">Share with Friends</button>
 	</div>
 </div>

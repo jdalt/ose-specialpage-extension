@@ -118,7 +118,7 @@ class SpecialShareOSE extends SpecialPage {
 		}
 
 		// TODO: Remove - development links
-		$this->loadTemplate('dev_links.html');
+		$this->loadTemplate('noun_project_credits.html');
 	}
 
 	/**

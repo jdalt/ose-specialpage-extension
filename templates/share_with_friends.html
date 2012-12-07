@@ -9,7 +9,7 @@
 			<img src="{{PATH}}images/pen_two.png"/>			
 		</li><li class="back-line">
 		</li><li class="active" id="join-us">
-			<a class="info" onclick="$j('#modal-overlay').css('visibility','visible')">Directions</a>
+			<a class="info" data-target="#directions-container">Directions</a>
 			<img src="{{PATH}}images/share_three.png"/>
 		</li>
 	</ul>
@@ -26,9 +26,9 @@
 	{{FORM}}
 </div>
 
-<div id="modal-overlay">
-	<div id="modal-directions">
-		<img id="close-button" src="{{PATH}}images/close_button.png" onclick="$j('#modal-overlay').css('visibility','hidden');" />
+<div class="modal-overlay-container" id="directions-container">
+	<div class="modal-overlay-pane" id="modal-directions">
+		<img class="modal-close-button" src="{{PATH}}images/close_button.png"/>
 		<h1>How to Spread the Word</h1>
 		<ul class="inline-links form-steps">
 			<li>
@@ -56,7 +56,7 @@
 			</div>
 			<img src="{{PATH}}images/multifriend.png" />
 		</div>
-		<button id="close-button-bottom" class="tf-button" onclick="$j('#modal-overlay').css('visibility','hidden');">Share with Friends</button>
+		<button id="close-button-bottom" class="modal-close-window">Share with Friends</button>
 	</div>
 </div>
 
@@ -64,7 +64,7 @@
 
 <div class="auto-replace" id="contact-holder">
 	<div class="contact-tag">To:</div>
-	<div id="email-button" class="contact-tag social-icons" onclick="$j('#email-modal').toggleClass('inactive');"><!-- onclick TDFriendSelector modal pop up -->
+	<div id="email-button" class="contact-tag social-icons" onclick="$j('#email-modal').css('visibility', 'visible');"><!-- onclick TDFriendSelector modal pop up -->
 		<div class="button-hover-tag">email</div>
 		<img src="{{PATH}}images/email.png" alt="email"/>
 	</div>
@@ -83,7 +83,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 </div>
 
 <div id="fb-root"></div>
-<div id="friend-selector-holder" class="modal-input-overlay inactive">
+<div id="friend-selector-holder" class="modal-overlay-container inactive">
 	<br /><br /><br />
 	Loading Facebook Friends...
 	<button id="CancelFriendSelect" onclick="$j('#friend-selector-holder').css('display','none');">Cancel</button>
@@ -118,6 +118,35 @@ Checkout the video I made for you and the links below as I think you'd be intere
 <button id="revokeAuth" type="button" onclick="uninstallApp()">Revoke/Uninstall</button>
 <button id="logout" type="button" onclick="logout()">Logout</button>
 
+<div id="email-modal" class="modal-overlay-container">
+	<div id="email-list-modal" class="modal-overlay-pane">
+		<img class="modal-close-button" src="{{PATH}}images/close_button.png"/>
+		<h3>Enter Email Addresses</h3>
+		<div id="email-input-container">
+			<div class="email-list-combo">
+				<div class="email-input-cluster">
+					<div class="mw-label">
+						<label>Name</label>
+					</div>
+					<div class="mw-input">
+						<input class="email-names" type="text" />
+					</div>
+				</div>
+				<div class="email-input-cluster">
+					<div class="mw-label">
+						<label for="ose-truefan-email-input">Email</label>
+					</div>
+					<div class="mw-input">
+						<input class="email-addresses" type="text" name="wpEmailInput[]"/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<br/>
+		<button id="email-list-ok" class="modal-close-window" type="button">Ok</button>
+		<button class="modal-close-window negative-action" type="button">Clear</button>
+	</div>
+</div>
 
 <script>
 	// These two json objects take content from first selector and put it in second; see dynamic.js
@@ -129,45 +158,18 @@ Checkout the video I made for you and the links below as I think you'd be intere
 	}
 	
 	$j(document).ready(function() {
-		var emailWrap =	'<div id="email-modal" class="modal-input-overlay inactive">'+
-							'<div id="email-list-modal" class="modal-input">'+
-								'<div id="email-input-container"></div>'+
-							'</div>'+
-						'</div>';
-		var emailHelpMessage = '<h3>Enter Email Addresses</h3>';
-		var emailButton = '<br/><input id="email-list-ok" type="button" value="Ok" />';
-	
-		$j('.mw-htmlform-field-HTMLTextArray').html(
-				'<div class="email-list-combo">'+
-					'<div class="email-input-cluster">'+
-						'<div class="mw-label">'+
-							'<label>Name</label>'+
-						'</div>'+
-						'<div class="mw-input">'+
-							'<input class="email-names" type="text" />'+
-						'</div>'+
-					'</div>'+
-					'<div class="email-input-cluster">'+
-						'<div class="mw-label">'+
-							'<label for="ose-truefan-email-input">Email</label>'+
-						'</div>'+
-						'<div class="mw-input">'+
-							'<input class="email-addresses" type="text" name="wpEmailInput[]"/>'+
-						'</div>'+
-					'</div>'+
-				'</div>');
+		$j('.mw-htmlform-field-HTMLTextArray').empty();
+		$j('#email-modal').appendTo('.mw-htmlform-field-HTMLTextArray');
 		$j('.email-addresses').keyup(addEmailInput);
-		$j('#mw-form-section-email .mw-htmlform-field-HTMLTextArray').children().wrapAll(emailWrap);
-		$j('#email-list-modal').prepend(emailHelpMessage);
-		$j('#email-list-modal').append(emailButton);
-		$j('#email-list-ok').click(processEmail);
-
-		
-		function processEmail()
-		{
+		$j('#email-modal .modal-close-window').click(function(){
+			$j('input[name=wpEmailList]').val('');
+			$j('#share-email-preview').empty();
+		});
+		$j('#email-list-ok').click(function(){
+			console.log('processEmail')
 			var addresses = new Array();
 			// TODO: Remove empty email inputs
-			$j('.modal-input-overlay').addClass('inactive');
+			//$j('.modal-overlay-container').css('visibility','hidden');
 			$j('#share-email-preview').empty('');
 			$j('#email-input-container .email-list-combo').each( function(index) {
 				var name = $j(this).find('.email-names').val();
@@ -188,7 +190,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 				}
 				$j('#share-email-preview').html(html);
 			}
-		}
+		});
 		
 		function addEmailInput(e)
 		{

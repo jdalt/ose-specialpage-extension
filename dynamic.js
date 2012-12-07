@@ -23,6 +23,25 @@ $j(document).ready(function() {
 		$j('#video-viewer').css('height',parseFloat($j('#video-viewer').css('width')) * 9/16);
 	});
 
+	// modal window button events
+	$j('.modal-button-show').click(function(){
+		console.log($j(this).siblings('.modal-overlay-container'));
+		$j(this).siblings('.modal-overlay-container').css('visibility', 'visible');
+	});
+	$j('.modal-close-button').click(function(){
+		console.log($j(this).closest('.modal-overlay-container'));
+		$j(this).closest('.modal-overlay-container').css('visibility', 'hidden');
+	});
+	$j('.modal-close-window').click(function(){
+		console.log('close win');
+		$j(this).closest('.modal-overlay-container').css('visibility', 'hidden');
+	});
+
+	$j('.info').click(function(){
+		console.log('click');
+		$j($j(this).attr('data-target')).css('visibility','visible');
+	});
+
 	for (var source in autoReplaceArray) {
   		if (autoReplaceArray.hasOwnProperty(source)) {
 			var sourceHtml = $j(source).html();
@@ -45,6 +64,3 @@ function runOnloadHook()
 {
 	console.log('runonloadhook');
 }
-
-
-

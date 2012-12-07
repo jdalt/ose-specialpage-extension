@@ -19,6 +19,7 @@
 	border: none;
 	font-size: 40px;
 	padding: 0;
+	line-height: normal;
 }
 
 h2
@@ -75,6 +76,7 @@ h6
 	width: 60%;
 	text-align: center;
 	margin-left: 15%;
+	margin-bottom: 40px;
 }
 
 #action-links a
@@ -175,9 +177,10 @@ ul.no-bullets li
 }
 
 /************* Modal Direction Window Styles *******************/
-#modal-overlay
+/*universal modal paradigm*/
+.modal-overlay-container
 {
-	visibility: visible;
+	visibility: hidden;
 	position: absolute;
 	left: 0px;
 	top: 0px;
@@ -188,14 +191,38 @@ ul.no-bullets li
 	z-index: 1000;
 }
 
-#modal-directions
+.modal-overlay-pane
 {
-	width: 65%;
+	width: 35%;
 	padding: 10px;
 	margin: 25px auto;
 	/*border: 1px solid black;*/
 	background: #fff;
 	box-shadow: 0 0 10px #fff;
+}
+
+
+.modal-close-button
+{
+	float: right;
+	opacity: 1;
+}
+
+.modal-close-button:hover
+{
+	opacity: .7;
+	box-shadow: 0 0 4px #800 inset;
+}
+
+/*modal specifc - directions*/
+#directions-container
+{
+	visibility: visible;
+}
+
+#modal-directions
+{
+	width: 65%;
 }
 
 #modal-directions h1
@@ -217,18 +244,6 @@ ul.no-bullets li
 #modal-directions h4
 {
 	font-weight: normal;
-}
-
-#close-button
-{
-	float: right;
-	opacity: 1;
-}
-
-#close-button:hover
-{
-	opacity: .7;
-	box-shadow: 0 0 4px #800 inset;
 }
 
 #directions 
@@ -263,6 +278,62 @@ ul.no-bullets li
 {
 	margin-top: 0;
 }	
+
+/*modal specific - icon credits*/
+#icon-credits-show
+{
+	position: absolute;
+	bottom: 0;
+	border: none;
+	border-radius: 5px 5px 0 0;
+	background-color: #000;
+	color: #fff;
+	font-weight: bold;
+	font-family: "HelveticaNeueW01-75Bold","Helvetica",Arial,sans-serif;
+	font-size: 14px;
+	padding: 3px 28px 0;
+    position: absolute;
+}
+
+#icon-credits
+{
+	width: 75%;
+	margin: 25px auto;
+	text-align: left;
+}
+
+#icon-credits h1
+{
+	margin: 15px 0 10px 0;
+	text-align: center;
+}
+
+#icon-credits p
+{
+	padding: 0 2em;
+}
+	
+#icon-credits #icon-credits-container
+{
+	width: 50%;
+	margin: 0 auto;
+}
+
+#icon-credits img
+{
+	display: inline-block;
+	height: 25px;
+}
+
+.credit-item
+{
+	margin-bottom: 10px;
+}
+
+.credit-item span
+{
+	margin-left: 5px;
+}
 
 /************* General Steps Header Styles (most form templates) *******************/
 #steps-header
@@ -358,7 +429,7 @@ ul.no-bullets li
 	border: 1px solid #000;
 }
 
-#bodyContent .mw-htmlform-submit, #close-button-bottom, #bodyContent form #email-list-ok, #bodyContent #ose-truefan-delete-submit
+#bodyContent .mw-htmlform-submit, #bodyContent .modal-close-window, #bodyContent #ose-truefan-delete-submit
 {
 	background-color: #060;
 	color: #fff;
@@ -372,12 +443,12 @@ ul.no-bullets li
 	margin: 10px auto;
 }
 
-#bodyContent .mw-htmlform-submit:hover
+#bodyContent .mw-htmlform-submit:hover, #bodyContent .modal-close-window:hover
 {
 	box-shadow: 0 0 12px #a00;
 }
 
-#bodyContent #ose-truefan-delete-submit
+#bodyContent #ose-truefan-delete-submit, #bodyContent .negative-action
 { 
 	background-color: #a00;
 }
@@ -514,29 +585,6 @@ ul.no-bullets li
 
 
 /*** Style for share_with_friends Modal Input Interface ***/
-.modal-input-overlay
-{
-	visibility: visible;
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	width:100%;
-	height:100%;
-	text-align:center;
-	background: rgba(105,105,105,.8);
-	z-index: 1000;
-}
-
-.modal-input
-{
-	width: 35%;
-	padding: 10px;
-	margin: 25px auto;
-	/*border: 1px solid black;*/
-	background: #fff;
-	box-shadow: 0 0 10px #fff;
-}
-
 #mw-form-section-social-buttons
 {
 	margin: 10px 0;
