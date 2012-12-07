@@ -223,6 +223,8 @@ ul.no-bullets li
 #modal-directions
 {
 	width: 65%;
+	max-height: 90%;
+	overflow-y: auto;
 }
 
 #modal-directions h1
@@ -234,6 +236,12 @@ ul.no-bullets li
 #modal-directions .form-steps li
 {
 	width: 180px;
+	opacity: .4;
+}
+
+#modal-directions .form-steps li.active
+{
+	opacity: 1;	
 }
 
 #modal-directions .form-steps li img
@@ -249,7 +257,7 @@ ul.no-bullets li
 #directions 
 {
 	text-align: left;
-	margin-left: 9%;
+	margin-left: 50px;
 	margin-right: 25px;
 }
 
@@ -257,15 +265,15 @@ ul.no-bullets li
 {
 	float: left;
 	margin-top: 5px;
-	margin-left: 4%;
-	width: 35px;
+	margin-left: 10px;
+	width: 30px;
 }
 
 #directions-box h2
 {
 	font-size: 28px;
 	text-align: left;
-	margin: 20px 0 5px 9%;
+	margin: 20px 0 5px 50px;
 }
 
 #directions p
@@ -482,6 +490,13 @@ ul.no-bullets li
 
 /*** Style for share_with_friends Template Social Icons (which activate contact input interfaces) ***/
 /* TODO: Put this style directly into the template */
+.inline-social-icon
+{
+	border-radius: 7px;
+	margin: 0 3px 0 0;
+	width: 25px;
+}
+
 .social-icons
 {
 	cursor: pointer;

@@ -2,8 +2,6 @@
  *  youtubeUploader.js
  */
 
-// !! The following is based on sample code from Google. !!
-
 // TODO: Handle processing error from google.
 
 var tag = document.createElement('script');
@@ -32,7 +30,9 @@ function onYouTubeIframeAPIReady() {
 function onStateChange(event) {
 	console.log(event.data.state);
 	if(event.data.state == YT.UploadWidgetState.ERROR) {
-		alert('Error Occurred');
+		$j('#error-container').css('visibility', 'visible');
+		$j('#modal-error-message').html('There was an error with the Youtube Uploader. There may be a problem with your webcam or the permissions you assigned to it.');
+		console.log('An error occurred: ' + YT.UploadWidgetState.ERROR);
 	}
 }
 
