@@ -136,6 +136,8 @@ class SpecialShareOSE extends SpecialPage {
 		// Request specific HTML dependent upon the request
 		switch($request) {
 			case 'welcome':
+				global $wgScriptPath, $wgOut;
+				$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeplayer.js');
 				$this->loadTemplate('welcome.html');
 				break;
 			case 'view':

@@ -11,7 +11,7 @@
 {
 	font-family: ubuntu;
 	padding-top: 10px;
-	min-height: 675px;
+	min-height: 400px;
 }
 
 #bodyContent h1
@@ -142,6 +142,11 @@ ul.no-bullets li
 .inactive
 {
 	display: none;
+}
+
+.deactivated
+{
+	opacity: .3;
 }
 
 .error-message
@@ -683,6 +688,34 @@ ul.no-bullets li
 	-ms-animation-duration: 2000ms; 
 	-ms-animation-iteration-count: infinite; 
 	-ms-animation-timing-function: linear;
+}
+
+#show-ose-truefan-name
+{
+	position: relative;
+}
+
+#blurb-popup
+{
+    background: transparent;
+    height: auto;
+    left: 0;
+    text-align: center;
+    top: -28px;
+}
+
+#blurb-popup .modal-overlay-pane
+{
+    border: 1px solid black;
+	box-shadow: none;
+    width: 100%;
+	margin: 0;
+	padding: 3px;
+}
+
+#show-ose-truefan-name:hover #blurb-popup
+{
+	visibility: visible;
 }
 
 /*** subscribe.html ***/

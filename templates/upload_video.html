@@ -85,11 +85,15 @@
 <script>
 	$j(document).ready(function() {
 		// Only display Name input when the user clicks the edit-tag
-		$j('#ose-truefan-name').parent().parent().css('display', 'none');
+		$j('#ose-truefan-name').parent().parent().css('display', 'none'); //TODO: jQuery.closest() ? 
 		var name = $j('#ose-truefan-name').val();
 		$j('#mw-form-section-upload').prepend(
 			'<div id="show-ose-truefan-name">'+
-				'<div id="video-author-label">Display Name</div>'+
+				'<div class="modal-overlay-container" id="blurb-popup">'+
+					'<div class="modal-overlay-pane">'+
+						'<div id="video-author-label">Display Name</div>'+
+					'</div>'+
+				'</div>'+
 				'<div><span id="video-author">'+name+'</span><span class="edit-tag" onclick="showEdit(\'ose-truefan-name\')">edit</span>'+
 			'</div></div>');
 

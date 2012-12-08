@@ -2,8 +2,7 @@
  *  youtubeUploader.js
  */
 
-// TODO: Handle processing error from google.
-
+var uploadIsProcessing = false;
 var tag = document.createElement('script');
 tag.src = "//www.youtube.com/iframe_api";
 console.log(tag.src);
@@ -20,10 +19,22 @@ function onYouTubeIframeAPIReady() {
    	width: parseInt($j('#video-viewer').css('width')),
    	events: {
    		'onUploadSuccess': onUploadSuccess,
-    		'onProcessingComplete': onProcessingComplete,
-			'onApiReady': onApiReady,
-			'onStateChange': onStateChange
+    	'onProcessingComplete': onProcessingComplete,
+		'onApiReady': onApiReady,
+		'onStateChange': onStateChange
    	}
+	});
+	$j('.mw-htmlform-submit[value="Save Video"]').click(function(e){
+		if(uploadIsProcessing) {
+			console.log('cannot submit while processing'); 
+			//TODO: interface to override this if there are processing errors; better yet be able to be able to 
+			//CONSIDER: on click launch a popup blurb that allows you to override but warns user that video might not submit correctly due to processing occuring at youtube
+			$j('#error-container').css('visibility', 'visible');
+			$j('#modal-error-message').html('You cannot Save Video while Youtube is processing your video.');
+			e.preventDefault();
+		} else {
+			return true;
+		}
 	});
 }				
 
@@ -37,12 +48,16 @@ function onStateChange(event) {
 }
 
 function onUploadSuccess(event) {
+	uploadIsProcessing = true;
+	$j('.mw-htmlform-submit[value="Save Video"]').addClass('deactivated');
  	$j('.gear').addClass('animate');
 	$j('#status').addClass('overlay');
-	$j('#status-text').html('Video ID ' + event.data.videoId + ' was uploaded and is currently being processed.');
+	$j('#status-text').html('The video is currently being processed on Youtube servers. You must wait until processing completes to order to save your video.');
 }
 
 function onProcessingComplete(event) {
+	uploadIsProcessing = false;
+	$j('.mw-htmlform-submit[value="Save Video"]').removeClass('deactivated');
 	widget.destroy();
 
 	var h = parseInt($j('#video-viewer').css('height'));
