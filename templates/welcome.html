@@ -1,16 +1,16 @@
 <div id="watch-area">
 	<div id="playlist-container">
 		<h3>Playlist</h3>
-		<ul class="no-bullets">
-			<li>Best Video 1</li>
-			<li>Best Video 2</li>
-			<li>Best Video 3</li>
-			<li>Marcin's Ted Talk</li>
-			<li>FeF Narrative</li>
-			<li>...</li>
-			<li>More Awesome Videos</li>
+		<!-- Add span as title, name, quote, id and jet over to correct spot upon clicking -->
+		<ul id="playlist" class="no-bullets">
+			<li>Marcin's Ted Talk<span class="hidden">zIsHKrP-66s</span></li>
+			<li>Bioneers East<span class="hidden">MIIzogiUHFY</span></li>
+			<li>OSEmail<span class="hidden">ubTNQV8oXVM</span></li>
+			<li>Enterprise Plan<span class="hidden">wbqC8zm7Hyg</span></li>
 		</ul>
 	</div>
+	<a href="{{BASE_URL}}?page=submit" class="green-button">Create True Fan Video</a>
+	<a href="{{BASE_URL}}?page=myprofile" class="green-button">My Video</a>
 </div>
 
 <div id="quote-area">
@@ -19,7 +19,7 @@
 </div>
 
 <div id="main-area">
-	<iframe id="video-viewer">Holy cats your browser doesn't support teh iframes.</iframe>
+	<div id="video-viewer"></div>
 	<!--<iframe id="video-viewer" src="http://www.youtube.com/embed/{{USER_VIDEO_ID}}">Holy cats your browser doesn't support teh iframes.</iframe>-->
 	<ul id="action-links" class="inline-links">
 		<li id="learn-more">
@@ -36,5 +36,3 @@
 		</li>
 	</ul>
 </div>
-
-

@@ -1,17 +1,51 @@
- 
-
-console.log('youtubeplayer.js');
+// youtubeplayer.js
 
 
-var firstVideo = 'MIIzogiUHFY';
-
-
-// 2. This code loads the IFrame Player API code asynchronously.
 var tag = document.createElement('script');
 tag.src = "//www.youtube.com/iframe_api";
+console.log(tag.src);
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
+
+
+var player;
+function onYouTubeIframeAPIReady() {
+	$j(document).ready(function() {
+		var h = parseInt($j('#video-viewer').css('height'));
+		var w = parseInt($j('#video-viewer').css('width'));
+		player = new YT.Player('video-viewer', {
+			height: h,
+	    	width: w,
+	    	events: {
+				'onReady': onPlayerReady,
+				'onStateChange': onPlayerStateChange
+			}
+	  	});
+	});
+}
+
+function onPlayerReady(event)
+{
+	console.log(event);
+	var videoIdArray = new Array();
+	$j('#playlist li').each(function(index){
+		$j(this).click(function() {
+			player.playVideoAt(index);
+		});
+		videoIdArray.push($j(this).find('span').html());	
+	});
+	//player.loadPlaylist(['zIsHKrP-66s', 'MIIzogiUHFY', 'ubTNQV8oXVM', 'wbqC8zm7Hyg', 'nV_-ZzYmo3A']);
+	console.log(videoIdArray);
+	player.loadPlaylist(videoIdArray);
+}
+
+function onPlayerStateChange(event)
+{
+	console.log(event);
+}
+
+/*
 // 3. This function creates an <iframe> (and YouTube player)
 //    after the API code downloads.
 var player;
@@ -20,14 +54,14 @@ var w = parseInt($j('#video-viewer').css('width'));
 function onYouTubeIframeAPIReady() {
 	player = new YT.Player('video-viewer', {
 		//height: h,
-		width: w,
-		videoId: firstVideo,
+	//	width: w,
+	//	videoId: firstVideo,
 		events: {
 			'onReady': onPlayerReady,
 			'onStateChange': onPlayerStateChange
 		}
 	});
-	//player.loadPlaylist({list:['zIsHKrP-66s', 'MIIzogiUHFY', 'ubTNQV8oXVM', 'wbqC8zm7Hyg', 'nV_-ZzYmo3A']})
+	//player.loadPlaylist({'list:['zIsHKrP-66s', 'MIIzogiUHFY', 'ubTNQV8oXVM', 'wbqC8zm7Hyg', 'nV_-ZzYmo3A']})
 }
 
 // 4. The API will call this function when the video player is ready.
@@ -48,3 +82,4 @@ function onPlayerStateChange(event) {
 function stopVideo() {
   player.stopVideo();
 }
+*/

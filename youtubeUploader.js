@@ -3,6 +3,7 @@
  */
 
 var uploadIsProcessing = false;
+
 var tag = document.createElement('script');
 tag.src = "//www.youtube.com/iframe_api";
 console.log(tag.src);

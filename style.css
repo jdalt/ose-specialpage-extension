@@ -158,6 +158,11 @@ ul.no-bullets li
 	margin: 0;
 }
 
+.hidden
+{
+	display:none;
+}
+
 #status
 {
 	color: #00f;
@@ -442,7 +447,7 @@ ul.no-bullets li
 	border: 1px solid #000;
 }
 
-#bodyContent .mw-htmlform-submit, #bodyContent .modal-close-window, #bodyContent #ose-truefan-delete-submit
+#bodyContent .mw-htmlform-submit, #bodyContent .modal-close-window, #bodyContent #ose-truefan-delete-submit, #bodyContent .green-button
 {
 	background-color: #060;
 	color: #fff;
@@ -456,7 +461,7 @@ ul.no-bullets li
 	margin: 10px auto;
 }
 
-#bodyContent .mw-htmlform-submit:hover, #bodyContent .modal-close-window:hover
+#bodyContent .mw-htmlform-submit:hover, #bodyContent .modal-close-window:hover, #bodyContent .green-button:hover
 {
 	box-shadow: 0 0 12px #a00;
 }
@@ -491,7 +496,13 @@ ul.no-bullets li
 	text-align: center;
 }
 
-
+#playlist-container ul li:hover
+{
+	font-weight: bold;
+	background: #000;
+	color: #fff;
+	cursor: pointer;
+}
 
 /*** Style for share_with_friends Template Social Icons (which activate contact input interfaces) ***/
 /* TODO: Put this style directly into the template */
