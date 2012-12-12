@@ -8,14 +8,9 @@ var autoReplaceArray, autoInputArray;
 $j(document).ready(function() {
 	console.log('$j says document ready');
 
-/*
-	$j('form').submit(function() {
-		$(this).submit(function() {
-			return false;
-		});
-		return true;
-	});
-*/		
+	// only some pages have #video-viewer
+	$j('#video-viewer').append('<div class="loading-block"><p>The Youtube plugin is loading.</p><img src="/w/extensions/ShareOSE/images/loading.gif" /></div>');
+
 	$j('#ose-truefan-message').keyup(function(){$j('#quote-area p').html($j('#ose-truefan-message').val());});
 	
 	$j('#video-viewer').css('height',parseFloat($j('#video-viewer').css('width')) * 9/16);

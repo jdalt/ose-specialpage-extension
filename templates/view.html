@@ -1,10 +1,12 @@
 <div id="watch-area">
 	<div id="playlist-container">
 		<h3>Playlist</h3>
-		<ul class="no-bullets">
-			<li>{{USER_NAME}}'s Video</li>
-			<li>Marcin's Ted Talk</li>
-			<li>FeF Narrative</li>
+		<ul id="playlist" class="no-bullets">
+			<li>{{USER_NAME}}'s Video<span class="hidden">{{USER_VIDEO_ID}}</span></li>
+			<li>Marcin's Ted Talk<span class="hidden">zIsHKrP-66s</span></li>
+			<li>Bioneers East<span class="hidden">MIIzogiUHFY</span></li>
+			<li>OSEmail<span class="hidden">ubTNQV8oXVM</span></li>
+			<li>Enterprise Plan<span class="hidden">wbqC8zm7Hyg</span></li>
 		</ul>
 	</div>
 </div>
@@ -15,7 +17,7 @@
 </div>
 
 <div id="main-area">
-	<iframe id="video-viewer" src="http://www.youtube.com/embed/{{USER_VIDEO_ID}}">Holy cats your browser doesn't support teh iframes.</iframe>
+	<div id="video-viewer"></div>
 	<ul id="action-links" class="inline-links">
 		<li id="learn-more">
 			<img src="{{PATH}}images/learn_more.png"/>

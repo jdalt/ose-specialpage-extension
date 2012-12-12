@@ -53,7 +53,6 @@ h6
 	float:left;
 }
 
-
 #quote-area
 {
 	width: 21%;
@@ -108,7 +107,17 @@ h6
 	box-shadow: 0 0 5px #aaa;
 }
 
+#loading-block 
+{
+	margin-top: 40%;
+}
 
+#loading-block p
+{
+	margin: 20px 0;
+	font-weight: bold;
+	font-size: 22px;
+}
 
 /***************** Utility CSS Classes *******************/
 .inline-links
@@ -221,7 +230,7 @@ ul.no-bullets li
 .modal-close-button:hover
 {
 	opacity: .7;
-	box-shadow: 0 0 4px #800 inset;
+	box-shadow: 0 0 4px #000 inset;
 }
 
 /*modal specifc - directions*/
@@ -463,7 +472,7 @@ ul.no-bullets li
 
 #bodyContent .mw-htmlform-submit:hover, #bodyContent .modal-close-window:hover, #bodyContent .green-button:hover
 {
-	box-shadow: 0 0 12px #a00;
+	box-shadow: 0 0 12px #000;
 }
 
 #bodyContent #ose-truefan-delete-submit, #bodyContent .negative-action

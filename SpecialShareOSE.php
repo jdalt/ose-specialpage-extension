@@ -141,6 +141,8 @@ class SpecialShareOSE extends SpecialPage {
 				$this->loadTemplate('welcome.html');
 				break;
 			case 'view':
+				global $wgScriptPath, $wgOut;
+				$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeplayer.js');
 				$profile = $this->mDb->getUser($this->mReqId);
 				if($profile) {
 					$this->loadTemplate('view.html', $profile);
@@ -154,6 +156,8 @@ class SpecialShareOSE extends SpecialPage {
 				break;
 			
 			case 'myprofile':
+				global $wgScriptPath, $wgOut;
+				$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeplayer.js');
 				// TODO: Add extra information like before - email and contacts sent to...?
 				if(!$wgUser->isLoggedIn()) {
 					$this->handleViewPage('login');
