@@ -11,7 +11,7 @@ $messages = array();
  * @author <your username>
  */
 $messages['en'] = array(
-        'shareose' => 'True Fans Showcase', // shareose must be all lower to be recognized by SpecialSpecialpages
+        'shareose' => 'True Fan Stories', // shareose must be all lower to be recognized by SpecialSpecialpages
         'shareOSE-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
 		  
         'trueFanForm-upload' => 'True Fan Information',

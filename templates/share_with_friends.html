@@ -65,17 +65,23 @@
 <!-- Auto Replace and Hidden Land - this HTML will be redirected via javascript -->
 
 <div class="auto-replace" id="contact-holder">
-	<div class="contact-tag">To:</div>
-	<div id="email-button" class="contact-tag social-icons" onclick="$j('#email-modal').css('visibility', 'visible');"><!-- onclick TDFriendSelector modal pop up -->
+	<div class="contact-tag">Contact Method:</div>
+	<div id="contact-type-selection">
+		<div class="contact-type"><input id="facebook-feed" type="checkbox" name="facebook-feed"/><label for="facebook-feed">Post to your Facebook Feed</label></div>
+		<div class="contact-type"><input id="facebook-private" type="checkbox" name="facebook-private"/><label for="facebook-private">Private Facebook Messages</label></div>
+		<div class="contact-type"><input id="email" type="checkbox" name="email"/><label for="email">Email Messages</label></div>
+	</div>
+	<!--<div id="email-button" class="contact-tag social-icons" onclick="$j('#email-modal').css('visibility', 'visible');">
 		<div class="button-hover-tag">email</div>
 		<img src="{{PATH}}images/email.png" alt="email"/>
 	</div>
 	<div id="share-email-preview" class="contact-preview"></div>
-	<div id="facebook-button" class="contact-tag social-icons"><!-- onclick TDFriendSelector modal pop up -->
+	<div id="facebook-button" class="contact-tag social-icons">
 		<div class="button-hover-tag">facebook</div>
 		<img src="{{PATH}}images/facebook.png" alt="facebook"/>
 	</div>
 	<div id="share-facebook-preview" class="contact-preview"></div>
+	-->
 </div>
 
 <div id="social-message" class="auto-replace" style="display: none">Hey {{FRIEND}},
@@ -222,6 +228,16 @@ Checkout the video I made for you and the links below as I think you'd be intere
 				$j('#trueFanForm .email-input-cluster input:last').keyup(addEmailInput);
 			}
 		}
+
+		$j('.contact-type input').click(function(){
+			if($j(this).is(':checked')){
+				console.log('Input: ' + $j(this).attr('id') + ' is active.' );
+				var modal = '#' + $j(this).attr('id') + '-modal';
+				$j(modal).css('visibility', 'visible');
+                //$j('#email-modal').css('visibility', 'visible'
+				console.log(modal);
+			}
+		});
 	});
 </script>
 

@@ -7,6 +7,11 @@
 	min-width: 1024px;
 }
 
+#content
+{
+	overflow: hidden;
+}
+
 #bodyContent
 {
 	font-family: ubuntu;
@@ -109,7 +114,8 @@ h6
 
 #loading-block 
 {
-	margin-top: 40%;
+	position: relative;
+	top: 40%;
 }
 
 #loading-block p
@@ -117,6 +123,12 @@ h6
 	margin: 20px 0;
 	font-weight: bold;
 	font-size: 22px;
+}
+
+#loading-block .warn
+{
+	color: blue;
+	font-size: 16px;
 }
 
 /***************** Utility CSS Classes *******************/
@@ -218,6 +230,8 @@ ul.no-bullets li
 	/*border: 1px solid black;*/
 	background: #fff;
 	box-shadow: 0 0 10px #fff;
+    max-height: 90%;
+	overflow-y: auto
 }
 
 
@@ -242,8 +256,6 @@ ul.no-bullets li
 #modal-directions
 {
 	width: 65%;
-	max-height: 90%;
-	overflow-y: auto;
 }
 
 #modal-directions h1
@@ -310,7 +322,7 @@ ul.no-bullets li
 #icon-credits-show
 {
 	position: absolute;
-	bottom: 0;
+	bottom: -10px;
 	border: none;
 	border-radius: 5px 5px 0 0;
 	background-color: #000;
@@ -318,14 +330,13 @@ ul.no-bullets li
 	font-weight: bold;
 	font-family: "HelveticaNeueW01-75Bold","Helvetica",Arial,sans-serif;
 	font-size: 14px;
-	padding: 3px 28px 0;
+	padding: 3px 28px 15px;
     position: absolute;
 }
 
 #icon-credits
 {
-	width: 75%;
-	margin: 25px auto;
+	width: 65%;
 	text-align: left;
 }
 
@@ -574,6 +585,19 @@ ul.no-bullets li
 	position: relative;
 }
 
+#contact-type-selection
+{
+	text-align: left;
+	float: left;
+	overflow: hidden;
+	margin-bottom: 15px;
+}
+
+#bodyContent .contact-type label
+{
+	margin-left: 2px;
+}
+
 .contact-preview
 {
 	text-align: left;
@@ -726,11 +750,11 @@ ul.no-bullets li
 
 #blurb-popup .modal-overlay-pane
 {
-    border: 1px solid black;
 	box-shadow: none;
     width: 100%;
 	margin: 0;
 	padding: 3px;
+	opacity: .9;
 }
 
 #show-ose-truefan-name:hover #blurb-popup
@@ -799,8 +823,27 @@ ul.no-bullets li
 
 #status-text
 {
-	top: 50%;
+	top: 40%;
 	position: relative;
+}
+
+/*** finsih.html ****/
+#bodyContent #finish-links a
+{
+	display: inline-block;
+	margin-right: 10px;
+	width: 21%;
+}
+
+#finish-video-link
+{
+    border: 1px solid #000;
+    color: #777;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 auto;
+    padding: 16px;
+	display: inline-block;
 }
 
 /*** temp dev global css ****/

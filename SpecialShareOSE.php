@@ -286,7 +286,7 @@ class SpecialShareOSE extends SpecialPage {
 
 			default:
 				// TODO: Consider - Should we display an error template?
-				tfDebug('Unknown GET request.');
+				tfDebug('Unknown GET request: '.$request);
 				break;
 
 		}
@@ -693,7 +693,7 @@ class TrueFanForm
 					'class' => 'HTMLSexyTextArea',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-friends-message',
-					'label' => 'Message to Friends',
+					'label' => 'Contact Message',
 					'rows' => 5,
 				),
 				'EmailInput' => array(

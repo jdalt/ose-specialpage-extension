@@ -35,6 +35,7 @@ window.fbAsyncInit = function() {
 				// connected
 				FB_AUTH_STATUS = 'connected';
 			}
+			// FIXME: else condition?
 		} else if (session === undefined) {
 			// not connected
 			FB_AUTH_STATUS = 'not_connected';
@@ -69,7 +70,7 @@ window.fbAsyncInit = function() {
 		$j('#CancelFriendSelect').click(friendSelector.hideFriendSelector);
 		$j('#TDFriendSelector_buttonClose').click(function(){console.log('clicked close button for friendselector'); $j('#friend-selector-holder').css('display','none');});
 
-		$j("#facebook-button").click(function (e) {
+		$j("#facebook-private").click(function (e) {
 			$j('#friend-selector-holder').css('display', 'block');
 			console.log('Yo we should be popping a friend selector...')
 			executeOnAuth(function(response) {

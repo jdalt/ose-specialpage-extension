@@ -1,44 +1,27 @@
 <div id="steps-header">
-	<h1>Awesome!</h1>
-	<h4>Video received and messages sent.</h4>
-	<p>Your video can be view publicly at this link:
-		<a href="{{USER_VIDEO_LINK}}">{{USER_VIDEO_LINK}}</a>
-	</p>
-	<br/><br/>
+
 </div>
 
 <div id="watch-area">
-	<div id="playlist-container">
-		<h3>Playlist</h3>
-		<ul class="no-bullets">
-			<li>{{USER_NAME}}'s Video</li>
-			<li>Marcin's Ted Talk</li>
-			<li>FeF Narrative</li>
-		</ul>
-	</div>
+
 </div>
 
 <div id="quote-area">
-	<h3>{{USER_NAME}}</h3>
-	<p>{{USER_MESSAGE}}</p>
+
 </div>
 
 <div id="main-area">
-	<iframe id="video-viewer" src="http://www.youtube.com/embed/{{USER_VIDEO_ID}}">Holy cats your browser doesn't support teh iframes.</iframe>
-	<ul id="action-links" class="inline-links">
-		<li id="learn-more">
-			<img src="{{PATH}}images/learn_more.png"/>
-			<a href="http://opensourceecology.org/about.php">Learn More</a>
-		</li>
-		<li id="get-involved">
-			<img src="{{PATH}}images/get_involved.png"/>
-			<a href="http://opensourceecology.org/wiki/Main_Page">Get Involved</a>
-		</li>
-		<li id="join-us">
-			<img src="{{PATH}}images/join_us.png"/>
-			<a href="http://opensourceecology.org/join.php">Join Us</a>
-		</li>
-	</ul>
+	<h2 style="font-size: 100px; margin: 0; padding: 0; line-height: normal">Finish</h2>
+	<p style="color:blue; font-weight: bold">Video received and messages sent.</p>
+	<br />
+	<p>The following is a permanent link to your video. You can post this to twitter or save it to your bookmarks.</p>
+	<div>
+		<div id="finish-video-link">{{USER_VIDEO_LINK}}</div>
+	</div>
+	<br /><br />
+	<h3> Where to?</h3>
+	<div id="finish-links"><a class="green-button" href="{{USER_VIDEO_LINK}}">My Video</a><a class="green-button" href="{{BASE_URL}}?page=welcome">True Fan Stories</a></div>
+	<br /><br />
 </div>
 
 

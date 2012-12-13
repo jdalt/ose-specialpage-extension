@@ -9,7 +9,10 @@ $j(document).ready(function() {
 	console.log('$j says document ready');
 
 	// only some pages have #video-viewer
-	$j('#video-viewer').append('<div class="loading-block"><p>The Youtube plugin is loading.</p><img src="/w/extensions/ShareOSE/images/loading.gif" /></div>');
+	$j('#video-viewer').append('<div id="loading-block"><p>Youtube plugin is loading.</p><img src="/w/extensions/ShareOSE/images/loading.gif" /></div>');
+	setTimeout(function(){
+		$j('#loading-block').append('<p class="warn">You may have to refresh the page to load Youtube plugin.</p>');
+	}, 5000);
 
 	$j('#ose-truefan-message').keyup(function(){$j('#quote-area p').html($j('#ose-truefan-message').val());});
 	
