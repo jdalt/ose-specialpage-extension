@@ -160,11 +160,6 @@ ul.no-bullets li
 	text-align: center;
 }
 
-.inactive
-{
-	display: none;
-}
-
 .deactivated
 {
 	opacity: .3;

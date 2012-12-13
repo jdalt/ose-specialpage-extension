@@ -63,17 +63,18 @@ window.fbAsyncInit = function() {
 				}
 				html += '</ul>\n';
 				$j('#share-facebook-preview').html(html);
-				$j('#friend-selector-holder').css('display', 'none');
+				$j('#friend-selector-holder').css('visibility', 'hidden');
 			}
 		});
 
 		$j('#CancelFriendSelect').click(friendSelector.hideFriendSelector);
-		$j('#TDFriendSelector_buttonClose').click(function(){console.log('clicked close button for friendselector'); $j('#friend-selector-holder').css('display','none');});
+		$j('#TDFriendSelector_buttonClose').click(function(){console.log('clicked close button for friendselector'); $j('#friend-selector-holder').css('visibility','hidden');});
 
 		$j("#facebook-private").click(function (e) {
-			$j('#friend-selector-holder').css('display', 'block');
+			$j('#friend-selector-holder').css('visibility', 'visible');
 			console.log('Yo we should be popping a friend selector...')
 			executeOnAuth(function(response) {
+				console.log('we can has auth');
 				friendSelector.showFriendSelector();
 			});
 			e.preventDefault(); // ??
@@ -185,6 +186,7 @@ function executeOnAuth(callback)
 	} else {
 		FB.login(function(response) {
 			if(response.authResponse) {
+				console.log('authed now calling callback');
 				callback();
 			} else {
 				// !! Output do common App debug outlets
