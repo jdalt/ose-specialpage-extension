@@ -85,9 +85,9 @@ window.fbAsyncInit = function() {
 function postToMyFeed()
 {
 	executeOnAuth(function(response) {
+		var messageText = $j('#ose-truefan-friends-message').val();
 		var postData =
 		{
-			to: postFriend.id,
 			message: messageText,
 			name: 'Open Source Ecology True Fans',
 			caption: 'Build yourself.',
