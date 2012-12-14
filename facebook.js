@@ -106,7 +106,7 @@ function postToMyFeed()
 			} else {
 				console.log('Posted to facebook feed.');
 				havePostedToFeed = true;
-				$j('.mw-htmlform-submit').click(); 
+				$j('#trueFanForm').submit();
 			}
 		});
 	  /*

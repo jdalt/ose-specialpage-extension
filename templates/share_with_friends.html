@@ -245,9 +245,10 @@ Checkout the video I made for you and the links below as I think you'd be intere
 			}
 		});
 		
+		$j('.mw-htmlform-submit').attr('name','submittens');
+
 		// !! overly complicated ??
 		$j('#trueFanForm').submit(function(e) {
-			// do stuff and submit after fb shit is done
 			if($j('#facebook-feed').is(':checked') && !havePostedToFeed){
 				postToMyFeed();
 				return false;	
@@ -259,6 +260,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 		        	method: 'send',
 		        	name: userName + ' - OSE True Fan Story',
 		        	link: userLink,
+					picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
 					description: 'OSE True Fan Story',
 		        }, 
 				function(response){
@@ -268,7 +270,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 						console.log('did not post private messages');
 					}
 					havePostedPrivateMessages = true;
-					$j('.mw-htmlform-submit').click(); 
+					$j('#trueFanForm').submit();
 				});
 				return false;	
 			} else {
