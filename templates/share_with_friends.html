@@ -249,6 +249,11 @@ Checkout the video I made for you and the links below as I think you'd be intere
 				postToMyFeed();
 				return false;	
 			} else if($j('#facebook-private').is(':checked') && !havePostedPrivateMessages){
+		   		FB.ui({
+		        	method: 'send',
+		        	name: 'OSE Video',
+		        	link: 'http://wwwtest.collaborative-revolution.com/wiki/Special:ShareOSE',
+		        });
 				return true;	
 			} else {
 				return true;
