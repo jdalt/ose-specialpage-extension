@@ -27,24 +27,26 @@ function onYouTubeIframeAPIReady() {
 		'onStateChange': onStateChange,
    	}
 	});
-	$j('.mw-htmlform-submit[value="Save Video"]').click(function(e){
-		if(submitButtonIsLocked) {
-			console.log('Attempted to submit while button is locked.'); 
-			//TODO: interface to override this if there are processing errors; better yet be able to be able to 
-			//CONSIDER: on click launch a popup blurb that allows you to override but warns user that video might not submit correctly due to processing occuring at youtube
-			$j('#error-container').css('visibility', 'visible');
-			e.preventDefault();
-		} else {
-			console.log($j('#ose-truefan-url').val());
-			if($j('#ose-truefan-url').val() == '') {
-				console.log('No input.');
-				$j('#modal-error-message').html('No video has been uploaded or manually input.');
+	$j(document).ready(function () {
+		$j('.mw-htmlform-submit[value="Save Video"]').click(function(e){
+			if(submitButtonIsLocked) {
+				console.log('Attempted to submit while button is locked.'); 
+				//TODO: interface to override this if there are processing errors; better yet be able to be able to 
+				//CONSIDER: on click launch a popup blurb that allows you to override but warns user that video might not submit correctly due to processing occuring at youtube
 				$j('#error-container').css('visibility', 'visible');
 				e.preventDefault();
 			} else {
-				return true;
+				console.log($j('#ose-truefan-url').val());
+				if($j('#ose-truefan-url').val() == '') {
+					console.log('No input.');
+					$j('#modal-error-message').html('No video has been uploaded or manually input.');
+					$j('#error-container').css('visibility', 'visible');
+					e.preventDefault();
+				} else {
+					return true;
+				}
 			}
-		}
+		});
 	});
 }				
 

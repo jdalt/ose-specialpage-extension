@@ -50,7 +50,7 @@ window.fbAsyncInit = function() {
 	$j(document).ready(function () {
 
 		/* Friend selector stuff */
-		TDFriendSelector.init({debug: true, speed: 25});
+/*		TDFriendSelector.init({debug: true, speed: 25});
 		friendSelector = TDFriendSelector.newInstance({
 			callbackSubmit: function(selectedFriendIds) {
 				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
@@ -77,78 +77,37 @@ window.fbAsyncInit = function() {
 				console.log('we can has auth');
 				friendSelector.showFriendSelector();
 			});
-			e.preventDefault(); // ??
 		});
-		// !! overly complicated ??
-		$j('#trueFanForm').submit(function(e) {
-			console.log(facebookSubmit);
-			console.log('Attempting to submit.');
-			console.log(e);
-			if(facebookSubmit == 0) {
-				console.log('No previous submission attempts');
-				console.log(friendSelector.getselectedFriendIds().length);
-				//!! Error --- TDFriendSelector is null no submit !!
-				if(friendSelector.getselectedFriendIds().length != 0) {
-					console.log('Posting to feed. Hold on to your butts.');
-					postFacebookFeed(friendSelector.getselectedFriendIds());
-					console.log('postFacebookFeed function returned; submit return false.');
-					return false;
-				} else { 
-					return true;
-				}
-			} else {
-				if(facebookSubmit == friendSelector.getselectedFriendIds().length) {
-					console.log('Responses already sent; Submit true');
-					return true;
-				} else {
-					console.log(facebookSubmit);
-					return false;
-				}
-			}
-			return false; // temp
-		});
+*/
 	});
 };
 
-function postFacebookFeed(friendIdArray)
+function postToMyFeed()
 {
 	executeOnAuth(function(response) {
-		console.log('got publish stream permissions');
+		var postData =
+		{
+			to: postFriend.id,
+			message: messageText,
+			name: 'Open Source Ecology True Fans',
+			caption: 'Build yourself.',
+			description: 'Moar machines...!!',
+			link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
+			picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
+		};
 
-		var messageText = $j('#ose-truefan-friends-message').val();
-
-		for(var i=0; i<friendIdArray.length; i++) {
-			postFriend = TDFriendSelector.getFriendById(friendIdArray[i]);
-			console.log(postFriend);
-
-			var postData =
-			{
-				to: postFriend.id,
-				message: messageText,
-				name: 'Open Source Ecology True Fans',
-				caption: 'Build yourself.',
-				description: 'Moar machines...!!',
-				link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
-				picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
-			};
-
-			FB.api('/' + postFriend.id + '/feed', 'post', postData, function(response) {
-				if (!response || response.error) {
-					console.log(response);
-					console.log('Error occured for: ' + postFriend.id);
-					alert('Error occured');
-				} else {
-					console.log('Post ID: ' + response.id);
-					console.log('Attempting to submit form.');
-					facebookSubmit++;
-					if(facebookSubmit == friendIdArray.length) {
-						console.log('Submitting form by firing click.');
-						$j('.mw-htmlform-submit').click(); 
-					}
-				}
-			});
-		}
-
+		FB.api('/me/feed', 'post', postData, function(response) {
+			if (!response || response.error) {
+				// TODO: Relay this message back UX
+				console.log(response);
+				console.log('Error occured posting to feed.');
+				alert('Error occured');
+			} else {
+				console.log('Posted to facebook feed.');
+				havePostedToFeed = true;
+				$j('.mw-htmlform-submit').click(); 
+			}
+		});
 	  /*
 		// Now publish an action the user who made the video's wall/timeline
 		FB.api('/me/osetruefantest:join', 'post',
@@ -161,7 +120,8 @@ function postFacebookFeed(friendIdArray)
 					alert('Join Cause action was successful! Action ID: ' + response.id);
 				}
 		});*/
-	}); 
+
+	});
 }
 
 function uninstallApp() {

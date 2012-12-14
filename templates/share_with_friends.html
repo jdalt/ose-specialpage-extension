@@ -51,10 +51,10 @@
 			<h2>Directions</h2>
 			<img id="directions-marker" src="{{PATH}}images/share_three_35.png"/>
 			<div id="directions">
-				<p>Invite friends to view your video. You can add <img class="inline-social-icon" src="{{PATH}}images/email.png" alt="email"/><strong>email</strong> and <img class="inline-social-icon" src="{{PATH}}images/facebook.png" alt="facebook"/><strong>facebook</strong> contacts to view your video by clicking on the appropriate icon.</p>
+				<p>Invite friends to view your video. You can post to your facebook feed, send private messages across facebook, and send email messages to contacts by clicking the appropriate checkbox.</p>
 				<p>This page includes a basic message that will be sent to your contacts. You can edit this message. Unlike the last step, this message will only be visible to the friends you send it to.</p>
-				<p>The text <strong>{{FRIEND}}</strong> will be replaced by the friend who receives message.</p>
-				<p>The text <strong>{{EMAIL_VIDEO_LINK}}</strong> will by replaced by the link to your video. <strong>Do not delete this text</strong>, or your contacts won't be able to find your video.</p>
+				<p>The text <strong>{{MY_FRIENDs_NAME}}</strong> will be replaced by the friend who receives message.</p>
+				<p>The text <strong>{{MY_VIDEO_LINK}}</strong> will by replaced by the link to your video. <strong>Do not delete this text</strong>, or your contacts won't be able to find your video.</p>
 			</div>
 			<img src="{{PATH}}images/multifriend.png" />
 		</div>
@@ -65,11 +65,11 @@
 <!-- Auto Replace and Hidden Land - this HTML will be redirected via javascript -->
 
 <div class="auto-replace" id="contact-holder">
-	<div class="contact-tag">Contact Method:</div>
+	<div class="contact-tag">Contact Method</div>
 	<div id="contact-type-selection">
 		<div class="contact-type"><input id="facebook-feed" type="checkbox" name="facebook-feed"/><label for="facebook-feed">Post to your Facebook Feed</label></div>
-		<div class="contact-type"><input id="facebook-private" type="checkbox" name="facebook-private"/><label for="facebook-private">Private Facebook Messages</label></div>
-		<div class="contact-type"><input id="email" type="checkbox" name="email"/><label for="email">Email Messages</label></div>
+		<div class="contact-type"><input id="facebook-private" type="checkbox" name="facebook-private"/><label for="facebook-private">Send Private Facebook Messages</label></div>
+		<div class="contact-type"><input id="email" type="checkbox" name="email"/><label for="email">Send Email Messages</label></div>
 	</div>
 	<!--<div id="email-button" class="contact-tag social-icons" onclick="$j('#email-modal').css('visibility', 'visible');">
 		<div class="button-hover-tag">email</div>
@@ -84,10 +84,10 @@
 	-->
 </div>
 
-<div id="social-message" class="auto-replace" style="display: none">Hey {{FRIEND}},
+<div id="social-message" class="auto-replace" style="display: none">Hey {{MY_FRIENDS_NAME}},
 
 Checkout the video I made for you and the links below as I think you'd be interested in Open Source Ecology.
-{{EMAIL_VIDEO_LINK}}
+{{MY_VIDEO_LINK}}
 </div>
 
 <div id="fb-root"></div>
@@ -164,6 +164,9 @@ Checkout the video I made for you and the links below as I think you'd be intere
 	var autoInputArray = {
 		"#social-message":"#ose-truefan-friends-message"
 	}
+
+	var havePostedToFeed = false;
+	var havePostedPrivateMessages = false;
 	
 	$j(document).ready(function() {
 		$j('.mw-htmlform-field-HTMLTextArray').empty();
@@ -236,6 +239,19 @@ Checkout the video I made for you and the links below as I think you'd be intere
 				$j(modal).css('visibility', 'visible');
                 //$j('#email-modal').css('visibility', 'visible'
 				console.log(modal);
+			}
+		});
+		
+		// !! overly complicated ??
+		$j('#trueFanForm').submit(function(e) {
+			// do stuff and submit after fb shit is done
+			if($j('#facebook-feed').is(':checked') && !havePostedToFeed){
+				postToMyFeed();
+				return false;	
+			} else if($j('#facebook-private').is(':checked') && !havePostedPrivateMessages){
+				return true;	
+			} else {
+				return true;
 			}
 		});
 	});

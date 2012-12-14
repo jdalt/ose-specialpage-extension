@@ -570,12 +570,12 @@ ul.no-bullets li
 	min-height: 50px;
 	overflow: hidden;
 	padding-top: 16px;
+	text-align: left;
 }
 
 .contact-tag
 {
 	font-size: 16px;
-	float: left;
 	margin-right: 10px;
 	position: relative;
 }

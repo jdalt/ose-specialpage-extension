@@ -24,16 +24,18 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event)
 {
-	var videoIdArray = new Array();
-	$j('#playlist li').each(function(index){
-		$j(this).click(function() {
-			console.log(index);
-			player.playVideoAt(index);
+	$j(document).ready(function () {
+		var videoIdArray = new Array();
+		$j('#playlist li').each(function(index){
+			$j(this).click(function() {
+				console.log(index);
+				player.playVideoAt(index);
+			});
+			videoIdArray.push($j(this).find('span').html());	
 		});
-		videoIdArray.push($j(this).find('span').html());	
+		console.log(videoIdArray);
+		player.cuePlaylist(videoIdArray);
 	});
-	console.log(videoIdArray);
-	player.cuePlaylist(videoIdArray);
 }
 
 function onPlayerStateChange(event)

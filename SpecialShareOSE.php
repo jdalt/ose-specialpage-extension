@@ -532,13 +532,13 @@ class TrueFanForm
 					$templateMessage = $formFields['FriendMessage'];
 					$replace = array();
 					$link = $this->mPage->getUserViewProfileLink();
-					$replace['EMAIL_VIDEO_LINK'] = '<a href="'.$link.'">'.$link.'</a>';
+					$replace['MY_VIDEO_LINK'] = '<a href="'.$link.'">'.$link.'</a>';
 
 					// initialize error collector variable
 					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
 						list($name, $address) = explode(':',$friendAddress);
-						$replace['FRIEND'] = $name;
+						$replace['MY_FRIENDS_NAME'] = $name;
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
 						// This code actually sends the emails, for purposes of debugging it requires SendEmails checkbox to actually send emails
