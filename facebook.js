@@ -86,13 +86,14 @@ function postToMyFeed()
 {
 	executeOnAuth(function(response) {
 		var messageText = $j('#ose-truefan-friends-message').val();
+		var userLink = $j('#user-video-link').html();
 		var postData =
 		{
 			message: messageText,
-			name: 'Open Source Ecology True Fans',
-			caption: 'Build yourself.',
-			description: 'Moar machines...!!',
-			link: 'http://wwwtest.collaborative-revolution.com/wiki/',          // !!! change this here !!! //
+			name: 'Open Source Ecology',
+			caption: 'True Fan Stories',
+			/*description: 'Moar machines...!!',*/
+			link: userLink,
 			picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
 		};
 

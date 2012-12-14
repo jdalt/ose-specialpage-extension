@@ -62,6 +62,9 @@
 	</div>
 </div>
 
+<span id="user-video-link" class="hidden">{{USER_VIDEO_LINK}}</span>
+<span id="user-name" class="hidden">{{USER_NAME}}</span>
+
 <!-- Auto Replace and Hidden Land - this HTML will be redirected via javascript -->
 
 <div class="auto-replace" id="contact-holder">
@@ -249,10 +252,12 @@ Checkout the video I made for you and the links below as I think you'd be intere
 				postToMyFeed();
 				return false;	
 			} else if($j('#facebook-private').is(':checked') && !havePostedPrivateMessages){
+				var userLink = $j('#user-video-link').html();
+				var userName = $j('#user-name').html();
 		   		FB.ui({
 		        	method: 'send',
-		        	name: 'OSE Video',
-		        	link: 'http://wwwtest.collaborative-revolution.com/wiki/Special:ShareOSE',
+		        	name: userName + ' - OSE True Fan Story',
+		        	link: userLink,
 		        }, 
 				function(response){
 					if (response && response.post_id){
