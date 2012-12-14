@@ -62,8 +62,8 @@
 	</div>
 </div>
 
-<span id="user-video-link" class="hidden">{{USER_VIDEO_LINK}}</span>
-<span id="user-name" class="hidden">{{USER_NAME}}</span>
+<input id="user-video-link" type="hidden" value="{{USER_VIDEO_LINK}}" />
+<input id="user-name" type="hidden" value="{{USER_NAME}}" />
 
 <!-- Auto Replace and Hidden Land - this HTML will be redirected via javascript -->
 
@@ -252,12 +252,14 @@ Checkout the video I made for you and the links below as I think you'd be intere
 				postToMyFeed();
 				return false;	
 			} else if($j('#facebook-private').is(':checked') && !havePostedPrivateMessages){
-				var userLink = $j('#user-video-link').html();
-				var userName = $j('#user-name').html();
+				var userLink = $j('#user-video-link').val();
+				console.log(userLink);
+				var userName = $j('#user-name').val();
 		   		FB.ui({
 		        	method: 'send',
 		        	name: userName + ' - OSE True Fan Story',
 		        	link: userLink,
+					description: 'OSE True Fan Story',
 		        }, 
 				function(response){
 					if (response && response.post_id){
