@@ -253,8 +253,17 @@ Checkout the video I made for you and the links below as I think you'd be intere
 		        	method: 'send',
 		        	name: 'OSE Video',
 		        	link: 'http://wwwtest.collaborative-revolution.com/wiki/Special:ShareOSE',
-		        });
-				return true;	
+		        }, 
+				function(response){
+					if (response && response.post_id){
+						console.log('post was teh success');
+					} else {
+						console.log('did not post private messages');
+					}
+					havePostedPrivateMessages = true;
+					$j('.mw-htmlform-submit').click(); 
+				});
+				return false;	
 			} else {
 				return true;
 			}
