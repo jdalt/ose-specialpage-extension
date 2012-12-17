@@ -238,10 +238,10 @@ Checkout the video I made for you and the links below as I think you'd be intere
 						$j('#fb-post-status').html('Private messages successfully sent to facebook.');
 						console.log('post was teh success');
 					} else {
-						$j('#fb-post-status').html('Unable to send private facebook messages.');
-						console.log('did not post private messages');
 						console.log(response);
 						console.log(response.post_id);
+						console.log('did not post private messages');
+						$j('#fb-post-status').html('Unable to send private facebook messages.');
 					}
 					havePostedPrivateMessages = true;
 					//$j('#trueFanForm').submit();
