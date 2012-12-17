@@ -707,7 +707,7 @@ class TrueFanForm
 					'class' => 'HTMLSexyCheckField',
 					'section' => 'email',
 					'id' => 'ose-truefan-email-check',
-					'label' => 'Send Emails',
+					'label' => 'Send Email Messages',
 				),
 				'FacebookFriends' => array(
 					'type' => 'hidden',

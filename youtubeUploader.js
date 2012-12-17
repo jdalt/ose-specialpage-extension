@@ -18,16 +18,16 @@ console.log(firstScriptTag);
 var widget;
 var player;
 function onYouTubeIframeAPIReady() {
-  	widget = new YT.UploadWidget('video-viewer', {
-   	width: parseInt($j('#video-viewer').css('width')),
-   	events: {
-   		'onUploadSuccess': onUploadSuccess,
-    	'onProcessingComplete': onProcessingComplete,
-		'onApiReady': onApiReady,
-		'onStateChange': onStateChange,
-   	}
-	});
 	$j(document).ready(function () {
+	  	widget = new YT.UploadWidget('video-viewer', {
+	   	width: parseInt($j('#video-viewer').css('width')),
+	   	events: {
+	   		'onUploadSuccess': onUploadSuccess,
+	    	'onProcessingComplete': onProcessingComplete,
+			'onApiReady': onApiReady,
+			'onStateChange': onStateChange,
+	   	}
+		});
 		$j('.mw-htmlform-submit[value="Save Video"]').click(function(e){
 			if(submitButtonIsLocked) {
 				console.log('Attempted to submit while button is locked.'); 

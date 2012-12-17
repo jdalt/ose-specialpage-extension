@@ -39,6 +39,8 @@ h3
 	text-align: center;
 	font-size: 30px;
 	padding-top: 0px;
+	line-height: normal;
+	padding-bottom: 10px;
 }
 
 h4
@@ -219,7 +221,7 @@ ul.no-bullets li
 
 .modal-overlay-pane
 {
-	width: 35%;
+	width: 500px;
 	padding: 10px;
 	margin: 25px auto;
 	/*border: 1px solid black;*/
@@ -671,10 +673,21 @@ ul.no-bullets li
 	margin-left: 5px;
 }
 
+#fb-post-status
+{
+	color: #fff;
+	font-size: 40px;
+}
+
 .gray
 {
 	opacity: .2;
 	text-decoration: line-through;
+}
+
+#bodyContent .inline-button
+{
+	display: inline;
 }
 
 /******* Style for upload Template - Creates Rotating Gear ********/
