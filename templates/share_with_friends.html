@@ -239,12 +239,11 @@ Checkout the video I made for you and the links below as I think you'd be intere
 						console.log('post was teh success');
 					} else {
 						console.log(response);
-						console.log(response.post_id);
 						console.log('did not post private messages');
 						$j('#fb-post-status').html('Unable to send private facebook messages.');
 					}
 					havePostedPrivateMessages = true;
-					//$j('#trueFanForm').submit();
+					$j('#trueFanForm').submit();
 				});
 				return false;	
 			} else {
