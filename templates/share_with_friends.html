@@ -156,7 +156,6 @@ Checkout the video I made for you and the links below as I think you'd be intere
 	$j(document).ready(function() {
 		$j('#bodyContent').css('min-height', $j(window).height() -250);
 
-		//$j('#email-fake').replaceWith($j('#ose-truefan-email-check'));
 		$j('#ose-truefan-email-check').parent().appendTo('#email-holder');
 
 		$j('.mw-htmlform-field-HTMLTextArray').empty();
@@ -173,7 +172,6 @@ Checkout the video I made for you and the links below as I think you'd be intere
 			console.log('processEmail')
 			var addresses = new Array();
 			// TODO: Remove empty email inputs
-			//$j('.modal-overlay-container').css('visibility','hidden');
 			$j('#share-email-preview').empty('');
 			$j('#email-input-container .email-list-combo').each( function(index) {
 				var name = $j(this).find('.email-names').val();
@@ -242,9 +240,11 @@ Checkout the video I made for you and the links below as I think you'd be intere
 					} else {
 						$j('#fb-post-status').html('Unable to send private facebook messages.');
 						console.log('did not post private messages');
+						console.log(response);
+						console.log(response.post_id);
 					}
 					havePostedPrivateMessages = true;
-					$j('#trueFanForm').submit();
+					//$j('#trueFanForm').submit();
 				});
 				return false;	
 			} else {
