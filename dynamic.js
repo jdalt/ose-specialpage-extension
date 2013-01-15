@@ -40,22 +40,6 @@ $j(document).ready(function() {
 		$j($j(this).attr('data-target')).css('visibility','visible');
 	});
 
-	for (var source in autoReplaceArray) {
-  		if (autoReplaceArray.hasOwnProperty(source)) {
-			var sourceHtml = $j(source).html();
-			$j(autoReplaceArray[source]).html(sourceHtml);
-			$j(source).empty();
-  		}
-	}
-
-	for (var source in autoInputArray) {
-  		if (autoInputArray.hasOwnProperty(source)) {
-			var sourceText = $j(source).html();
-			$j(autoInputArray[source]).val(sourceText);
-			$j(source).empty();
-  		}
-	}
-
 });
 
 function runOnloadHook()

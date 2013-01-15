@@ -67,8 +67,9 @@ class SpecialShareOSE extends SpecialPage {
 		}
 		
 		// Use the POST variable Page to build correct form to auto load the rest of the POST request.
-		$this->mReqPostPage = $wgRequest->getText('Page');
+		$this->mReqPostPage = $wgRequest->getText('wpPage');
 		if($wgRequest->wasPosted()) {
+			echo "Posted: ".$this->mReqPostPage;
 			$this->mPostedForm = new TrueFanForm($this, $this->mReqPostPage);
 		}
 	}
@@ -414,12 +415,18 @@ class TrueFanForm
 		if(!$this->mFormBuilt) {
 			// Reminder: 2nd param in constructor creates messagePrefix which is used to 
 			// name the fieldset. (text of which is .i18n file)
-			$this->mForm = new SexyForm($this->mDescriptor, "trueFanForm"); 
+			
+			// !! can assign a context through SpecialPage::getContext()
+			$this->mForm = new SexyForm($this->mDescriptor, $this->mPage->getContext(), "trueFanForm"); 
+			
+			//$this->mForm = new SexyForm($this->mDescriptor, "trueFanForm"); 
+			
+			
 			$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-".$this->mType)); 
 			$this->mForm->setSubmitName('submit');
 			$this->mForm->setSubmitCallback(array($this, 'formCallback'));
 			$this->mForm->setId("trueFanForm");
-			$this->mForm->setTitle($this->mPage->getTitle());
+			//$this->mForm->setTitle($this->mPage->getTitle());
 			$this->mForm->addPreText($this->mPreText);
 			$this->mFormBuilt = true;
 		}
@@ -490,6 +497,7 @@ class TrueFanForm
 	 */
 	public function formCallback($formFields)
 	{ 
+		echo "callback for ".$formFields['Page'];
 		switch($formFields['Page']) {
 			case 'upload':
 				//TODO: Guarantee that we're XSS safe and that we can round trip text with special characters
@@ -596,7 +604,7 @@ class TrueFanForm
 				}
 				
 				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
-				if(isset($_POST['DeleteProfile'])) {
+				if(isset($_POST['wpDeleteProfile'])) {
 					if(!$this->mPage->mDb->deleteUser($this->mPage->mTfProfile['id'])) {
 						return 'Failed to delete profile.';
 					} else {
