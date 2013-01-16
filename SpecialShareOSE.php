@@ -69,7 +69,6 @@ class SpecialShareOSE extends SpecialPage {
 		// Use the POST variable Page to build correct form to auto load the rest of the POST request.
 		$this->mReqPostPage = $wgRequest->getText('wpPage');
 		if($wgRequest->wasPosted()) {
-			echo "Posted: ".$this->mReqPostPage;
 			$this->mPostedForm = new TrueFanForm($this, $this->mReqPostPage);
 		}
 	}
@@ -497,7 +496,6 @@ class TrueFanForm
 	 */
 	public function formCallback($formFields)
 	{ 
-		echo "callback for ".$formFields['Page'];
 		switch($formFields['Page']) {
 			case 'upload':
 				//TODO: Guarantee that we're XSS safe and that we can round trip text with special characters
@@ -568,7 +566,6 @@ class TrueFanForm
 					} 
 					if($errors) {
 						tfDebug($errors);
-						echo '<br/>'.$errors;
 						return 'Unable to mail messages.';
 					}
 		
