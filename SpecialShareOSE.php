@@ -556,9 +556,9 @@ class TrueFanForm
 							$from = new MailAddress($this->mPage->mTfProfile['email']);
 							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
-							$result = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);
-							if($result !== true) {
-								$errors .= $result->getMessage().'\n';
+							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);
+							if($resultStatus->isGood() !== true) {
+								$errors .= $resultStatus->getWikiText().'\n';
 							} 
 						}						
 						$friendAddress = str_replace('<','&lt',$friendAddress);
@@ -571,6 +571,7 @@ class TrueFanForm
 						echo '<br/>'.$errors;
 						return 'Unable to mail messages.';
 					}
+		
 				}
 				return true;
 				break;
@@ -617,6 +618,7 @@ class TrueFanForm
 				break;
 
 		}
+
 		// Anything that falls through to here is likely a curl request or some other tomfoolery
 		tfDebug('Unknown request posted: '.$formFields['Page']);
 		return false;
