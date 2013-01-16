@@ -568,6 +568,7 @@ class TrueFanForm
 					} 
 					if($errors) {
 						tfDebug($errors);
+						echo '<br/>'.$errors;
 						return 'Unable to mail messages.';
 					}
 				}
