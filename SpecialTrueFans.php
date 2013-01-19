@@ -787,3 +787,5 @@ function tfDebug($str)
 {
 	wfDebugLog( 'TrueFans', $str);
 }
+
+//white space error
