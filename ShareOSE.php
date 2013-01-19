@@ -11,25 +11,33 @@ EOT;
 }
  
 $wgExtensionCredits['specialpage'][] = array(
-        'path' => __FILE__,
-        'name' => 'ShareOSE',
-        'author' => 'Brad Lewis',
-        'url' => 'https://www.mediawiki.org/wiki/Extension:MyExtension',
-        'descriptionmsg' => 'This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage',
-        'version' => '0.0.1',
+	'path' => __FILE__,
+	'name' => 'ShareOSE',
+	'author' => 'Jacob Dalton',
+	'url' => 'https://github.com/jdalt/ose-specialpage-extension',
+	'descriptionmsg' => 'This extension provides a mechanism for share and disseminating videos about the Open Source Ecology project.',
+	'version' => '0.1.0',
 );
 
 // !! This hook will not work in MediaWiki 1.16 !! The hook was only added in MW 1.17  :( 
 $wgHooks['UnitTestsList'][] = 'eShareOSERegisterUnitTests';
 function eShareOSERegisterUnitTests( &$files ) {
-        $testDir = dirname( __FILE__ ) . '/';
-        $files[] = $testDir . 'ShareOSETest.php';
-        return true;
+	$files[] = dirname( __FILE__ ) . '/ShareOSETest.php';
+	return true;
 }
 
-$dir = dirname(__FILE__) . '/';
- 
+# Schema updates for update.php
+$wgHooks['LoadExtensionSchemaUpdates'][] = 'schemaPartyHook';
+function schemaPartyHook( DatabaseUpdater $updater ) {
+	$updater->addExtensionTable( 'true_fans',
+    	dirname( __FILE__ ) . '/patches/truefans_table.sql', true );
+	return true;
+}
+
+// this variable can't be used within hooks because dirname will return a different value within a hook
+$dir = dirname( __FILE__ ) . '/';
 $wgAutoloadClasses['SpecialShareOSE'] = $dir . 'SpecialShareOSE.php'; # Location of the SpecialMyExtension class (Tell MediaWiki to load this file)
+$wgAutoloadClasses['TrueFansDb'] = $dir . 'class.TrueFansDb.php'; # Location of the SpecialMyExtension class (Tell MediaWiki to load this file)
 $wgExtensionMessagesFiles['ShareOSE'] = $dir . 'ShareOSE.i18n.php'; # Location of a messages file (Tell MediaWiki to load this file)
 $wgExtensionMessagesFiles['ShareOSEAlias'] = $dir . 'ShareOSE.alias.php'; # Location of an aliases file (Tell MediaWiki to load this file)
 $wgSpecialPages['ShareOSE'] = 'SpecialShareOSE'; # Tell MediaWiki about the new special page 

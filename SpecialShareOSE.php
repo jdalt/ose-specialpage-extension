@@ -22,7 +22,7 @@
  * @ingroup Extensions
 */
 
-require_once('class.TrueFansDb.php');
+// class.TrueFansDb.php is automatically included and defines constants for the field names
 require_once('SexyForm.php');
  
 class SpecialShareOSE extends SpecialPage {
@@ -178,7 +178,7 @@ class SpecialShareOSE extends SpecialPage {
 				$wgOut->addHTML('<table id="submissions"><tbody>');
 				foreach($result as $row) {
 					$wgOut->addHTML('<tr>');
-					$wgOut->addHTML("<td><a href='?page=view&id=".$row['id']."'>{$row['id']} </a></td>");
+					$wgOut->addHTML("<td><a href='?page=view&id=".$row[TF_ID]."'>{$row[TF_ID]} </a></td>");
 					// This is sort of future proofed for further column additions to TrueFanDb
 					foreach($row as $key => $val) {
 						if($key != 'id') {
@@ -264,9 +264,9 @@ class SpecialShareOSE extends SpecialPage {
 							$form = new TrueFanForm($this, 'edit');
 							// We're using htmlspecialchars_decode because db entries htmlspecialchars encoded. 
 							// This allows us to sanely round trip editing so that apostrophes don't matastisize in textboxes.
-							$form->setFieldAttr('Name', 'default', htmlspecialchars_decode($this->mTfProfile['name'], ENT_QUOTES));
-							$form->setFieldAttr('VideoId', 'default', $this->mTfProfile['video_id']);									
-							$form->setFieldAttr('VideoMessage', 'default', htmlspecialchars_decode($this->mTfProfile['video_message'], ENT_QUOTES));
+							$form->setFieldAttr('Name', 'default', htmlspecialchars_decode($this->mTfProfile[TF_NAME], ENT_QUOTES));
+							$form->setFieldAttr('VideoId', 'default', $this->mTfProfile[TF_VIDEO_ID]);									
+							$form->setFieldAttr('VideoMessage', 'default', htmlspecialchars_decode($this->mTfProfile[TF_VIDEO_MESSAGE], ENT_QUOTES));
 							break;
 
 						default:
@@ -329,9 +329,9 @@ class SpecialShareOSE extends SpecialPage {
 		$templateStr['USER_VIDEO_LINK'] = $this->getUserViewProfileLink();
 
 		if($profile != NULL) {
-			$templateStr['USER_NAME'] = $profile['name'];
-			$templateStr['USER_MESSAGE'] = $profile['video_message'];
-			$templateStr['USER_VIDEO_ID'] = $profile['video_id'];
+			$templateStr['USER_NAME'] = $profile[TF_NAME];
+			$templateStr['USER_MESSAGE'] = $profile[TF_VIDEO_MESSAGE];
+			$templateStr['USER_VIDEO_ID'] = $profile[TF_VIDEO_ID];
 		}
 
 		if($extraReplace != NULL) {
@@ -370,7 +370,7 @@ class SpecialShareOSE extends SpecialPage {
 	function getUserViewProfileLink() 
 	{
 		//TODO: test not logged in case
-		return $this->getTitle()->getFullUrl()."?page=view&id={$this->mTfProfile['id']}"; 
+		return $this->getTitle()->getFullUrl()."?page=view&id={$this->mTfProfile[TF_ID]}"; 
 	}
 }
 
@@ -514,7 +514,7 @@ class TrueFanForm
 				break;
 
 			case 'write':
-				if($this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile['id'], $formFields['VideoMessage'])) { 
+				if($this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile[TF_ID], $formFields['VideoMessage'])) { 
 					$this->mPage->mFormStep = 'share';
 				} else {
 					// With the updateVideoMessage function configured to return true on a none update this else should never be tripped
@@ -578,24 +578,24 @@ class TrueFanForm
 				// we would reduce database requests. However I think the current code is better in terms 
 				// of usability because the user is told exactly why their submission wasn't accepted.
 				
-				if($this->mPage->mTfProfile['name'] != htmlspecialchars($formFields['Name'], ENT_QUOTES)) {
-					if(!$this->mPage->mDb->updateName($this->mPage->mTfProfile['id'], $formFields['Name'])) {
+				if($this->mPage->mTfProfile[TF_NAME] != htmlspecialchars($formFields['Name'], ENT_QUOTES)) {
+					if(!$this->mPage->mDb->updateName($this->mPage->mTfProfile[TF_ID], $formFields['Name'])) {
 						return 'Unable to update your name.';
 					} else {
 						$this->mPage->mStatusMessage .= 'Updated your name. ';
 					}
 				}
 
-				if($this->mPage->mTfProfile['video_id'] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
-					if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile['id'], $formFields['VideoId'], true)) {
+				if($this->mPage->mTfProfile[TF_VIDEO_ID] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
+					if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile[TF_ID], $formFields['VideoId'], true)) {
 						return 'Unable to update your video.'; 
 					} else {
 						$this->mPage->mStatusMessage .= 'Updated video id. ';
 					}
 				}
 				
-				if($this->mPage->mTfProfile['video_message'] != htmlspecialchars($formFields['VideoMessage'], ENT_QUOTES)) {
-					if(!$this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile['id'], $formFields['VideoMessage'])) {
+				if($this->mPage->mTfProfile[TF_VIDEO_MESSAGE] != htmlspecialchars($formFields['VideoMessage'], ENT_QUOTES)) {
+					if(!$this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile[TF_ID], $formFields['VideoMessage'])) {
 						return 'Unable to update your video message.';
 					} else {
 						$this->mPage->mStatusMessage .= 'Updated video message. ';
@@ -604,7 +604,7 @@ class TrueFanForm
 				
 				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
 				if(isset($_POST['wpDeleteProfile'])) {
-					if(!$this->mPage->mDb->deleteUser($this->mPage->mTfProfile['id'])) {
+					if(!$this->mPage->mDb->deleteUser($this->mPage->mTfProfile[TF_ID])) {
 						return 'Failed to delete profile.';
 					} else {
 						$this->mPage->mStatusMessage .= 'Your profile has been deleted. ';

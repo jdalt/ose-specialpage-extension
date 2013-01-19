@@ -22,12 +22,19 @@
  * @ingroup Extensions
 */
 
+// Constants used for field and tables names, defined here so that changes to schema
+// need only be made once. Note that this must be kept in sync with changes to
+// sql files in patches directory to reflect current schema.
+global $wgDBprefix;
+define('TF_TABLE', $wgDBprefix.'true_fans');
+define('TF_ID', 'tf_id');
+define('TF_FOREIGN_ID', 'tf_foreign_id');
+define('TF_NAME', 'tf_name');
+define('TF_EMAIL', 'tf_email');
+define('TF_VIDEO_ID', 'tf_video_id');
+define('TF_VIDEO_MESSAGE', 'tf_video_message');
+define('TF_EMAIL_INVITE_LIST', 'tf_email_invite_list'); 
 
-if(!@include_once("/home2/wordpage/.connect_truefans.php"))
-{
-    @include_once("/home/jacob/.connect_truefans.php"); // local file
-}
-   
 class TrueFansDb
 {
 	// TODO: Is bconnected useful? 
@@ -39,9 +46,13 @@ class TrueFansDb
 	*/
 	function __construct()
 	{
-		$dsn = 'mysql:dbname='.getDatabase().';host='.getHost();
+		//$dsn = 'mysql:dbname='.getDatabase().';host='.getHost();
+		global $wgDBtype, $wgDBname, $wgDBserver, $wgDBuser, $wgDBpassword;
+
+		$dsn = $wgDBtype . ':dbname='.$wgDBname.';host='.$wgDBserver;
 		try {
-			$this->pdo = new PDO($dsn, getUser(),getPass());
+			//$this->pdo = new PDO($dsn, getUser(),getPass());
+			$this->pdo = new PDO($dsn, $wgDBuser, $wgDBpassword);
 			$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$this->bconnected = true;
@@ -68,12 +79,12 @@ class TrueFansDb
 	// *** Modification Functions ***
 	
 	/**
-	* Adds a new user and fills name, email, and video_id fields
+	* Adds a new user and fills TF_NAME, TF_EMAIL, and TF_VIDEO_ID fields
 	* @param String $name
 	* @param String $email 
 	* @param String $video_id
 	* @param Boolean $extractUrl Optional parameter to extract url. 
-	* Defaults to true. When set to false, video_id inserted w/o checks.
+	* Defaults to true. When set to false, TF_VIDEO_ID inserted w/o checks.
 	* @return True|NULL On success returns true. On failure returns NULL.
 	*/
 	public function addUser($foreign_id, $name, $email, $video_id, $extractUrl=true)
@@ -88,7 +99,7 @@ class TrueFansDb
 			}
 		}
 
-		$stmt = $this->pdo->prepare('INSERT INTO true_fans(foreign_id, name,email,video_id) VALUES(:foreign_id, :name, :email, :video_id)');
+		$stmt = $this->pdo->prepare('INSERT INTO '.TF_TABLE.'('.TF_FOREIGN_ID.','.TF_NAME.','.TF_EMAIL.','.TF_VIDEO_ID.') VALUES(:foreign_id, :name, :email, :video_id)');
 		try {
 			if($stmt->execute(array(':foreign_id' => $foreign_id, ':name' => $name, ':email' => $email, ':video_id' => $insert_id))) {
 				// success
@@ -101,7 +112,7 @@ class TrueFansDb
 	}
 	
 	/**
-	* Updates a row of true_ran table with name
+	* Updates a row of true_ran table with TF_NAME
 	* @param Integer $id The row to update.
 	* @param String $name The message to add.
 	* @return Boolean Returns true on success and false on failure.
@@ -111,7 +122,7 @@ class TrueFansDb
 	{
 		$name = htmlspecialchars($name, ENT_QUOTES);
 
-		$stmt = $this->pdo->prepare('UPDATE true_fans SET name=:name WHERE id=:id');
+		$stmt = $this->pdo->prepare('UPDATE '.TF_TABLE.' SET '.TF_NAME.'=:name WHERE '.TF_ID.'=:id');
 		try {
 			if($stmt->execute(array(':name' => $name, ':id' => $id))) {
 				// success
@@ -122,17 +133,17 @@ class TrueFansDb
 				return true;
 			}
 		} catch (PDOException $e) {
-			$this->log('Unable to add message and email list invitation for '.$id.': ' .$e->getMessage());
+			$this->log('Unable to add message and '.TF_EMAIL.' list invitation for '.$id.': ' .$e->getMessage());
 		}
 		return false; 
 	}
 
 	/**
-	* Updates a video_id
+	* Updates a TF_VIDEO_ID
 	* @param String $id 
 	* @param String $video_id
 	* @param Boolean $extractUrl Optional parameter to extract url. 
-	* Defaults to true. When set to false, video_id inserted w/o checks.
+	* Defaults to true. When set to false, TF_VIDEO_ID inserted w/o checks.
 	* @return Boolean Returns true on success and false on failure.
 	* No rows being updated counts as a failure. This requires a client
 	* of this library to test that the new data will different than existing
@@ -144,28 +155,28 @@ class TrueFansDb
 		if($extractUrl) {
 			$update_id = $this->extractVideoId($video_id);
 			if(!$update_id) {
-				$this->log('Unable to update extract video id.'); 
+				$this->log('Unable to update extract video '.TF_ID.'.'); 
 				return false;
 			}
 		} 
 	
-		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_id=:update_id WHERE id=:id');
+		$stmt = $this->pdo->prepare('UPDATE '.TF_TABLE.' SET '.TF_VIDEO_ID.'=:update_id WHERE '.TF_ID.'=:id');
 		try {
 			if($stmt->execute(array(':id' => $id, ':update_id' => $update_id))) {
 				if($stmt->rowCount() == 0) {
-					$this->log('No rows were updated on video_id');
+					$this->log('No rows were updated on '.TF_VIDEO_ID.'');
 					return false;
 				}
 				return true;
 			}
 		} catch (PDOException $e) {
-			$this->log('Unable to update video id exception thrown: ' .$e->getMessage());
+			$this->log('Unable to update video '.TF_ID.' exception thrown: ' .$e->getMessage());
 		}
 		return false; 
 	}
 
 	/**
-	* Updates a row of true_ran table with video_message 
+	* Updates a row of true_ran table with TF_VIDEO_MESSAGE 
 	* @param Integer $id The row to update.
 	* @param String $message The message to add.
 	* @return Boolean Returns true on success and false on failure.
@@ -175,7 +186,7 @@ class TrueFansDb
 	{
 		$video_message = htmlspecialchars($video_message, ENT_QUOTES);
 
-		$stmt = $this->pdo->prepare('UPDATE true_fans SET video_message=:message WHERE id=:id');
+		$stmt = $this->pdo->prepare('UPDATE '.TF_TABLE.' SET '.TF_VIDEO_MESSAGE.'=:message WHERE '.TF_ID.'=:id');
 		try {
 			if($stmt->execute(array(':message' => $video_message, ':id' => $id))) {
 				// success
@@ -194,14 +205,14 @@ class TrueFansDb
 
 	
 	/**
-	* Deletes the profile of the truefan referred to by id.
+	* Deletes the profile of the truefan referred to by TF_ID.
 	* @param Integer $id 
 	* @return Boolean Returns true on success and false on failure.
 	* No rows being updated counts as a failure.
 	*/
 	public function deleteUser($id)
 	{
-		$stmt = $this->pdo->prepare('DELETE FROM true_fans WHERE id=:id');
+		$stmt = $this->pdo->prepare('DELETE FROM '.TF_TABLE.' WHERE '.TF_ID.'=:id');
 		try {
 			if($stmt->execute(array(':id' => $id))) {
 				// success
@@ -217,13 +228,13 @@ class TrueFansDb
 	// *** Get Functions *** \\
 	
 	/**
-	* Retrieves a true fan via id key
+	* Retrieves a true fan via TF_ID key
 	* @param Integer $id Id key in db
 	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
 	*/
 	public function getUser($id)
 	{
-		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE id=:id');
+		$stmt = $this->pdo->prepare('SELECT * FROM '.TF_TABLE.' WHERE '.TF_ID.'=:id');
 		if($stmt->execute(array(':id' => $id))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
@@ -232,13 +243,13 @@ class TrueFansDb
 	}
 
 	/**
-	* Retrieves a true fan via foreign_id key
+	* Retrieves a true fan via TF_FOREIGN_ID key
 	* @param String $key
 	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
 	*/
 	public function getUserByForeignId($key)
 	{
-		$stmt = $this->pdo->prepare('SELECT * FROM true_fans WHERE foreign_id=:key');
+		$stmt = $this->pdo->prepare('SELECT * FROM '.TF_TABLE.' WHERE '.TF_FOREIGN_ID.'=:key');
 		if($stmt->execute(array(':key' => $key))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result;
@@ -253,7 +264,7 @@ class TrueFansDb
 	*/
 	public function getAllEntries()
 	{
-		$stmt = $this->pdo->prepare('SELECT * FROM true_fans');
+		$stmt = $this->pdo->prepare('SELECT * FROM '.TF_TABLE.'');
 		if($stmt->execute()) {
 			$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $result;
@@ -262,13 +273,13 @@ class TrueFansDb
 	}
 	
 	/**
-	* Retrieves a true fan id from a foreign_id 
+	* Retrieves a true fan TF_ID from a TF_FOREIGN_ID 
 	* @param String $foreign_id 
 	* @return Array|NULL Returns entire row of true fans table as assoc array or NULL on miss
 	*/
 	public function getUserId($foreign_id)
 	{
-		$stmt = $this->pdo->prepare('SELECT id FROM true_fans WHERE email=:email');
+		$stmt = $this->pdo->prepare('SELECT '.TF_ID.' FROM '.TF_TABLE.' WHERE '.TF_EMAIL.'=:email');
 		if($stmt->execute(array(':email' => $email))) {
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			return $result['id'];
@@ -280,13 +291,13 @@ class TrueFansDb
 	// *** Utility functions *** \\
 	
 	/**
-	* Checks for a duplicate email in database
+	* Checks for a duplicate TF_EMAIL in database
 	* @param String $email The key to match in the database
 	* @return Boolean True on match otherwise false
 	*/
 	public function isDuplicateEmail($email)
 	{
-		$stmt = $this->pdo->prepare('SELECT id FROM true_fans WHERE email=:email');
+		$stmt = $this->pdo->prepare('SELECT '.TF_ID.' FROM '.TF_TABLE.' WHERE '.TF_EMAIL.'=:email');
 		if($stmt->execute(array(':email' => $email))) {
 			$result = $stmt->fetch(PDO::FETCH_NUM);
 			if($result){
@@ -300,27 +311,27 @@ class TrueFansDb
 	}
 
 	/**
-	* Performs a series of regular expressions to find video_id
+	* Performs a series of regular expressions to find TF_VIDEO_ID
 	* Accepts youtube embed iframes, shortened youtu.be urls, youtube viewing urls
-	* and straight 11 character ids.
-	* @param String $url_mess The incoming iframe, url, or id to search inside
-	* @return String|NULL Returns 11 character video_id String on a match or null on a miss
+	* and straight 11 character TF_ID's.
+	* @param String $url_mess The incoming iframe, url, or TF_ID to search inside
+	* @return String|NULL Returns 11 character TF_VIDEO_ID String on a match or null on a miss
 	*/
 	public function extractVideoId($url_mess)
 	{
 		// TODO: These regexes could use some unit tests to prove their correctness and ferret out any edge cases
-		// FIXME: adding characters to an id within a url will cause regex to snip added characters and return an invalid id
-		if(preg_match('/src=\"http[s]??:\/\/www.youtube.com\/embed\/([A-Za-z0-9_-]{11})[\?&]?[\S]*\"/', $url_mess, $matches) == 1) {  // carve out 11 digit id from iframe embed
-			$this->log('Extracted id from src attribute of an iframe.');
+		// FIXME: adding characters to an '.TF_ID.' within a url will cause regex to snip added characters and return an invalid '.TF_ID.'
+		if(preg_match('/src=\"http[s]??:\/\/www.youtube.com\/embed\/([A-Za-z0-9_-]{11})[\?&]?[\S]*\"/', $url_mess, $matches) == 1) {  // carve out 11 digit '.TF_ID.' from iframe embed
+			$this->log('Extracted '.TF_ID.' from src attribute of an iframe.');
 			return $matches[1];
-		} else if(preg_match('/http[s]??:\/\/youtu.be\/([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out id from shortened youtube url
-			$this->log('Extracted id from shortened url text.');
+		} else if(preg_match('/http[s]??:\/\/youtu.be\/([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out '.TF_ID.' from shortened youtube url
+			$this->log('Extracted '.TF_ID.' from shortened url text.');
 			return $matches[1];
-		} else if(preg_match('/[\?&]v=([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out id from youtube viewing url
-			$this->log('Extracted id from viewing url text.');
+		} else if(preg_match('/[\?&]v=([A-Za-z0-9_-]{11})[\?&]?[\S]*/', $url_mess, $matches) == 1) { //carve out '.TF_ID.' from youtube viewing url
+			$this->log('Extracted '.TF_ID.' from viewing url text.');
 			return $matches[1];
-		} else if(preg_match('/^[A-Za-z0-9_-]{11}$/', $url_mess, $matches) == 1) { // take an 11 character string of valid characters as an id
-			$this->log('Extracted plain id.');
+		} else if(preg_match('/^[A-Za-z0-9_-]{11}$/', $url_mess, $matches) == 1) { // take an 11 character string of valid characters as an '.TF_ID.'
+			$this->log('Extracted plain '.TF_ID.'.');
 			return $matches[0];
 		} else {
 			return NULL;
