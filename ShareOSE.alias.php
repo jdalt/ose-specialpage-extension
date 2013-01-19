@@ -1,6 +1,6 @@
 <?php
 /**
- * Aliases for ShareOSE
+ * Aliases for TrueFans
  *
  * @file
  * @ingroup Extensions
@@ -9,9 +9,9 @@
 $specialPageAliases = array();
  
 /** English
- * @author <your username>
+ * @author <jdalt>
  */
 $specialPageAliases['en'] = array(
-        'ShareOSE' => array( 'ShareOSE', 'Share OSE' ),
+        'TrueFans' => array( 'TrueFans', 'True Fans Stories' ),
 );
  

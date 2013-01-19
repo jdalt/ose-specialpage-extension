@@ -72,7 +72,7 @@ h6
 
 #quote-area p
 {
-	background: url('/w/extensions/ShareOSE/images/quote.png') no-repeat scroll 0 0 transparent;
+	background: url('/w/extensions/TrueFans/images/quote.png') no-repeat scroll 0 0 transparent;
 	font-size: 15px;
 	padding-left: 7px;
 	padding-top: 4px;
@@ -420,7 +420,7 @@ ul.no-bullets li
 #steps-header li.back-line
 {
 	width: 50px;
-	background: url("/w/extensions/ShareOSE/images/sm_stripe.png") repeat-x;
+	background: url("/w/extensions/TrueFans/images/sm_stripe.png") repeat-x;
 	height: 7px;
 	margin-bottom: -1px;
 	opacity: 1;
@@ -501,7 +501,7 @@ ul.no-bullets li
 #playlist-container h3
 {
 	font-size: 24px;
-	background: url('/w/extensions/ShareOSE/images/video_bg.png') repeat-x scroll;
+	background: url('/w/extensions/TrueFans/images/video_bg.png') repeat-x scroll;
 	color: #fff;
 	padding: 6px 0;
 

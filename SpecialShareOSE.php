@@ -1,6 +1,6 @@
 <?php
 /**
- * SpecialShareOSE.php -- the html entry point for displaying and gluing pages that manage TrueFansDb.
+ * SpecialTrueFans.php -- the html entry point for displaying and gluing pages that manage TrueFansDb.
  * Copyright 2012 by Jacob Dalton	
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * @file SpecialShareOSE.php
+ * @file SpecialTrueFans.php
  * @author Jacob Dalton <jacobrdalton@gmail.com>
  * @ingroup Extensions
 */
@@ -25,7 +25,7 @@
 // class.TrueFansDb.php is automatically included and defines constants for the field names
 require_once('SexyForm.php');
  
-class SpecialShareOSE extends SpecialPage {
+class SpecialTrueFans extends SpecialPage {
 	// This variables directly affect the html structure of page and contents of the db
 	public $mDb;
 	public $mTfProfile;
@@ -45,9 +45,9 @@ class SpecialShareOSE extends SpecialPage {
 	 */
 	public function __construct() {
 		global $wgUser, $wgRequest;
-		tfDebug('--Constructing SpecialShareOSE--');
+		tfDebug('--Constructing SpecialTrueFans--');
 		
-		parent::__construct( 'ShareOSE');
+		parent::__construct( 'TrueFans');
 		
 		// Initialize string member variables
 		$this->mErrorMessage = $this->mStatusMessage = '';
@@ -85,8 +85,8 @@ class SpecialShareOSE extends SpecialPage {
 		// Basic style and interaction scripts for these pages
 		$this->setHeaders();
 		$this->outputHeader();
-		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/style.css');
-		$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/dynamic.js');
+		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/TrueFans/style.css');
+		$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/dynamic.js');
 		
 		// Request logic. POST > GET. Empty request = 'welcome' GET request. 
 		if($this->mReqPostPage) { // Handle POST
@@ -137,12 +137,12 @@ class SpecialShareOSE extends SpecialPage {
 		switch($request) {
 			case 'welcome':
 				global $wgScriptPath, $wgOut;
-				$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeplayer.js');
+				$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/youtubeplayer.js');
 				$this->loadTemplate('welcome.html');
 				break;
 			case 'view':
 				global $wgScriptPath, $wgOut;
-				$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeplayer.js');
+				$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/youtubeplayer.js');
 				$profile = $this->mDb->getUser($this->mReqId);
 				if($profile) {
 					$this->loadTemplate('view.html', $profile);
@@ -157,7 +157,7 @@ class SpecialShareOSE extends SpecialPage {
 			
 			case 'myprofile':
 				global $wgScriptPath, $wgOut;
-				$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeplayer.js');
+				$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/youtubeplayer.js');
 				// TODO: Add extra information like before - email and contacts sent to...?
 				if(!$wgUser->isLoggedIn()) {
 					$this->handleViewPage('login');
@@ -206,7 +206,7 @@ class SpecialShareOSE extends SpecialPage {
 				if(!$this->mReqGetPage) {
 					$this->mReqGetPage  = 'submit';
 				}
-				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:ShareOSE&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
 				$this->loadTemplate('login.html', NULL, $replace);
 				break;
 
@@ -231,7 +231,7 @@ class SpecialShareOSE extends SpecialPage {
 
 							//TODO: load this through the templating system
 							global $wgScriptPath, $wgOut;
-							$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/youtubeUploader.js');
+							$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/youtubeUploader.js');
 
 							$template = 'upload_video.html';
 							$form = new TrueFanForm($this, 'upload');
@@ -250,9 +250,9 @@ class SpecialShareOSE extends SpecialPage {
 						case 'share':
 							// Precondition: User exists in db
 							global $wgScriptPath, $wgOut;
-							$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/facebook.js');
-							$wgOut->addScriptFile($wgScriptPath.'/extensions/ShareOSE/lib/tdfriendselector.js');
-							$wgOut->addExtensionStyle($wgScriptPath.'/extensions/ShareOSE/lib/tdfriendselector.css');
+							$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/facebook.js');
+							$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/lib/tdfriendselector.js');
+							$wgOut->addExtensionStyle($wgScriptPath.'/extensions/TrueFans/lib/tdfriendselector.css');
 							$template = 'share_with_friends.html';
 							$form = new TrueFanForm($this, 'share');
 							break;
@@ -322,7 +322,7 @@ class SpecialShareOSE extends SpecialPage {
 
 		// These are default replacement tags for templates
 		$templateStr = array();
-		$templateStr['PATH'] = $wgScriptPath.'/extensions/ShareOSE/';
+		$templateStr['PATH'] = $wgScriptPath.'/extensions/TrueFans/';
 		$templateStr['BASE_URL'] = $this->getTitle()->getLocalUrl();
 		$templateStr['ERROR_MESSAGE'] = $this->mErrorMessage;
 		$templateStr['STATUS_MESSAGE'] = $this->mStatusMessage;
@@ -785,5 +785,5 @@ class TrueFanForm
  */
 function tfDebug($str)
 {
-	wfDebugLog( 'ShareOSE', $str);
+	wfDebugLog( 'TrueFans', $str);
 }

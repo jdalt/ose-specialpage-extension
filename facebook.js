@@ -17,7 +17,7 @@ console.log('attempting to load in facebook');
 window.fbAsyncInit = function() {
 	FB.init({
 		appId: gAppID,
-		channelUrl : '//wwwtest.collaborative-revolution.org/w/extensions/ShareOSE/lib/channel.php',
+		channelUrl : '//wwwtest.collaborative-revolution.org/w/extensions/TrueFans/lib/channel.php',
 		status: true,
 		cookie: true,
 		xfbml: false,

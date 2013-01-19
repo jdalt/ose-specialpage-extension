@@ -1,6 +1,6 @@
 <?php
 /**
- * Internationalisation for ShareOSE
+ * Internationalisation for TrueFans
  *
  * @file
  * @ingroup Extensions
@@ -8,11 +8,11 @@
 $messages = array();
  
 /** English
- * @author <your username>
+ * @author <jdalt>
  */
 $messages['en'] = array(
-        'shareose' => 'True Fan Stories', // shareose must be all lower to be recognized by SpecialSpecialpages
-        'shareOSE-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
+        'truefans' => 'True Fan Stories', // shareose must be all lower to be recognized by SpecialSpecialpages
+        'TrueFans-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
 		  
         'trueFanForm-upload' => 'True Fan Information',
         'trueFanSubmitText-upload' => 'Save Video',
@@ -29,8 +29,8 @@ $messages['en'] = array(
 );
  
 /** Message documentation
- * @author <your username>
+ * @author <jdalt>
  */
 $messages['qqq'] = array(
-        'shareOSE-desc' => "{{desc}}",
+        'TrueFans-desc' => "{{desc}}",
 );
