@@ -548,16 +548,16 @@ class TrueFanForm
 						$replace['MY_FRIENDS_NAME'] = $name;
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
-						// This code actually sends the emails, for purposes of debugging it requires SendEmails checkbox to actually send emails
+						// This code actually sends the emails
 						if($formFields['SendEmails']) {
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
 							$from = new MailAddress($wgPasswordSender);
+							tfDebug($wgPasswordSender);
 							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
 							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $replyto, $contentType);
-							$errors .= $resultStatus->getWikiText().'\n';
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
 							} 
