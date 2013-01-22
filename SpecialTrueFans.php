@@ -207,6 +207,7 @@ class SpecialTrueFans extends SpecialPage {
 					$this->mReqGetPage  = 'submit';
 				}
 				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+				$replace['OPENID_LOGIN_LINK'] = '/w/index.php?title=Special:OpenIDLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
 				$this->loadTemplate('login.html', NULL, $replace);
 				break;
 
@@ -551,7 +552,7 @@ class TrueFanForm
 						if($formFields['SendEmails']) {
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
-							$from = new MailAddress($this->mPage->mTfProfile['email']);
+							$from = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
 							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);

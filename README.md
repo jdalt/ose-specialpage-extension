@@ -12,3 +12,5 @@ Add the following lines to LocalSettings.php:
 	$wgDebugLogGroups = array(
 		'TrueFans'     => "$IP/extensions/TrueFans/logs/true_fans.log",
 	);
+
+Then navigate to your wiki /maintenance directory and run update.php to create database tables. 
