@@ -557,6 +557,7 @@ class TrueFanForm
 							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
 							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $replyto, $contentType);
+							$errors .= $resultStatus->getWikiText().'\n';
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
 							} 
