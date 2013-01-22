@@ -552,7 +552,7 @@ class TrueFanForm
 						if($formFields['SendEmails']) {
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
-							$from = $wgPasswordSender;
+							$from = new MailAddress($wgPasswordSender);
 							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
