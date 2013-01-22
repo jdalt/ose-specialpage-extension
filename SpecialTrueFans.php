@@ -552,10 +552,11 @@ class TrueFanForm
 						if($formFields['SendEmails']) {
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
-							$from = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
+							$from = $wgPasswordSender;
+							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
 							$contentType = 'text/html';
-							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $from, $contentType);
+							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $replyto, $contentType);
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
 							} 
