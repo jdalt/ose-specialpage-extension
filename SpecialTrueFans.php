@@ -533,6 +533,7 @@ class TrueFanForm
 				$this->mPage->mFormStep = 'share';
 			
 				//TODO: Delete temporary $wgOut of email for debugging purposes.
+				//TODO: Create meaningful error returns.
 				if($formFields['EmailList']) {
 					$wgOut->addHtml('<h4>Email Debug Output</h4>');
 					$emailArray = explode(',', $formFields['EmailList']);
@@ -549,12 +550,15 @@ class TrueFanForm
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
 						// This code actually sends the emails
-						if($formFields['SendEmails']) {
+						if($formFields['SendEmails'] && Santizer::validateEmail($friendAddress)) {
 							global $wgPasswordSender, $wgSitename;
 							$friendAddress = str_replace(':',' ',$friendAddress);
+
 							$sendTo = new MailAddress($friendAddress);
 							//$from = new MailAddress($wgPasswordSender, $wgSitename.' Mailer');
-							$from = new MailAddress('fakeemail@opensourceecology.org', $wgSitename.' Mailer');
+							//TODO: Check with eli that there is a valid reply email for this project
+							// any in domain email can be used fakeemail, truefans, just need to make sure other side is ready to receive mails...
+							$from = new MailAddress('truefanstories@opensourceecology.org', $wgSitename);
 							tfDebug($wgPasswordSender);
 							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
@@ -563,7 +567,10 @@ class TrueFanForm
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
 							} 
-						}						
+						} elseif(!Sanitizer::validateEmail($friendAddress)) {
+							// TODO: create a warning system that allows submit to finish but reports back to user
+							$errors .= 'Invalid email: '.$friendAddress;
+						}
 						$friendAddress = str_replace('<','&lt',$friendAddress);
 						$friendAddress = str_replace('>','&gt',$friendAddress);
 						$wgOut->addHtml($friendAddress.'<br />');
