@@ -550,6 +550,7 @@ class TrueFanForm
 
 						// This code actually sends the emails
 						if($formFields['SendEmails']) {
+							global $wgPasswordSender, $wgSitename;
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
 							$from = new MailAddress($wgPasswordSender, $wgSitename + ' Mailer');
