@@ -553,7 +553,8 @@ class TrueFanForm
 							global $wgPasswordSender, $wgSitename;
 							$friendAddress = str_replace(':',' ',$friendAddress);
 							$sendTo = new MailAddress($friendAddress);
-							$from = new MailAddress($wgPasswordSender, $wgSitename + ' Mailer');
+							//$from = new MailAddress($wgPasswordSender, $wgSitename.' Mailer');
+							$from = new MailAddress('fakeemail@opensourceecology.org', $wgSitename.' Mailer');
 							tfDebug($wgPasswordSender);
 							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
