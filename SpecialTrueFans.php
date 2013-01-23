@@ -550,7 +550,7 @@ class TrueFanForm
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
 						// This code actually sends the emails
-						if($formFields['SendEmails'] && Santizer::validateEmail($friendAddress)) {
+						if($formFields['SendEmails'] && Sanitizer::validateEmail($friendAddress)) {
 							global $wgPasswordSender, $wgSitename;
 							$friendAddress = str_replace(':',' ',$friendAddress);
 
