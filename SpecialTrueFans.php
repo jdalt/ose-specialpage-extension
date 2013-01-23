@@ -550,11 +550,11 @@ class TrueFanForm
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
 						// This code actually sends the emails
-						if($formFields['SendEmails'] && Sanitizer::validateEmail($friendAddress)) {
+						if($formFields['SendEmails'] && Sanitizer::validateEmail($address)) {
 							global $wgPasswordSender, $wgSitename;
 							$friendAddress = str_replace(':',' ',$friendAddress);
 
-							$sendTo = new MailAddress($friendAddress);
+							$sendTo = new MailAddress($address, $name);
 							//$from = new MailAddress($wgPasswordSender, $wgSitename.' Mailer');
 							//TODO: Check with eli that there is a valid reply email for this project
 							// any in domain email can be used fakeemail, truefans, just need to make sure other side is ready to receive mails...
@@ -567,7 +567,7 @@ class TrueFanForm
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
 							} 
-						} elseif(!Sanitizer::validateEmail($friendAddress)) {
+						} elseif(!Sanitizer::validateEmail($address)) {
 							// TODO: create a warning system that allows submit to finish but reports back to user
 							$errors .= 'Invalid email: '.$friendAddress;
 						}
