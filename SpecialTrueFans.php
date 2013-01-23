@@ -546,6 +546,8 @@ class TrueFanForm
 					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
 						list($name, $address) = explode(':',$friendAddress);
+						$address = str_replace(array('<','>'),'',$address);
+						//$address = str_replace('>','',$address);
 						$replace['MY_FRIENDS_NAME'] = $name;
 						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
 
@@ -569,7 +571,7 @@ class TrueFanForm
 							} 
 						} elseif(!Sanitizer::validateEmail($address)) {
 							// TODO: create a warning system that allows submit to finish but reports back to user
-							$errors .= 'Invalid email: '.$friendAddress;
+							$errors .= 'Invalid email: '.$address.'\n';
 						}
 						$friendAddress = str_replace('<','&lt',$friendAddress);
 						$friendAddress = str_replace('>','&gt',$friendAddress);
@@ -578,7 +580,8 @@ class TrueFanForm
 					} 
 					if($errors) {
 						tfDebug($errors);
-						return 'Unable to mail messages.';
+						$errors = str_replace('\n','<br />',$errors);
+						return $errors;
 					}
 		
 				}
