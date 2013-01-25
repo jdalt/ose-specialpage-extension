@@ -798,7 +798,7 @@ class TrueFanForm
 					'type' => 'submit',
 					'section' => $this->mType,
 					'id' => 'ose-truefan-resend-submit',
-					'default' => 'Send Messagess',
+					'default' => 'Send Messages',
 				),
 			);
 			break;
