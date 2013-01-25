@@ -344,16 +344,12 @@
 				var userLink = $j('#user-video-link').val();
 				console.log(userLink);
 				var userName = $j('#user-name').val();
-
-				$j('#fb-root .fb_dialog').css('left', '50px');
-				$j('#fb-root .fb_dialog').css('top', '50px');
-				
 				FB.ui({
 		        	method: 'send',
 		        	name: userName + ' - OSE True Fan Story',
 		        	link: userLink,
 					picture: 'http://www.opensourceecology.org/w/ose-logo.png',
-					description: 'OSE True Fan Story',
+					description: 'OSE True Fan Story MAYBE',
 		        }, 
 				function(response){
 					if (response && response.success){

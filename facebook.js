@@ -59,7 +59,7 @@ function postToMyFeed()
 			/*caption: 'True Fan Stories',*/
 			link: userLink,
 			picture: 'http://www.opensourceecology.org/w/ose-logo.png',
-			description: 'A Network of Farmers, Engineers, and Supporters Building the Global Village Construction Set',
+			description: 'Can I send a description?',
 		};
 
 		FB.api('/me/feed', 'post', postData, function(response) {
