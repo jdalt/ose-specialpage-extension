@@ -541,14 +541,14 @@ class TrueFanForm
 					$templateMessage = $formFields['FriendMessage'];
 					$link = $this->mPage->getUserViewProfileLink();
 					// \n is temporary until we build html email message
-					$templateMessage .= '\n<a href="'.$link.'">'.$link.'</a>';
+					$templateMessage .= '\r\n\r\n<a href="'.$link.'">'.$link.'</a>';
 
 					// initialize error collector variable
 					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
 						list($name, $address) = explode(':',$friendAddress);
 						$address = str_replace(array('<','>'),'',$address);
-						$currentMessage = 'Hey '.$name.',\n'.$templateMessage;
+						$currentMessage = 'Hey '.$name.',\r\n\r\n'.$templateMessage;
 
 						// This code actually sends the emails
 						if(Sanitizer::validateEmail($address)) {
