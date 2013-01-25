@@ -260,8 +260,7 @@ class SpecialTrueFans extends SpecialPage {
 						case 'share':
 							// Precondition: User exists in db
 							global $wgScriptPath, $wgOut;
-							$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/facebook.js');
-							$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/lib/tdfriendselector.js');
+							//$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/facebook.js');
 							$wgOut->addExtensionStyle($wgScriptPath.'/extensions/TrueFans/lib/tdfriendselector.css');
 							$template = 'share_with_friends.html';
 							$form = new TrueFanForm($this, 'share');

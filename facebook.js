@@ -52,14 +52,14 @@ function postToMyFeed()
 	executeOnAuth(function(response) {
 		var messageText = $j('#ose-truefan-friends-message').val();
 		var userLink = $j('#user-video-link').val();
+		var userName = $j('#user-name').val();
 		var postData =
 		{
 			message: messageText,
-			name: 'Open Source Ecology',
-			/*caption: 'True Fan Stories',*/
+			name: userName + ' - OSE True Fan Story',
 			link: userLink,
 			picture: 'http://www.opensourceecology.org/w/ose-logo.png',
-			description: 'Can I send a description?',
+			description: 'A Network of Farmers, Engineers, and Supporters Building the Global Village Construction Set',
 		};
 
 		FB.api('/me/feed', 'post', postData, function(response) {
