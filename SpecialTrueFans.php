@@ -30,6 +30,7 @@ class SpecialTrueFans extends SpecialPage {
 	public $mDb;
 	public $mTfProfile;
 	public $mFormStep;
+	public $mEditRedirect;
 	public $mErrorMessage;
 	public $mStatusMessage;
 	
@@ -52,6 +53,7 @@ class SpecialTrueFans extends SpecialPage {
 		// Initialize string member variables
 		$this->mErrorMessage = $this->mStatusMessage = '';
 		$this->mFormStep = 'upload';
+		$this->mEditRedirect = ''; // we'll make the real initialization where it's used
 
 		// Initialize GET request variables. 	
 		$this->mReqGetPage = $wgRequest->getText('page');
@@ -97,13 +99,20 @@ class SpecialTrueFans extends SpecialPage {
 				// loadHandledForm will check load data from the POST request and check the edit token to prevent CSRF attacks
 				$formReturn = $this->mPostedForm->loadHandledForm();
 				if($formReturn === true) { 
-					if($this->mReqPostPage != 'share') { 
-						// Update the profile that the viewer will use.
-						$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); 
-						// Throw control into the page viewing system. Submit will select a page based on $this->mFormStep
-						$this->handleViewPage('submit'); 
-					} else {
-						$this->handleViewPage('finish');
+					switch($this->mReqPostPage){
+						case 'share':
+							$this->handleViewPage('finish');
+							break;
+						case 'edit':
+							$this->handleViewPage($this->mEditRedirect); 
+							break;
+
+						default:
+							// Update the profile that the viewer will use.
+							$this->mTfProfile = $this->mDb->getUserByForeignId($this->getMwId()); 
+							// Throw control into the page viewing system. Submit will select a page based on $this->mFormStep
+							$this->handleViewPage('submit'); 
+							break;
 					}
 				} else {
 					$this->mPostedForm->clearRequests();
@@ -541,14 +550,14 @@ class TrueFanForm
 					$templateMessage = $formFields['FriendMessage'];
 					$link = $this->mPage->getUserViewProfileLink();
 					// \n is temporary until we build html email message
-					$templateMessage .= '\r\n\r\n<a href="'.$link.'">'.$link.'</a>';
+					$templateMessage .= '<br /><br /><a href="'.$link.'">'.$link.'</a>';
 
 					// initialize error collector variable
 					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
 						list($name, $address) = explode(':',$friendAddress);
 						$address = str_replace(array('<','>'),'',$address);
-						$currentMessage = 'Hey '.$name.',\r\n\r\n'.$templateMessage;
+						$currentMessage = 'Hey '.$name.',<br /><br />'.$templateMessage;
 
 						// This code actually sends the emails
 						if(Sanitizer::validateEmail($address)) {
@@ -563,7 +572,7 @@ class TrueFanForm
 							tfDebug($wgPasswordSender);
 							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
-							$contentType = 'text/plain'; // TODO: Change when we switch to html formatted emails
+							$contentType = 'text/html'; // TODO: Change when we switch to html formatted emails
 							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $replyto, $contentType);
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
@@ -591,6 +600,8 @@ class TrueFanForm
 				// TODO: Consider-We could have a simpler database class with a single update function and
 				// we would reduce database requests. However I think the current code is better in terms 
 				// of usability because the user is told exactly why their submission wasn't accepted.
+
+				$this->mPage->mEditRedirect = 'myprofile';
 				
 				if($this->mPage->mTfProfile[TF_NAME] != htmlspecialchars($formFields['Name'], ENT_QUOTES)) {
 					if(!$this->mPage->mDb->updateName($this->mPage->mTfProfile[TF_ID], $formFields['Name'])) {
@@ -617,13 +628,22 @@ class TrueFanForm
 				}
 				
 				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
+				if(isset($_POST['wpResendMessages'])) {
+					$this->mPage->mEditRedirect = 'submit';
+					$this->mPage->mFormStep = 'share';
+				}
+
+				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
 				if(isset($_POST['wpDeleteProfile'])) {
 					if(!$this->mPage->mDb->deleteUser($this->mPage->mTfProfile[TF_ID])) {
 						return 'Failed to delete profile.';
 					} else {
 						$this->mPage->mStatusMessage .= 'Your profile has been deleted. ';
+						$this->mPage->mEditRedirect = 'welcome';
 					}			
 				}
+				// Reload the profile
+				$this->mPage->mTfProfile = $this->mPage->mDb->getUser($this->mPage->mTfProfile[TF_ID]); 
 				$this->clearRequests();
 				return true;
 				break;
@@ -774,6 +794,12 @@ class TrueFanForm
 					'section' => $this->mType,
 					'id' => 'ose-truefan-delete-submit',
 					'default' => 'Delete Profile',
+				),
+				'ResendMessages' => array(
+					'type' => 'submit',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-resend-submit',
+					'default' => 'Send Messagess',
 				),
 			);
 			break;

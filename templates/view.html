@@ -9,6 +9,7 @@
 			<li>Enterprise Plan<span class="hidden">wbqC8zm7Hyg</span></li>
 		</ul>
 	</div>
+	<a href="{{BASE_URL}}?page=submit" class="green-button">Edit Video Information</a>
 </div>
 
 <div id="quote-area">
@@ -34,4 +35,11 @@
 	</ul>
 </div>
 
+<script>
+	$j(document).ready(function() {
+		// Hack to add subtitle because we can't access of change title or a MediaWiki page
+		var userName = $j('#quote-area h3').html();
+		$j('#firstHeading').append(' - ' + userName);
 
+	});
+</script>

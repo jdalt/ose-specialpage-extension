@@ -8,7 +8,6 @@
 		<p class="error-message">{{ERROR_MESSAGE}}</p>
 		{{FORM}}
 
-		<h2 style="text-align:center">Preview</h2>
 	</div>
 </div>
 
@@ -16,13 +15,16 @@
 </div>
 
 <div id="quote-area">
-	<h3>{{USER_NAME}}</h3>
-	<p>{{USER_MESSAGE}}</p>
+
 </div>
 
 <div id="main-area">
 
-	<iframe id="video-viewer" src="http://www.youtube.com/embed/{{USER_VIDEO_ID}}">Holy cats your browser doesn't support teh iframes.</iframe>
-
-
 </div>
+
+<script>
+	// temporary hack to get around for output code
+	$j(document).ready(function() {
+		$j('#mw-form-section-edit>label').remove();
+	});
+</script>
