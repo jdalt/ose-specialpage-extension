@@ -532,27 +532,26 @@ class TrueFanForm
 					
 				$this->mPage->mFormStep = 'share';
 			
-				//TODO: Delete temporary $wgOut of email for debugging purposes.
 				//TODO: Create meaningful error returns.
-				if($formFields['EmailList']) {
+				if($formFields['EmailList'] && $formFields['SendEmails']) {
+					//TODO: Delete temporary $wgOut of email for debugging purposes.
 					$wgOut->addHtml('<h4>Email Debug Output</h4>');
 					$emailArray = explode(',', $formFields['EmailList']);
+					// TODO: Rewrite - load a template for html styled email and inject FriendMessage
 					$templateMessage = $formFields['FriendMessage'];
-					$replace = array();
 					$link = $this->mPage->getUserViewProfileLink();
-					$replace['MY_VIDEO_LINK'] = '<a href="'.$link.'">'.$link.'</a>';
+					// \n is temporary until we build html email message
+					$templateMessage .= '\n<a href="'.$link.'">'.$link.'</a>';
 
 					// initialize error collector variable
 					$errors = NULL;
 					foreach($emailArray as $friendAddress) {
 						list($name, $address) = explode(':',$friendAddress);
 						$address = str_replace(array('<','>'),'',$address);
-						//$address = str_replace('>','',$address);
-						$replace['MY_FRIENDS_NAME'] = $name;
-						$currentMessage = $this->mPage->replaceTemplateTags($templateMessage, $replace); 
+						$currentMessage = 'Hey '.$name.',\n'.$templateMessage;
 
 						// This code actually sends the emails
-						if($formFields['SendEmails'] && Sanitizer::validateEmail($address)) {
+						if(Sanitizer::validateEmail($address)) {
 							global $wgPasswordSender, $wgSitename;
 							$friendAddress = str_replace(':',' ',$friendAddress);
 
@@ -564,7 +563,7 @@ class TrueFanForm
 							tfDebug($wgPasswordSender);
 							$replyto = new MailAddress($this->mPage->mTfProfile[TF_EMAIL]);
 							$subject = 'Open Source Ecology';
-							$contentType = 'text/html';
+							$contentType = 'text/plain'; // TODO: Change when we switch to html formatted emails
 							$resultStatus = UserMailer::send($sendTo, $from, $subject, $currentMessage, $replyto, $contentType);
 							if($resultStatus->isGood() !== true) {
 								$errors .= $resultStatus->getWikiText().'\n';
@@ -576,7 +575,7 @@ class TrueFanForm
 						$friendAddress = str_replace('<','&lt',$friendAddress);
 						$friendAddress = str_replace('>','&gt',$friendAddress);
 						$wgOut->addHtml($friendAddress.'<br />');
-						$wgOut->addHtml($currentMessage.'<br /><br />');
+						$wgOut->addHtml(str_replace('\n','<br />',$currentMessage).'<br /><br />');
 					} 
 					if($errors) {
 						tfDebug($errors);

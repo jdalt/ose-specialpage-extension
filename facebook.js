@@ -17,7 +17,7 @@ console.log('attempting to load in facebook');
 window.fbAsyncInit = function() {
 	FB.init({
 		appId: gAppID,
-		channelUrl : '//wwwtest.collaborative-revolution.org/w/extensions/TrueFans/lib/channel.php',
+		channelUrl : '//test.opensourceecology.org/w/extensions/TrueFans/lib/channel.php',
 		status: true,
 		cookie: true,
 		xfbml: false,
@@ -45,41 +45,6 @@ window.fbAsyncInit = function() {
 			FB_AUTH_STATUS = 'not_authorized';
 		}
 	});
-
-	// ?? Do I need to auth first -- debug and try no login and no auth...although really only want to auth if user clicks fb button
-	$j(document).ready(function () {
-
-		/* Friend selector stuff */
-/*		TDFriendSelector.init({debug: true, speed: 25});
-		friendSelector = TDFriendSelector.newInstance({
-			callbackSubmit: function(selectedFriendIds) {
-				console.log("The following friends were selected: " + selectedFriendIds.join(", "));
-				var html = '<ul>\n';
-				for(var i=0; i < selectedFriendIds.length; i++) {
-					console.log(selectedFriendIds[i]);
-					var friend = TDFriendSelector.getFriendById(selectedFriendIds[i]);
-					console.log(friend);
-					html += '<li><img src="//graph.facebook.com/' + friend.id + '/picture?type=square" /><span>' + friend.name + '</span></li>\n'; 
-				}
-				html += '</ul>\n';
-				$j('#share-facebook-preview').html(html);
-				$j('#friend-selector-holder').css('visibility', 'hidden');
-			}
-		});
-
-		$j('#CancelFriendSelect').click(friendSelector.hideFriendSelector);
-		$j('#TDFriendSelector_buttonClose').click(function(){console.log('clicked close button for friendselector'); $j('#friend-selector-holder').css('visibility','hidden');});
-
-		$j("#facebook-private").click(function (e) {
-			$j('#friend-selector-holder').css('visibility', 'visible');
-			console.log('Yo we should be popping a friend selector...')
-			executeOnAuth(function(response) {
-				console.log('we can has auth');
-				friendSelector.showFriendSelector();
-			});
-		});
-*/
-	});
 };
 
 function postToMyFeed()
@@ -92,9 +57,9 @@ function postToMyFeed()
 			message: messageText,
 			name: 'Open Source Ecology',
 			caption: 'True Fan Stories',
-			/*description: 'Moar machines...!!',*/
+			description: 'A Network of Farmers, Engineers, and Supporters Building the Global Village Construction Set',
 			link: userLink,
-			picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
+			picture: 'http://www.opensourceecology.org/w/ose-logo.png'
 		};
 
 		FB.api('/me/feed', 'post', postData, function(response) {

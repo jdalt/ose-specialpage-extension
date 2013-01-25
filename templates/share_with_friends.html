@@ -1,5 +1,4 @@
 <!-- step 3 -->
-
 <div id="steps-header">
 	<ul class="inline-links form-steps">
 		<li id="learn-more">
@@ -65,7 +64,7 @@
 <input id="user-video-link" type="hidden" value="{{USER_VIDEO_LINK}}" />
 <input id="user-name" type="hidden" value="{{USER_NAME}}" />
 
-<!-- Auto Replace and Hidden Land - this HTML will be redirected via javascript -->
+<!-- Auto Replace and Hidden Land - this HTML will be moved via javascript -->
 
 <div class="auto-replace" id="contact-holder">
 	<div class="contact-tag">Contact Method</div>
@@ -76,10 +75,7 @@
 	</div>
 </div>
 
-<div id="social-message" class="auto-replace" style="display: none">Hey {{MY_FRIENDS_NAME}},
-
-Checkout the video I made for you and the links below as I think you'd be interested in Open Source Ecology.
-{{MY_VIDEO_LINK}}
+<div id="social-message" class="auto-replace" style="display: none">Checkout the video I made for you and the links below as I think you'd be interested in Open Source Ecology.
 </div>
 
 <div id="fb-root"></div>
@@ -87,9 +83,6 @@ Checkout the video I made for you and the links below as I think you'd be intere
 	<br /><br /><br />
 	<span id="fb-post-status">Submitting messages...</span>
 </div>
-
-<button id="revokeAuth" type="button" onclick="uninstallApp()">Revoke/Uninstall</button>
-<button id="logout" type="button" onclick="logout()">Logout</button>
 
 <div id="email-modal" class="modal-overlay-container">
 	<div id="email-list-modal" class="modal-overlay-pane">
@@ -119,6 +112,80 @@ Checkout the video I made for you and the links below as I think you'd be intere
 		<button id="email-list-ok" class="modal-close-window inline-button" type="button">Ok</button>
 		<button id="email-list-clear" class="modal-close-window negative-action inline-button" type="button">Clear</button>
 	</div>
+</div>
+
+<!-- is there an easy way to keep this synced with facebook.js in case we change the text? -->
+<style>
+	.preview-holder{
+		display: none;
+		width: 411px; 
+		padding-left: 50px; 
+		float: left
+	}
+	.preview-holder h4{
+		text-align: center;
+	}
+	.preview-box{
+		width: 379px; 
+		color: #333; 
+		border: 1px solid #C4CDE0; 
+		border-radius: 3px; 
+		padding: 13px 15px; 
+		font-size: 11px;
+	}
+	.facebook-preview-link-box{
+		background-color: #f6f7f9; 
+		border: 1px solid #d3dae8; 
+		overflow:hidden;
+	}
+	.bld{font-weight: bold;}
+	.nml{font-weight: normal;}
+</style>
+<div id="facebook-feed-preview" class="preview-holder">
+	<h4>Facebook Feed Preview</h4>
+	<div class="preview-box">
+		<div class="contact-message-text" style="font-size: 13px; padding-bottom: 13px">This is temporary text.</div>
+		<div class="facebook-preview-link-box">
+			<img src="http://www.opensourceecology.org/w/ose-logo.png" style="width: 114px; border-right: 1px solid #d3dae8"/>
+			<div style="width: 250px; padding: 5px; float:right">
+				<div class="bld" style="color: #3B5998">Open Source Ecology</div>
+				<div>True Fan Stories</div>
+				<div style="padding-top: 11px">A Network of Farmers, Engineers, and Supporters building the Global Village Construction Set.</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="facebook-private-preview" class="preview-holder">
+	<h4>Facebook Private Message Preview</h4>
+	<div class="preview-box">
+		<div style="color: #3B5998; font-weight: bold; font-size: 13px">{{USER_NAME}}</div>
+		<div class="" style="font-size: 13px; padding-bottom: 13px">You will have to retype your message for private messages. Facebook does not allow autotmatic text for private messages.</div>
+		<div class="facebook-preview-link-box">
+			<img src="http://www.opensourceecology.org/w/ose-logo.png" style="width: 114px; border-right: 1px solid #d3dae8"/>
+			<div style="width: 250px; padding: 5px; float:right">
+				<div class="bld" style="color: #3B5998">Open Source Ecology</div>
+				<div>True Fan Stories</div>
+				<div style="padding-top: 11px">A Network of Farmers, Engineers, and Supporters building the Global Village Construction Set.</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="ose-truefan-email-check-preview" class="preview-holder">
+	<h4>Email Message Preview</h4>
+	<div class="preview-box" style="font-size: 13px">
+		<div class="bld">To: <span id="email-preview-to" class="nml"></span></div>
+		<div class="bld">From: <span class="nml">{{USER_NAME}}</span></div>
+		<div style="padding-top: 7px">Hey <span id="email-preview-to-name"></span>,</div>
+		<div class="contact-message-text" style="font-size: 13px; padding: 7px 0">Temporary text.</div>
+		{{USER_VIDEO_LINK}} 
+	</div>
+</div>
+
+<div style="clear:both; display: block;">
+	<button id="revokeAuth" type="button" onclick="uninstallApp()">Revoke/Uninstall</button>
+	<button id="logout" type="button" onclick="logout()">Logout</button>
 </div>
 
 <script>
@@ -184,13 +251,14 @@ Checkout the video I made for you and the links below as I think you'd be intere
 			dummyEvent = {'value':'q'};
 			addEmailInput(dummyEvent);
 			$j('#ose-truefan-email-check').removeAttr('checked');	
-			$j('#share-email-preview').empty();
+			$j('#email-preview-to').empty();
+			$j('#email-preview-to-name').empty();
+			$j('#ose-truefan-email-check-preview').css('display','none');
 		});
 		$j('#email-list-ok').click(function(){
 			console.log('processEmail')
 			var addresses = new Array();
 			// TODO: Remove empty email inputs
-			$j('#share-email-preview').empty('');
 			$j('#email-input-container .email-list-combo').each( function(index) {
 				var name = $j(this).find('.email-names').val();
 				var address = $j(this).find('.email-addresses').val();
@@ -198,18 +266,15 @@ Checkout the video I made for you and the links below as I think you'd be intere
 					addresses.push(name + ':<' + address + '>');
 				}
 			});
+			$j('#email-preview-to').empty();
+			$j('#email-preview-to-name').empty();
+			$j.each(addresses, function(index, value){
+				value = value.replace(/[<|>]/g, '');
+				var parts = value.split(':');
+				$j('#email-preview-to').append("(" + parts[1] + ") ");
+				$j('#email-preview-to-name').append("(" + parts[0] + ") ");
+			});
 			$j('input[name=wpEmailList]').val(addresses.join(','));
-		
-			if(addresses.length > 0) {
-				var html = '<ul>\n';
-				for(var i=0; i<addresses.length; i++) {
-					addresses[i] = addresses[i].replace('<','&lt');
-					addresses[i] = addresses[i].replace('>','&gt');
-					addresses[i] = addresses[i].replace(':',' ');
-					html += '<li class="email-preview-item"><img src="{{PATH}}images/email_sm.png" /><span class="preview-address">'+addresses[i]+'</span></li>';
-				}
-				//$j('#share-email-preview').html(html);
-			}
 		});
 		
 		function addEmailInput(e)
@@ -222,19 +287,46 @@ Checkout the video I made for you and the links below as I think you'd be intere
 			}
 		}
 		
-		console.log('trying to attach to click event');
-		console.log($j('.contact-type input'));
+		// initialize the preview messages
+		$j('.contact-message-text').html($j('#ose-truefan-friends-message').val());
+		$j('#ose-truefan-friends-message').keyup(function(){
+			$j('.contact-message-text').html($j('#ose-truefan-friends-message').val());
+		});
 		$j('.contact-type input').click(function(){
 			console.log('got some contact type ing going on');
 			if($j(this).is(':checked')){
+				var messageText = $j('#ose-truefan-friends-message').val();
 				console.log('Input: ' + $j(this).attr('id') + ' is active.' );
-				if($j(this).attr('id') == 'ose-truefan-email-check') {
-					$j('#email-modal').css('visibility', 'visible');
+				switch($j(this).attr('id')) {
+					case 'ose-truefan-email-check':
+						$j('#email-modal').css('visibility', 'visible');
+						$j('#email-preview-to').empty();
+						$j('#email-preview-to-name').empty();
+						$j('#ose-truefan-email-check-preview').css('display','block');
+						break;
+					case 'facebook-feed':
+						$j('#facebook-feed-preview').css('display','block');
+						break;
+					case 'facebook-private':
+						$j('#facebook-private-preview').css('display','block');
+						break;
+				}
+			} else {
+				switch($j(this).attr('id')) {
+					case 'ose-truefan-email-check':
+						$j('#ose-truefan-email-check-preview').css('display','none');
+						break;
+					case 'facebook-feed':
+						$j('#facebook-feed-preview').css('display','none');
+						break;
+					case 'facebook-private':
+						$j('#facebook-private-preview').css('display','none');
+						break;
 				}
 			}
 		});
 		
-		// change the name os submit button to create correct submit behavior for jQuery
+		// change the name of submit button to create correct submit behavior for jQuery
 		$j('.mw-htmlform-submit').attr('name','submittens');
 		$j('#trueFanForm').submit(function(e) {
 			$j('#facebook-post-modal').css('visibility','visible');
@@ -251,7 +343,7 @@ Checkout the video I made for you and the links below as I think you'd be intere
 		        	method: 'send',
 		        	name: userName + ' - OSE True Fan Story',
 		        	link: userLink,
-					picture: 'http://www.wordpages.org/facebook/lib/ose-logo.png',
+					picture: 'http://www.opensourceecology.org/w/ose-logo.png',
 					description: 'OSE True Fan Story',
 		        }, 
 				function(response){

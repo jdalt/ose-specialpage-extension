@@ -12,7 +12,7 @@ $messages = array();
  */
 $messages['en'] = array(
         'truefans' => 'True Fan Stories', // shareose must be all lower to be recognized by SpecialSpecialpages
-        'TrueFans-desc' => "This extension provides several pages designed for sharing personalized video messages and directing friends/colleagues to an introductory webpage",
+        'TrueFans-desc' => "This extension provides a mechanism for making and sharing video stories by OSE True Fans.",
 		  
         'trueFanForm-upload' => 'True Fan Information',
         'trueFanSubmitText-upload' => 'Save Video',

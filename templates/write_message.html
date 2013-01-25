@@ -68,3 +68,11 @@
 		<button id="close-button-bottom" class="modal-close-window">Close this Window</button>
 	</div>
 </div>
+
+<script>
+	$j(document).ready(function() {
+		$j('#ose-truefan-message').keyup(function(){
+			$j('#quote-area p').html($j('#ose-truefan-message').val());
+		});
+	});
+</script>

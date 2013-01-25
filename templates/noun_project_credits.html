@@ -1,5 +1,5 @@
 <div id="modal-button-show-container">
-	<button id="icon-credits-show"class="modal-button-show">Icon Credits</button>
+	<a id="icon-credits-show" class="modal-button-show">Icon Credits</a>
 	<div class="modal-overlay-container">
 		<div class="modal-overlay-pane" id="icon-credits">
 			<img class="modal-close-button" src="{{PATH}}images/close_button.png"/>
@@ -25,7 +25,7 @@
 </div>
 
 <script>
-	$j(document).ready(function() {
+	/*$j(document).ready(function() {
 		function centerCreditsButton(){
 			console.log('centered');
 			var adjusted_midpoint = parseInt($j('#main-area').css('margin-left')) + $j('#main-area').width()/2 - $j('#icon-credits-show').width()/2 - parseInt($j('#icon-credits-show').css('padding-left')) + 12; //$j('#bodyContent').width()/2 - $j('#icon-credits-show').width()/2;
@@ -34,5 +34,8 @@
 		centerCreditsButton();
 		$j(window).resize(centerCreditsButton);
 	});
-
+*/
+$j(document).ready(function() {
+	$j('#firstHeading').append($j('#modal-button-show-container'));
+});	
 </script>
