@@ -1,5 +1,5 @@
 #TrueFans#
-This extension is to be used for Open Source Ecology's True Fans microfunding platform. This code is to be tested on a LAMP stack development environment running MediaWiki 1.16.
+This extension is to be used for Open Source Ecology's True Fans microfunding platform. This code is to be tested on a LAMP stack development environment running MediaWiki 1.20.
 
 
 ##Installation##
