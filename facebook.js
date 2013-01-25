@@ -57,10 +57,10 @@ function postToMyFeed()
 			message: messageText,
 			name: 'Open Source Ecology',
 			caption: 'True Fan Stories',
-			description: 'Building the GCVS.',
-			/*description: 'A Network of Farmers, Engineers, and Supporters Building the Global Village Construction Set',*/
 			link: userLink,
-			picture: 'http://www.opensourceecology.org/w/ose-logo.png'
+			picture: 'http://www.opensourceecology.org/w/ose-logo.png',
+			description: 'Building the GCVS'
+			/*description: 'A Network of Farmers, Engineers, and Supporters Building the Global Village Construction Set',*/
 		};
 
 		FB.api('/me/feed', 'post', postData, function(response) {
