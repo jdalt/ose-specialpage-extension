@@ -344,7 +344,11 @@
 				var userLink = $j('#user-video-link').val();
 				console.log(userLink);
 				var userName = $j('#user-name').val();
-		   		FB.ui({
+
+				$j('#fb-root .fb_dialog').css('left', '50px');
+				$j('#fb-root .fb_dialog').css('top', '50px');
+				
+				FB.ui({
 		        	method: 'send',
 		        	name: userName + ' - OSE True Fan Story',
 		        	link: userLink,

@@ -56,10 +56,11 @@ function postToMyFeed()
 		{
 			message: messageText,
 			name: 'Open Source Ecology',
-			caption: 'True Fan Stories',
+			/*caption: 'True Fan Stories',*/
 			link: userLink,
 			picture: 'http://www.opensourceecology.org/w/ose-logo.png',
-			description: 'Building the GCVS'
+			/*description: 'Building the GCVS',*/
+			description: 'OSE True Fan Story',
 			/*description: 'A Network of Farmers, Engineers, and Supporters Building the Global Village Construction Set',*/
 		};
 
