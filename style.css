@@ -469,6 +469,7 @@ ul.no-bullets li
 	display: block;
 	padding: 3px 23px;
 	margin: 10px auto;
+	text-decoration: none;
 }
 
 #bodyContent .mw-htmlform-submit:hover, #bodyContent .modal-close-window:hover, #bodyContent .green-button:hover
