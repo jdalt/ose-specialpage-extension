@@ -9,8 +9,11 @@
 			<li>Enterprise Plan<span class="hidden">wbqC8zm7Hyg</span></li>
 		</ul>
 	</div>
-	<a href="{{BASE_URL}}?page=submit" class="green-button">Create True Fan Video</a>
-	<!--<a href="{{BASE_URL}}?page=myprofile" class="green-button">My Video</a>-->
+	<?php if($this->mTfProfile){ ?>
+		<a href="{{BASE_URL}}?page=myprofile" class="green-button">My Video</a>
+	<?php } else {?>
+		<a href="{{BASE_URL}}?page=submit" class="green-button">Create True Fan Video</a>
+	<?php } ?>
 </div>
 
 <div id="quote-area">

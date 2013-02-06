@@ -160,10 +160,6 @@ class SpecialTrueFans extends SpecialPage {
 				}
 				break;
 			
-			case 'subscribe':
-				$this->loadTemplate('subscribe.html');
-				break;
-			
 			case 'myprofile':
 				global $wgScriptPath, $wgOut;
 				$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/youtubeplayer.js');
@@ -178,25 +174,6 @@ class SpecialTrueFans extends SpecialPage {
 						$this->loadTemplate('view.html', $this->mTfProfile);
 					}
 				}
-				break;
-					
-			case 'viewall':
-				global $wgOut;
-
-				$result = $this->mDb->getAllEntries();
-				$wgOut->addHTML('<table id="submissions"><tbody>');
-				foreach($result as $row) {
-					$wgOut->addHTML('<tr>');
-					$wgOut->addHTML("<td><a href='?page=view&id=".$row[TF_ID]."'>{$row[TF_ID]} </a></td>");
-					// This is sort of future proofed for further column additions to TrueFanDb
-					foreach($row as $key => $val) {
-						if($key != 'id') {
-							$wgOut->addHTML("<td>$val</td>");
-						}
-					}
-					$wgOut->addHTML('</tr>');
-				}
-				$wgOut->addHTML('</table></tbody>');
 				break;
 
 			case 'finish':
@@ -346,17 +323,18 @@ class SpecialTrueFans extends SpecialPage {
 		if($extraReplace != NULL) {
 			$templateStr = $templateStr + $extraReplace;
 		}
-
-		$templateContents = file_get_contents('templates/'.$path, FILE_USE_INCLUDE_PATH);
-		$preparedHtml = $this->replaceTemplateTags($templateContents, $templateStr);
 			
-		// Below will load the file as php allowing us to do fun php stuff like il8n
-    	/*if (is_file($path)) {
-        ob_start();
-        include $path;
-        $str = ob_get_clean();
-		}*/
-		
+		// Below will load the file as php allowing us to do fun php stuff like il8n and conditional buttons
+		$full_path = dirname(__FILE__).'/templates/'.$path;
+    	if (is_file($full_path)) {
+        	ob_start();
+        	include $full_path;
+        	$templateContents = ob_get_clean();
+		} else {
+			tfDebug('Could not find file at '.$full_path.'<br />'); // Throw an exception?
+		}
+
+		$preparedHtml = $this->replaceTemplateTags($templateContents, $templateStr);
 		$wgOut->addHTML($preparedHtml);
 	}
 
@@ -424,17 +402,11 @@ class TrueFanForm
 			// Reminder: 2nd param in constructor creates messagePrefix which is used to 
 			// name the fieldset. (text of which is .i18n file)
 			
-			// !! can assign a context through SpecialPage::getContext()
 			$this->mForm = new SexyForm($this->mDescriptor, $this->mPage->getContext(), "trueFanForm"); 
-			
-			//$this->mForm = new SexyForm($this->mDescriptor, "trueFanForm"); 
-			
-			
 			$this->mForm->setSubmitText(wfMsg("trueFanSubmitText-".$this->mType)); 
 			$this->mForm->setSubmitName('submit');
 			$this->mForm->setSubmitCallback(array($this, 'formCallback'));
 			$this->mForm->setId("trueFanForm");
-			//$this->mForm->setTitle($this->mPage->getTitle());
 			$this->mForm->addPreText($this->mPreText);
 			$this->mFormBuilt = true;
 		}
@@ -602,44 +574,44 @@ class TrueFanForm
 
 				$this->mPage->mEditRedirect = 'myprofile';
 				
-				if($this->mPage->mTfProfile[TF_NAME] != htmlspecialchars($formFields['Name'], ENT_QUOTES)) {
-					if(!$this->mPage->mDb->updateName($this->mPage->mTfProfile[TF_ID], $formFields['Name'])) {
-						return 'Unable to update your name.';
-					} else {
-						$this->mPage->mStatusMessage .= 'Updated your name. ';
-					}
-				}
-
-				if($this->mPage->mTfProfile[TF_VIDEO_ID] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
-					if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile[TF_ID], $formFields['VideoId'], true)) {
-						return 'Unable to update your video.'; 
-					} else {
-						$this->mPage->mStatusMessage .= 'Updated video id. ';
-					}
-				}
-				
-				if($this->mPage->mTfProfile[TF_VIDEO_MESSAGE] != htmlspecialchars($formFields['VideoMessage'], ENT_QUOTES)) {
-					if(!$this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile[TF_ID], $formFields['VideoMessage'])) {
-						return 'Unable to update your video message.';
-					} else {
-						$this->mPage->mStatusMessage .= 'Updated video message. ';
-					}
-				}
 				
 				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
 				if(isset($_POST['wpResendMessages'])) {
 					$this->mPage->mEditRedirect = 'submit';
 					$this->mPage->mFormStep = 'share';
-				}
-
-				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
-				if(isset($_POST['wpDeleteProfile'])) {
+				} elseif(isset($_POST['wpDeleteProfile'])) {
 					if(!$this->mPage->mDb->deleteUser($this->mPage->mTfProfile[TF_ID])) {
 						return 'Failed to delete profile.';
 					} else {
 						$this->mPage->mStatusMessage .= 'Your profile has been deleted. ';
 						$this->mPage->mEditRedirect = 'welcome';
 					}			
+				} elseif(isset($_POST['wpCancel'])) {
+					$this->mPage->mEditRedirect = 'myprofile'; // TODO: redund...
+				} else {
+					if($this->mPage->mTfProfile[TF_NAME] != htmlspecialchars($formFields['Name'], ENT_QUOTES)) {
+						if(!$this->mPage->mDb->updateName($this->mPage->mTfProfile[TF_ID], $formFields['Name'])) {
+							return 'Unable to update your name.';
+						} else {
+							$this->mPage->mStatusMessage .= 'Updated your name. ';
+						}
+					}
+	
+					if($this->mPage->mTfProfile[TF_VIDEO_ID] != $this->mPage->mDb->extractVideoId($formFields['VideoId'])) {
+						if(!$this->mPage->mDb->updateVideoId($this->mPage->mTfProfile[TF_ID], $formFields['VideoId'], true)) {
+							return 'Unable to update your video.'; 
+						} else {
+							$this->mPage->mStatusMessage .= 'Updated video id. ';
+						}
+					}
+					
+					if($this->mPage->mTfProfile[TF_VIDEO_MESSAGE] != htmlspecialchars($formFields['VideoMessage'], ENT_QUOTES)) {
+						if(!$this->mPage->mDb->updateVideoMessage($this->mPage->mTfProfile[TF_ID], $formFields['VideoMessage'])) {
+							return 'Unable to update your video message.';
+						} else {
+							$this->mPage->mStatusMessage .= 'Updated video message. ';
+						}
+					}
 				}
 				// Reload the profile
 				$this->mPage->mTfProfile = $this->mPage->mDb->getUser($this->mPage->mTfProfile[TF_ID]); 
@@ -800,6 +772,12 @@ class TrueFanForm
 					'id' => 'ose-truefan-resend-submit',
 					'default' => 'Send Messages',
 				),
+				'Cancel' => array(
+					'type' => 'submit',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-resend-submit',
+					'default' => 'Cancel',
+				),
 			);
 			break;
 
@@ -826,5 +804,3 @@ function tfDebug($str)
 {
 	wfDebugLog( 'TrueFans', $str);
 }
-
-//white space error
