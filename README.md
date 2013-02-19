@@ -23,4 +23,4 @@ Add the following lines to LocalSettings.php:
 
 Then navigate to your wiki /maintenance directory and run 'php update.php' to create the necessary database tables. 
 
-<iframe src="http://www.youtube.com/watch?v=Rhv8iOY08TY">Hey</iframe>
+<iframe width="560" height="315" src="http://www.youtube.com/embed/Rhv8iOY08TY" frameborder="0" allowfullscreen></iframe>
