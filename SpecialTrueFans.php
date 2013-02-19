@@ -89,6 +89,8 @@ class SpecialTrueFans extends SpecialPage {
 		$this->outputHeader();
 		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/TrueFans/style.css');
 		$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/dynamic.js');
+		//TODO: Do really need underscore for templating?
+		$wgOut->addScriptFile('//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js');
 		
 		// Request logic. POST > GET. Empty request = 'welcome' GET request. 
 		if($this->mReqPostPage) { // Handle POST
@@ -702,13 +704,6 @@ class TrueFanForm
 					'default' => '',
 					'section' => 'contact-area',
 				),
-				'FriendMessage' => array(
-					'class' => 'HTMLSexyTextArea',
-					'section' => $this->mType,
-					'id' => 'ose-truefan-friends-message',
-					'label' => 'Contact Message',
-					'rows' => 5,
-				),
 				'EmailInput' => array(
 					'class' => 'HTMLTextArray',
 					'section' => 'email',
@@ -722,9 +717,12 @@ class TrueFanForm
 					'id' => 'ose-truefan-email-check',
 					'label' => 'Send Email Messages',
 				),
-				'FacebookFriends' => array(
-					'type' => 'hidden',
-					'default' => $this->mType, 
+				'FriendMessage' => array(
+					'class' => 'HTMLSexyTextArea',
+					'section' => $this->mType,
+					'id' => 'ose-truefan-friends-message',
+					'label' => 'Contact Message',
+					'rows' => 5,
 				),
 				'EmailList' => array(
 					'class' => 'HTMLReturnableHiddenField',

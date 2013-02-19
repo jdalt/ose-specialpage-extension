@@ -32,6 +32,9 @@
 	{{FORM}}
 </div>
 
+
+<!-- ***** Modal Windows ******* -->
+
 <div class="modal-overlay-container" id="directions-container">
 	<div class="modal-overlay-pane" id="modal-directions">
 		<img class="modal-close-button" src="{{PATH}}images/close_button.png"/>
@@ -69,21 +72,6 @@
 <input id="user-video-link" type="hidden" value="{{USER_VIDEO_LINK}}" />
 <input id="user-name" type="hidden" value="{{USER_NAME}}" />
 
-<!-- Auto Replace and Hidden Land - this HTML will be moved via javascript -->
-
-<div class="auto-replace" id="contact-holder">
-	<div class="contact-tag">Contact Method</div>
-	<div id="contact-type-selection">
-		<div class="contact-type"><input id="facebook-feed" type="checkbox" name="facebook-feed"/><label for="facebook-feed">Post to your Facebook Feed</label></div>
-		<div class="contact-type"><input id="facebook-private" type="checkbox" name="facebook-private"/><label for="facebook-private">Send Private Facebook Messages</label></div>
-		<div id="email-holder" class="contact-type"><!-- shoot in form member from form --></div>
-	</div>
-</div>
-
-<div id="social-message" class="auto-replace" style="display: none">Checkout the video I made for you and the links below as I think you'd be interested in Open Source Ecology.
-</div>
-
-
 <div id="facebook-post-modal" class="modal-overlay-container">
 	<br /><br /><br />
 	<span id="fb-post-status">Submitting messages...</span>
@@ -119,7 +107,11 @@
 	</div>
 </div>
 
+
+<!-- ***** Previews ******* -->
+
 <!-- is there an easy way to keep this synced with facebook.js in case we change the text? -->
+<!-- FIXME: Does in body style break in < ie9? debug -->
 <style>
 	.preview-holder{
 		display: none;
@@ -146,6 +138,7 @@
 	.bld{font-weight: bold;}
 	.nml{font-weight: normal;}
 </style>
+
 <div id="facebook-feed-preview" class="preview-holder">
 	<h4>Facebook Feed Preview</h4>
 	<div class="preview-box">
@@ -188,19 +181,49 @@
 	</div>
 </div>
 
-<div style="clear:both; display: block;">
+<!-- debug buttons -->
+<!--<div style="clear:both; display: block;">
 	<button id="revokeAuth" type="button" onclick="uninstallApp()">Revoke/Uninstall</button>
 	<button id="logout" type="button" onclick="logout()">Logout</button>
-</div>
+</div>-->
+
+<!-- ***** Templates ******* -->
+
+<!--// FIXME: for tags are incorrect -->
+<script type="text/template" id="email-inputs">
+	<div class="email-list-combo">
+		<div class="email-input-cluster">
+			<div class="mw-label">
+				<label>Name</label>
+			</div>
+			<div class="mw-input">
+				<input class="email-names" type="text" />
+			</div>
+		</div>
+		<div class="email-input-cluster">
+			<div class="mw-label">
+				<label for="ose-truefan-email-input">Email</label>
+			</div>
+			<div class="mw-input">
+				<input class="email-addresses" type="text" name="wpEmailInput[]"/>
+			</div>
+		</div>
+	</div>
+</script>
+
+<!-- Consider doing this on the BE -->
+<script type="text/template" id="contact-holder">
+	<div class="contact-tag">Contact Method</div>
+	<div id="contact-type-selection">
+		<div class="contact-type"><input id="facebook-feed" type="checkbox" name="facebook-feed"/><label for="facebook-feed">Post to your Facebook Feed</label></div>
+		<div class="contact-type"><input id="facebook-private" type="checkbox" name="facebook-private"/><label for="facebook-private">Send Private Facebook Messages</label></div>
+		<div id="email-holder" class="contact-type"><!-- shoot in form member from form --></div>
+	</div>
+</script>
+
+<script type="text/template" id="social-message">Checkout the video I made for you and the links below as I think you'd be interested in Open Source Ecology.</script>
 
 <script type="text/javascript">
-	// These two json objects take content from first selector and put it in second; see dynamic.js
-	var autoReplaceArray = {
-		"#contact-holder":"#mw-form-section-contact-area"
-	}
-	var autoInputArray = {
-		"#social-message":"#ose-truefan-friends-message"
-	}
 
 	var havePostedToFeed = false;
 	var havePostedPrivateMessages = false;
@@ -253,47 +276,20 @@
 		});
 	};
 	
-	// FIXME: for tags are incorrect
-	var email_inputs = '<div class="email-list-combo">'+
-							'<div class="email-input-cluster">'+
-								'<div class="mw-label">'+
-									'<label>Name</label>'+
-								'</div>'+
-								'<div class="mw-input">'+
-									'<input class="email-names" type="text" />'+
-								'</div>'+
-							'</div>'+
-							'<div class="email-input-cluster">'+
-								'<div class="mw-label">'+
-									'<label for="ose-truefan-email-input">Email</label>'+
-								'</div>'+
-								'<div class="mw-input">'+
-									'<input class="email-addresses" type="text" name="wpEmailInput[]"/>'+
-								'</div>'+
-							'</div>'+
-						'</div>';
+	
 	
 	$j(document).ready(function() {
-		for (var source in autoReplaceArray) {
-			if (autoReplaceArray.hasOwnProperty(source)) {
-				var sourceHtml = $j(source).html();
-				$j(autoReplaceArray[source]).html(sourceHtml);
-				$j(source).empty();
-			}
-		}
 
-		for (var source in autoInputArray) {
-			if (autoInputArray.hasOwnProperty(source)) {
-				var sourceText = $j(source).html();
-				$j(autoInputArray[source]).val(sourceText);
-				$j(source).empty();
-			}
-		}
+		// These template objects are defined in script tags and injected into the dom 
+		$j('#mw-form-section-contact-area').html($('#contact-holder').html());
+		$j('#ose-truefan-friends-message').val($j('#social-message').html());
 	
-		console.log('**logging**');
+		// ?Can we do this in a css declaration; like a min-height %
+		// or would this cause a massive cascade of height % decs...
 		$j('#bodyContent').css('min-height', $j(window).height() -250);
-		console.log($j(window).height());
 		
+		// TODO/Consider: why not just create these on the BE side and 
+		// ignore them on the post, then we just have to attach events
 		$j('#ose-truefan-email-check').parent().appendTo('#email-holder');
 
 		$j('.mw-htmlform-field-HTMLTextArray').empty();
@@ -330,18 +326,20 @@
 			$j('input[name=wpEmailList]').val(addresses.join(','));
 		});
 		
+		var $email_inputs = $('#email-inputs').html();
 		function addEmailInput(e)
 		{
-			// Any input that contains value creates a single new input, and pays the process forward
+			// Any input that contains some value creates a single new input, and pays the process forward
 			if(this.value != '') {
 				$j(this).unbind('keyup');
-				$j('#email-input-container').append(email_inputs);
+				$j('#email-input-container').append($email_inputs);
 				$j('#trueFanForm .email-input-cluster input:last').keyup(addEmailInput);
 			}
 		}
 		
 		// initialize the preview messages
 		$j('.contact-message-text').html($j('#ose-truefan-friends-message').val());
+		// now update preview messages on every key that's input
 		$j('#ose-truefan-friends-message').keyup(function(){
 			$j('.contact-message-text').html($j('#ose-truefan-friends-message').val());
 		});
