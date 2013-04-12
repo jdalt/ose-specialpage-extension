@@ -42,7 +42,6 @@ class SpecialTrueFans extends SpecialPage {
 	 
 	/**
 	 * Load requests and build TrueFansDb
-	 * TODO: Consider - Any useful unit tests for special page or is that something for Symfony/Webdriver/Integration testing frameworks?
 	 */
 	public function __construct() {
 		global $wgUser, $wgRequest;
@@ -89,7 +88,6 @@ class SpecialTrueFans extends SpecialPage {
 		$this->outputHeader();
 		$wgOut->addExtensionStyle($wgScriptPath.'/extensions/TrueFans/style.css');
 		$wgOut->addScriptFile($wgScriptPath.'/extensions/TrueFans/dynamic.js');
-		//TODO: Do really need underscore for templating?
 		$wgOut->addScriptFile('//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js');
 		
 		// Request logic. POST > GET. Empty request = 'welcome' GET request. 
@@ -128,7 +126,6 @@ class SpecialTrueFans extends SpecialPage {
 			$this->handleViewPage('welcome');
 		}
 
-		// TODO: Remove - development links
 		$this->loadTemplate('noun_project_credits.html');
 	}
 
@@ -189,13 +186,14 @@ class SpecialTrueFans extends SpecialPage {
 				break;
 
 			case 'login':
+				global $wgScriptPath;
 				//TODO: redundancy--put in it's own case, put into the template
 				$replace = array();
 				if(!$this->mReqGetPage) {
 					$this->mReqGetPage  = 'submit';
 				}
-				$replace['LOGIN_LINK'] = '/w/index.php?title=Special:UserLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
-				$replace['OPENID_LOGIN_LINK'] = '/w/index.php?title=Special:OpenIDLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+				$replace['LOGIN_LINK'] = $wgScriptPath.'/index.php?title=Special:UserLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
+				$replace['OPENID_LOGIN_LINK'] = $wgScriptPath.'/index.php?title=Special:OpenIDLogin&returnto=Special:TrueFans&returntoquery=page='.$this->mReqGetPage; // TODO: find a universal way to retrieve full url to interwiki link without this ridiculous manual url
 				$this->loadTemplate('login.html', NULL, $replace);
 				break;
 
@@ -508,18 +506,13 @@ class TrueFanForm
 				break;
 
 			case 'share':
-				// TODO: Consider - Save emailList in the database or not? Save the sent message or not?		
-
 				global $wgOut;
 					
 				$this->mPage->mFormStep = 'share';
 			
-				//TODO: Create meaningful error returns.
+				//TODO: Create more meaningful error returns.
 				if($formFields['EmailList'] && $formFields['SendEmails']) {
-					//TODO: Delete temporary $wgOut of email for debugging purposes.
-					$wgOut->addHtml('<h4>Email Debug Output</h4>');
 					$emailArray = explode(',', $formFields['EmailList']);
-					// TODO: Rewrite - load a template for html styled email and inject FriendMessage
 					$templateMessage = $formFields['FriendMessage'];
 					$link = $this->mPage->getUserViewProfileLink();
 					// \n is temporary until we build html email message
@@ -538,8 +531,7 @@ class TrueFanForm
 							$friendAddress = str_replace(':',' ',$friendAddress);
 
 							$sendTo = new MailAddress($address, $name);
-							//$from = new MailAddress($wgPasswordSender, $wgSitename.' Mailer');
-							//TODO: Check with eli that there is a valid reply email for this project
+							//TODO: Check with Elifarley that there is a valid reply email for this project
 							// any in domain email can be used fakeemail, truefans, just need to make sure other side is ready to receive mails...
 							$from = new MailAddress('truefanstories@opensourceecology.org', $wgSitename);
 							tfDebug($wgPasswordSender);
@@ -551,7 +543,7 @@ class TrueFanForm
 								$errors .= $resultStatus->getWikiText().'\n';
 							} 
 						} elseif(!Sanitizer::validateEmail($address)) {
-							// TODO: create a warning system that allows submit to finish but reports back to user
+							// Consider: could create a warning system that allows submit to finish but reports back to user
 							$errors .= 'Invalid email: '.$address.'\n';
 						}
 						$friendAddress = str_replace('<','&lt',$friendAddress);
@@ -570,12 +562,11 @@ class TrueFanForm
 				break;
 
 			case 'edit':
-				// TODO: Consider-We could have a simpler database class with a single update function and
+				// Consider - We could have a simpler database class with a single update function and
 				// we would reduce database requests. However I think the current code is better in terms 
 				// of usability because the user is told exactly why their submission wasn't accepted.
 
 				$this->mPage->mEditRedirect = 'myprofile';
-				
 				
 				// HTMLForm is too dull to understand this...no other way of checking if a submit button was actually submitted
 				if(isset($_POST['wpResendMessages'])) {

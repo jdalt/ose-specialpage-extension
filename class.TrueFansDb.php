@@ -46,12 +46,10 @@ class TrueFansDb
 	*/
 	function __construct()
 	{
-		//$dsn = 'mysql:dbname='.getDatabase().';host='.getHost();
 		global $wgDBtype, $wgDBname, $wgDBserver, $wgDBuser, $wgDBpassword;
 
 		$dsn = $wgDBtype . ':dbname='.$wgDBname.';host='.$wgDBserver;
 		try {
-			//$this->pdo = new PDO($dsn, getUser(),getPass());
 			$this->pdo = new PDO($dsn, $wgDBuser, $wgDBpassword);
 			$this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 			$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -180,7 +178,7 @@ class TrueFansDb
 	* @param Integer $id The row to update.
 	* @param String $message The message to add.
 	* @return Boolean Returns true on success and false on failure.
-	* No rows being updated counts as true TODO: think about this...in the sense of updating you should be able to update to same value...check on your own if it's the same why not...however updating a non profile...check on your own if it exists...
+	* No rows being updated counts as true 
 	*/
 	public function updateVideoMessage($id, $video_message)
 	{
@@ -202,8 +200,6 @@ class TrueFansDb
 		return false; 
 	}
 	
-
-	
 	/**
 	* Deletes the profile of the truefan referred to by TF_ID.
 	* @param Integer $id 
@@ -223,7 +219,6 @@ class TrueFansDb
 		}
 		return false;
 	}
-
 
 	// *** Get Functions *** \\
 	
@@ -260,7 +255,7 @@ class TrueFansDb
 	/**
 	* Retrieves all true fan entries in database
 	* @return Array An associate array of all entries
-	* TODO: Create a pagination strategy so that a large db doesn't DDOS db server
+	* TODO: Create a pagination strategy so that a large db doesn't DOS db server
 	*/
 	public function getAllEntries()
 	{
